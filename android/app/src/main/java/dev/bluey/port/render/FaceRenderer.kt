@@ -30,7 +30,7 @@ class FaceRenderer(private val fredoka: Typeface) {
     private val skin = LinearGradient(205f, 46.9f, 615f, 653.1f,
         Palette.gradient, Palette.stops, Shader.TileMode.CLAMP)
     private val shine = RadialGradient(246f, 126f, 243f,
-        intArrayOf(alpha(Color.WHITE, 0.5), Color.TRANSPARENT), null, Shader.TileMode.CLAMP)
+        intArrayOf(alpha(Color.WHITE, 0.5), alpha(Color.WHITE, 0.0)), null, Shader.TileMode.CLAMP)
 
     // MaskFilter blur is rasterized once on software canvases, then composited on
     // the hardware canvas. No per-frame bitmap allocation or software View layer.

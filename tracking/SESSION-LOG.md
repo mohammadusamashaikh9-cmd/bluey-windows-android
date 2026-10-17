@@ -151,3 +151,14 @@ with test evidence and debug APK artifact upload. No Windows/network/audio/API
 implementation. Original source/assets/build paths diff from foundation is empty.
 `git diff --check` passed for tracked edits; staged/CI checks pending. No compile,
 unit, lint or rendering result is claimed until the actual CI run returns.
+
+### F1 first CI setup correction
+
+Initial push received a transient empty server reply; normal retry succeeded.
+[Run 39070247973](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39070247973)
+at `f958f7563efd44405aa866377177e4cfc5b39911` failed in SDK setup, before Gradle:
+the action's default `tools platform-tools` included the discontinued `tools`
+package (`Failed to find package 'tools'`). Set packages explicitly to
+`platform-tools` and suppress verbose license text; SDK 36/build-tools remain
+explicitly installed in CI. Source review also corrected the radial shine endpoint
+to transparent white, retaining the source hue during alpha interpolation.
