@@ -175,3 +175,73 @@ center to remain white; no renderer change is needed for this failure. Save its
 image before assertions so future failures retain the reproduction. Also remove
 nullable render-path and old Kotlin compiler-DSL warnings. Lint/APK packaging
 were not completed in this failed run; offscreen render evidence was uploaded.
+
+### F1 successful CI and visual evidence
+
+[Run 39070720349](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39070720349)
+at `e231228188a515cef24d0b104d3b1ea5fd2b70e0` completed SUCCESS. Actual command
+from `android/`:
+
+```text
+gradle --no-daemon --console=plain :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+```
+
+Gradle reported BUILD SUCCESSFUL in 1m12s. Downloaded the test evidence using
+`gh run download 39070720349 --name android-test-evidence-e231228188a515cef24d0b104d3b1ea5fd2b70e0 --dir build/f1-evidence/verified/evidence`.
+Parsed JUnit XML: FaceAnimatorTest 17 tests, FaceRendererTest 6, all zero
+failures/errors/skips. Native graphics ran API 35/JDK 17. Counted 17 PNGs.
+Lint XML has 0 errors and 11 warnings: pinned versions/target SDK notices (6),
+fixed-orientation policy (1), future backup extraction rules (1), demo launcher
+icon (1), optional KTX bitmap style suggestions (2). No suppression or baseline
+hides them. SDK 36 is the selected compatible F1 target, not store-readiness.
+
+Inspected generated listening/happy/sleepy frames against original listening and
+expressions previews: silhouette, crown, gradients, highlight, eye spacing,
+happy arcs/mouth and sleepy clipping follow the source. Capture states/poses are
+not identical and upstream previews have no deterministic trace metadata; this is
+qualitative geometry/composition review, not pixel equality or physical acceptance.
+Android blur/antialiasing/text metrics and GPU display remain calibration items.
+
+[APK artifact 12114897856](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39070720349/artifacts/12114897856)
+contains app-debug.apk and SHA256SUMS.txt; archive size 11,028,390 bytes.
+[Evidence artifact 12114808444](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39070720349/artifacts/12114808444)
+contains reports/XML/renders. `gh api .../actions/runs/39070720349/artifacts`
+confirmed IDs/names/sizes. Archive SHA-256 is separate from APK SHA-256.
+No local SDK was installed; evidence downloads remain under ignored `build/`.
+
+Opened and attached [PR #2](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/2),
+head port/android-face, base main, no merge. Updated canonical current owners to
+describe accepted F0 and implemented F1. Workflow also runs on main after eventual
+owner merge. Follow-up is tracking/workflow only; tested Android sources remain
+unchanged. F1 physical-phone acceptance stays UNVERIFIED; F2–F6 remain planned.
+
+Local validation so far: 23 Markdown files / 177 local links and anchors resolved,
+Android XML parsed, exact F1 path allowlist and original-source preservation passed,
+and staged `git diff --check` passed. Counts will change with added evidence links;
+repeat final checks after closeout. F0's helper has a foundation-only allowlist,
+so F1 uses scoped link/XML/path checks rather than pretending that old scope fits.
+
+### F1 APK inspection
+
+Downloaded the successful APK with
+`gh run download 39070720349 --name bluey-android-debug-e231228188a515cef24d0b104d3b1ea5fd2b70e0 --dir build/f1-evidence/verified/apk`.
+Python hashlib SHA-256 matched CI's SHA256SUMS file:
+`9f7d5442ee6089f28c04dac6d34cb676b3e9d3e8d294ed3f53af86b567e83aed`.
+APK is 11,489,883 bytes and contains DEX/manifest. ZIP inspection verified all
+four original TTFs and both OFL notices against the accepted foundation Git blobs.
+An initial comparison against Windows working-copy bytes differed for the text
+notice because of CRLF conversion; canonical Git-blob comparison passed for all
+six files. No font/license modification was made. Also inspected successful
+blink/resting/thinking PNGs: the blink sliver is present, z glyphs and thought dots
+render, and paths remain dynamic. This is artifact/offscreen evidence only.
+
+### F1 closeout checks
+
+Final scoped Python/static check passed: 23 canonical/skill Markdown files,
+179 relative links/anchors, Android XML parsing, 27 changed paths inside the
+F1 allowlist, no original Apple/source/assets/build changes, and no Android
+source difference from successful CI commit `e231228188a515cef24d0b104d3b1ea5fd2b70e0`.
+`git diff --check` passed. APK metadata is documented separately from CI archive
+digests; no device result inferred. PR #2 verified OPEN, main base, correct head,
+mergedAt null. Commit/push of this tracking/workflow closeout and final remote
+head/clean-worktree checks follow; no merge or additional feature work authorized.

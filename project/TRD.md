@@ -4,7 +4,7 @@ See [architecture](ARCHITECTURE.md), [schema](PROTOCOL-DATA-SCHEMA.md) and
 [decisions](../tracking/DECISIONS.md). Requirements below are new port work;
 source observations are identified separately.
 
-## Proposed platform choices, not confirmed support
+## Platform choices and verification boundaries
 
 | Area | Proposal | Proof needed before commitment |
 | --- | --- | --- |
