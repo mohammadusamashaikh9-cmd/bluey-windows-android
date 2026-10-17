@@ -12,8 +12,11 @@ As of 2026-10-18 (Asia/Karachi), F0 static foundation verified.
   assets and font notices retained. Static validation passes for 23 Markdown
   files, 173 local links, four frontmatters, six fixture packets and 25 allowed
   changed paths, with original source/build/assets and README body preserved.
-- F0 static gate verified; commit/push/PR publication pending at this entry.
-  F1–F6 are planned, with no target implementation acceptance implied by F0.
+- F0 static gate verified. Foundation commit `5cd0ec24dab4d169d8ca231c126807489ecb4430`
+  pushed on `planning/foundation`; [PR #1](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/1)
+  is open targeting `main`, verified unmerged. This tracking closeout follows in
+  the same PR; its current head is authoritative for the complete reviewed tree.
+  F1–F6 remain planned, with no target implementation acceptance implied by F0.
 - Source protocol is raw TCP LF-JSON with no auth/TLS/version; port security and
   platform choices are documented requirements/proposals, not implemented features.
 - No Windows/Android app code, toolchain installs, paid API calls, application runs,

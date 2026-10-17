@@ -101,3 +101,30 @@ and numeric ID. [GitHub's official email reference](https://docs.github.com/en/e
 documents the ID-based no-reply format. The task-created, unpushed commit will
 use that no-reply identity through a command-local override; no global/repository
 identity setting, account privacy preference or published history will be changed.
+
+## 2026-10-18 — Foundation publication verified
+
+After repeating the static checker and `git diff --cached --check`, the unpushed
+task commit's author/committer were corrected with
+`git -c user.email=296289031+mohammadusamashaikh9-cmd@users.noreply.github.com commit --amend --no-edit --reset-author`.
+`git log -1 --format='%H %ae %ce'` confirmed both no-reply fields. No pre-existing
+or published commit was rewritten. Resulting foundation commit:
+`5cd0ec24dab4d169d8ca231c126807489ecb4430`.
+
+`git push -u origin planning/foundation` succeeded without force. `git ls-remote`
+confirmed that SHA for the planning branch and unchanged main at the upstream pin.
+`gh pr create --repo mohammadusamashaikh9-cmd/bluey-windows-android --base main --head planning/foundation --title 'Establish source-verified Windows and Android port foundation' --body-file <temporary UTF-8 body file>`
+created [PR #1](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/1).
+The body describes final scope, actual checks and limitations. PR attached to this
+Codex chat using the app artifact tool.
+
+`gh pr view 1 --repo mohammadusamashaikh9-cmd/bluey-windows-android --json url,state,isDraft,baseRefName,headRefName,headRefOid,files,commits,mergedAt`
+confirmed OPEN, base main, head planning/foundation at the foundation SHA, exactly
+25 allowed changed files, non-draft and mergedAt null. `git status --short` was
+empty and `git show --format= --check HEAD` passed. No merge/release performed.
+
+This follow-up updates only current tracking/publication evidence in the same PR.
+Repeat the static checker and staged whitespace check before its commit, use the
+same command-local no-reply identity, push normally and verify current remote/PR
+head equals local HEAD. No application or device verification is added by this
+tracking closeout. Next owner action: review PR #1 and its provisional decisions.
