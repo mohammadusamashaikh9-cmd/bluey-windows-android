@@ -1,5 +1,28 @@
 # Bluey
 
+## Unofficial Windows + Android port
+
+This repository is a source-based port foundation forked from
+[Riley's Bluey](https://github.com/rbrown101010/bluey-by-riley), pinned to
+[`6d84d91456f3bf7ad9b31caf31f19710b0ba8328`](https://github.com/rbrown101010/bluey-by-riley/commit/6d84d91456f3bf7ad9b31caf31f19710b0ba8328).
+It is unofficial and does not imply endorsement by the upstream author.
+**Windows and Android applications are not implemented yet.**
+
+Start with [PORTING](PORTING.md) for the canonical plan, [verified status](tracking/STATUS.md),
+[checkpoints](tracking/CHECKPOINTS.md) and [agent guidance](AGENTS.md).
+The plan preserves the original `Mac/`, `iOS/` and `Shared/` sources and assets.
+Proposed C#/.NET and Kotlin/Compose choices await platform validation. V1 needs
+no hosted backend or cloud database; authenticated encrypted local pairing is new
+port work. No target builds, device tests or live API validation are claimed.
+
+The original Apple description and instructions below are retained as upstream
+documentation. Its API model strings, security claims and commands describe that
+baseline; they are not verified target support or current API availability/pricing.
+Source-informed corrections and port differences are in [PRD](project/PRD.md),
+[schema](project/PROTOCOL-DATA-SCHEMA.md) and [security](project/SECURITY.md).
+
+## Original Mac + iPhone project
+
 A blueberry character who lives on an iPhone under your Mac's screen and points at things with his own big cursor.
 
 **Now:** no voice out. Double tap him on the phone (or press ⌥Space on the Mac) to start a session: the phone's mic stays on and everything you say becomes context, but he stays quiet. **Press and hold the screen** to ask him something; let go and he answers. His reply pops up as a cute speech bubble next to his cursor (or above the phone when he isn't pointing), with a little cartoon chirp from the phone. Ask "what's this?" and he points at whatever is under your mouse. Double tap again and he goes back to follow mode.

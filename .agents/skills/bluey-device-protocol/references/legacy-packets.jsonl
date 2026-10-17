@@ -1,0 +1,6 @@
+{"hello":"Fixture Desktop"}
+{"face":{"gazeX":0.25,"gazeY":-0.5,"mood":"pointing","talk":0}}
+{"command":"tool","callID":"fixture-call-1","tool":"point_at_spot","text":"{\"x\":500,\"y\":250}"}
+{"command":"toolResult","callID":"fixture-call-1","text":"Pointed at fixture target."}
+{"command":"caption","text":"First line\nSecond line"}
+{"command":"asleep"}
