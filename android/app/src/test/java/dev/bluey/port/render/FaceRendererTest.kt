@@ -42,7 +42,7 @@ class FaceRendererTest {
             renderer.draw(Canvas(it), w.toFloat(), h.toFloat(), frame)
         }
     private fun save(bitmap: Bitmap, name: String) {
-        val dir = File(System.getProperty("bluey.renderDir"))
+        val dir = File(requireNotNull(System.getProperty("bluey.renderDir")))
         dir.mkdirs()
         File(dir, "$name.png").outputStream().use { assertTrue(bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)) }
     }
@@ -72,10 +72,13 @@ class FaceRendererTest {
         val open = render(renderer, fixed(Mood.listening))
         val closed = render(renderer, fixed(Mood.listening).copy(closed = 1.0))
         val happy = render(renderer, fixed(Mood.happy))
-        assertEquals(Color.WHITE, open.getPixel(225, 200))
-        assertNotEquals(Color.WHITE, closed.getPixel(225, 200))
-        assertNotEquals(Color.WHITE, happy.getPixel(225, 200))
         save(closed, "blink-closed")
+        assertEquals(Color.WHITE, open.getPixel(225, 170))
+        assertNotEquals(Color.WHITE, closed.getPixel(225, 170))
+        assertNotEquals(Color.WHITE, happy.getPixel(225, 170))
+        // Swift deliberately keeps a 0.06-open white sliver during a full blink.
+        // Its center remains white; the old assertion sampled inside that sliver.
+        assertEquals(Color.WHITE, closed.getPixel(225, 201))
     }
     @Test fun coverCropAndDoubledResolutionRenderWithoutChangingDesignCoordinates() {
         val renderer = renderer()

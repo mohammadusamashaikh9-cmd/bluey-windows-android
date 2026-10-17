@@ -11,7 +11,7 @@ It is unofficial and does not imply endorsement by the upstream author.
 Start with [PORTING](PORTING.md) for the canonical plan, [verified status](tracking/STATUS.md),
 [checkpoints](tracking/CHECKPOINTS.md) and [agent guidance](AGENTS.md).
 The plan preserves the original `Mac/`, `iOS/` and `Shared/` sources and assets.
-Proposed C#/.NET and Kotlin/Compose choices await platform validation. V1 needs
+C#/.NET remains proposed; Android F1 uses Kotlin/Compose Canvas under D007. V1 needs
 no hosted backend or cloud database; authenticated encrypted local pairing is new
 port work. See the [Android F1 checks](project/QA.md#android-f1-build-and-comparison)
 and [current results](tracking/STATUS.md) for build versus device evidence.

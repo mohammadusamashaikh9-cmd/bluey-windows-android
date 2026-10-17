@@ -1,10 +1,12 @@
 # Windows + Android port foundation
 
-This fork plans an unofficial source-based port. There is no Windows or Android
-application yet. The Apple source remains the baseline, not a target build.
+This fork develops an unofficial source-based port. Android has an offline native
+face demo under `android/`; Windows is not implemented. The Apple source remains
+the unchanged baseline. See current tracking for build and device evidence.
 
 Start with [current status](tracking/STATUS.md), [next task](tracking/HANDOFF.md)
-and [agent rules](AGENTS.md). No toolchain installation is needed to review F0.
+and [agent rules](AGENTS.md). No toolchain installation is needed to review F0;
+use [CI build instructions](project/QA.md#android-f1-build-and-comparison) for F1.
 
 | Need | Canonical document |
 | --- | --- |

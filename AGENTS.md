@@ -22,8 +22,8 @@ No unattended pushes, releases or merges.
 - Preserve `Mac/`, `iOS/`, `Shared/`, Apple build files and existing preview assets.
   Translate into separately authorized target-platform paths; do not reorganize
   originals as incidental cleanup. Keep upstream attribution and font licenses.
-- C#/.NET for Windows and Kotlin/Compose for Android are **proposals**. Framework,
-  renderer, supported OS versions and packaging await a dated decision and spike.
+- Android F1 uses Kotlin/Compose Canvas under D007 in [DECISIONS](tracking/DECISIONS.md).
+  C#/.NET and Windows framework/renderer/OS/packaging remain **proposals**.
 - There is no required hosted backend or cloud database. Read
   [ARCHITECTURE](project/ARCHITECTURE.md) and [data schema](project/PROTOCOL-DATA-SCHEMA.md).
 - Label facts as source-observed, port-planned or target-unverified. A material

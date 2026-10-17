@@ -19,7 +19,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions { jvmTarget = "17" }
     // Reuse the original fonts AND their OFL notices; no duplicate binary assets.
     sourceSets.getByName("main").assets.srcDir(rootProject.file("../Shared/Fonts"))
     testOptions {
@@ -30,6 +29,10 @@ android {
             it.systemProperty("bluey.renderDir", layout.buildDirectory.dir("renders").get().asFile.absolutePath)
         }
     }
+}
+
+kotlin {
+    compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) }
 }
 
 dependencies {

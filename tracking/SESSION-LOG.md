@@ -162,3 +162,16 @@ package (`Failed to find package 'tools'`). Set packages explicitly to
 `platform-tools` and suppress verbose license text; SDK 36/build-tools remain
 explicitly installed in CI. Source review also corrected the radial shine endpoint
 to transparent white, retaining the source hue during alpha interpolation.
+
+### F1 compilation and first test results
+
+[Run 39070333603](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39070333603)
+at `5d3a2b9a7eb2f54007da157910f5409feba961b0` compiled Android and test Kotlin,
+then ran 23 tests: 22 passed, one rendered-pixel assertion failed. All 17 pure
+animator/geometry tests passed. The failed assertion expected the center of a
+fully blinked eye not to be white, but Swift deliberately preserves a 0.06-open
+sliver. Correct the test to sample above the sliver and explicitly require the
+center to remain white; no renderer change is needed for this failure. Save its
+image before assertions so future failures retain the reproduction. Also remove
+nullable render-path and old Kotlin compiler-DSL warnings. Lint/APK packaging
+were not completed in this failed run; offscreen render evidence was uploaded.
