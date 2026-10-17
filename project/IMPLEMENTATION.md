@@ -1,6 +1,7 @@
 # Ordered implementation plan
 
-All implementation gates are **planned**. F0 adds documentation/skills only.
+F0 is complete; the authorized Android F1 slice is active. F2–F6 remain planned.
+F1 implementation/build checks and physical-device acceptance are separate.
 Use [checkpoint states](../tracking/CHECKPOINTS.md) and [QA](QA.md); gate numbers
 are not evidence of progress. Changes of scope require [a decision](../tracking/DECISIONS.md).
 
@@ -43,3 +44,8 @@ commit, input seed/timestamps, capture/artifact hashes and unresolved failures.
 An exit condition needing unavailable hardware stays planned/active/blocked,
 never verified by a substitute source review. No CI workflow or build scaffolding
 is created by this foundation task.
+
+F1 follow-up authorization now covers `android/`, the Android CI workflow and
+relevant canonical docs/tracking. D007 selects the Android tool versions and
+renderer. This does not authorize Windows/network/API work. F1 cannot become
+fully verified until physical-device comparison and pacing checks have evidence.

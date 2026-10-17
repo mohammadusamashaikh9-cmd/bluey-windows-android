@@ -128,3 +128,26 @@ Repeat the static checker and staged whitespace check before its commit, use the
 same command-local no-reply identity, push normally and verify current remote/PR
 head equals local HEAD. No application or device verification is added by this
 tracking closeout. Next owner action: review PR #1 and its provisional decisions.
+
+## 2026-10-18 — F1 baseline and implementation
+
+User authorized full native Android face slice, CI builds/tests, commit/push on
+existing `port/android-face` and one PR to main, without merge. `git remote -v`,
+branch/HEAD/status confirmed correct fork, clean branch at accepted foundation
+`55a1c62abaf3fae19b944fc2335f2f2e8adc2299`. Direct remote main lookup matched;
+`gh pr view 1 --json state,mergedAt,mergeCommit` confirmed PR #1 MERGED at that SHA.
+This supersedes earlier current-state notes describing it as open.
+
+Read AGENTS and the three requested local skills, relevant product/technical/QA
+docs and original FaceView/BlobShape/Palette/fonts. Visually inspected original
+expressions.png and listening.png. No JDK/Gradle/Kotlin executable found on PATH.
+D007 records tool/renderer choices before implementation; no local SDK/tool install.
+
+Wrote pure Kotlin state/springs with clock/random injection; vector renderer with
+source geometry, palette, clipping/layer order and cached vector blur; lifecycle
+gated fullscreen Compose demo with secondary mood/gaze/talk controls; deterministic
+JUnit and native offscreen-render cases; minimal read-only-permission Android CI
+with test evidence and debug APK artifact upload. No Windows/network/audio/API
+implementation. Original source/assets/build paths diff from foundation is empty.
+`git diff --check` passed for tracked edits; staged/CI checks pending. No compile,
+unit, lint or rendering result is claimed until the actual CI run returns.

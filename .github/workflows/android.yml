@@ -1,0 +1,59 @@
+name: Android face
+on:
+  push:
+    branches: [port/android-face]
+    paths: ['android/**', 'Shared/Fonts/**', '.github/workflows/android.yml']
+  pull_request:
+    branches: [main]
+    paths: ['android/**', 'Shared/Fonts/**', '.github/workflows/android.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: SDK packages (CI only)
+        run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
+      - name: Unit tests, native bitmap renders, lint and debug APK
+        run: gradle --no-daemon --console=plain :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+      - name: APK digest
+        run: sha256sum app/build/outputs/apk/debug/app-debug.apk > app/build/outputs/apk/debug/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: bluey-android-debug-${{ github.sha }}
+          path: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            android/app/build/outputs/apk/debug/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-test-evidence-${{ github.sha }}
+          path: |
+            android/app/build/test-results/
+            android/app/build/reports/
+            android/app/build/renders/
+          if-no-files-found: warn
+          retention-days: 14

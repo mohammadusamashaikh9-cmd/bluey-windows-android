@@ -1,6 +1,7 @@
 # QA and evidence plan
 
-F0 is static foundation validation. F1–F6 test plans below have **not run**.
+F0 is static foundation validation. F1 execution is recorded in tracking;
+the wider F2–F6 test plans below have **not run**.
 See [CHECKPOINTS](../tracking/CHECKPOINTS.md) for gate ownership/evidence.
 
 ## Evidence rules
@@ -88,3 +89,40 @@ on Windows plus Android. F4 needs explicit live API authorization and current do
 use mock boundaries until then. F5 needs stop without network/model cooperation.
 File a triage record with reproduction, expected/source authority, actual result,
 severity, affected gate, evidence and minimal next experiment; no synthetic success.
+
+## Android F1 build and comparison
+
+CI is [android.yml](../.github/workflows/android.yml): Ubuntu 24.04, JDK 17,
+Gradle 8.13, SDK 36/build tools 35.0.0. From `android/` run:
+
+```text
+gradle --no-daemon --console=plain :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+```
+
+No local JDK/Gradle/SDK is required when using CI. No wrapper JAR is checked in;
+the workflow downloads the exact Gradle distribution through setup-gradle. For
+optional local builds, provide these exact tools and an SDK path in untracked
+`android/local.properties`. Do not install Studio, emulator, WSL or Docker for F1.
+
+Pure Kotlin JUnit cases cover numerical spring integration, first-frame/dt cap,
+touch/local/remote/thinking precedence, stale state, talk smoothing/fallback,
+blink phases, impulses, mood settling, deterministic random traces, cover scaling,
+background-clock suspension and invalid time. Robolectric native graphics on
+SDK 35 uses the actual Android Canvas renderer to produce seven fixed mood PNGs,
+blink, scaling/crop cases and happy transition keyframes under
+`android/app/build/renders/`. It also checks vector bounds, font notices and
+absence of system permissions. These are offscreen tests, not physical GPU tests.
+
+Success uploads `bluey-android-debug-<commit>` with `app-debug.apk` and
+`SHA256SUMS.txt`; `android-test-evidence-<commit>` contains reports/XML/renders.
+Both are retained 14 days. Builds and debug signing happen in CI, not a store
+release. Actual run URLs, failures, results and APK digest belong in tracking.
+
+Phone acceptance: Android 8/API 26 or newer; install the exact debug APK/digest,
+record model/OS/refresh rate/resolution and hide Demo. Exercise seven moods, gaze
+extremes, talk 0/0.5/1, touch, idle wander, normal/double/sleepy blinks, happy
+transition and pause/resume. Check fullscreen/cutouts/system-bar swipe and keep
+screen awake only while foreground. Compare upstream previews and record a 60 s
+trace; report FPS/frame times/thermal behavior from the device, not CI. On Android
+16 large displays, OS orientation policy can override landscape; cover crop still
+applies. No device is available to this agent; all such outcomes stay UNVERIFIED.

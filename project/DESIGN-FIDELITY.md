@@ -92,3 +92,28 @@ Use the existing previews as references and obtain a runnable Apple reference
 recording when available. No Apple runtime or target screenshots were produced
 in F0. Device refresh rate, reduced motion and thermal/battery behavior remain
 unverified until physical-device measurements.
+
+## Android F1 translation
+
+[FaceAnimator.kt](../android/app/src/main/java/dev/bluey/port/animation/FaceAnimator.kt)
+translates Spring and FaceAnimator, preserving update order, every mood target,
+random scheduling and precedence. Clock and unit-random inputs are injectable;
+the demo uses monotonic active time and pauses in background. Invalid/backwards
+time is rejected rather than integrated. No desktop-idle mood policy is invented.
+
+[FaceGeometry.kt](../android/app/src/main/java/dev/bluey/port/animation/FaceGeometry.kt)
+owns palette, crown points and cover transform.
+[FaceRenderer.kt](../android/app/src/main/java/dev/bluey/port/render/FaceRenderer.kt)
+translates BlobShape and FaceView.draw through Compose Canvas's native canvas.
+All artwork is drawn from paths and math; only the static vector-derived blur
+masks are cached (about 4.4 MB) to avoid unsupported GPU mask filters. No external
+art, screenshots, GIFs or animation libraries are used as the character.
+Bundled original Fredoka draws the z glyphs; all original font/OFL files are assets.
+
+Android versus Swift blur kernel, antialiasing and text metrics are calibration
+items, not asserted pixel identity. The upstream PNGs lack deterministic capture
+inputs; compare composition/geometry qualitatively, and compare the original path
+and animator mathematics structurally. CI renders fixed frames and a happy-mood
+transition with the same renderer, without an emulator. GPU pacing, actual font
+appearance, touch/lifecycle/fullscreen and visual fidelity remain physical-device
+checks. Hide the secondary demo panel before recording comparisons.
