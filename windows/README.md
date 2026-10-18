@@ -168,7 +168,10 @@ performance measurements remain pending until recorded on the actual devices.
 
 The initial phone attempt failed before Windows showed approval. TCP reachability
 and the failing TLS/enrollment stage were not captured, so the physical root cause
-is **not established**. These builds add bounded in-app stage diagnostics on both
+is **not established**. These builds also prevent a cancelled socket read from being treated as an active
+pairing failure that could clear a newer attempt. A real loopback/coroutine
+regression tests that mechanism; it does not establish the physical failure cause.
+These builds add bounded in-app stage diagnostics on both
 platforms, without changing D009, TLS versions, certificates or enrollment rules.
 The phone and server certificate fingerprints are supposed to differ.
 

@@ -128,7 +128,7 @@ class DeviceLink(context:Context) {
                     latest.value=null;mutable.update{it.copy(connected=false)}
                     val failure="${attempt.id}: ${attempt.current} / $code. "+failureHint(code)
                     if(enroll!=null || attempt.current==LinkStage.IDENTITY_LOADING || e is javax.net.ssl.SSLException ||
-                        e is ProtocolException || e is java.security.GeneralSecurityException || e is ConnectionProblem) {
+                        e is ProtocolException || e is java.security.GeneralSecurityException || (e is ConnectionProblem && code!=LinkFailure.WRITE_TIMEOUT)) {
                         if(enroll!=null){invitation=null;enrollmentAttempt=null}
                         desired=false;status(failure);return
                     }
@@ -154,10 +154,10 @@ class DeviceLink(context:Context) {
         val tcp=Socket();installSocket(tcp);tcp.tcpNoDelay=true
         try {tcp.connect(InetSocketAddress(host.address,host.port),5000)}finally{attempt.port=tcp.localPort.coerceAtLeast(0)}
         attempt.phase(LinkStage.TCP_CONNECTED)
+        progress(attempt,LinkStage.TLS_STARTED,"Negotiating pinned mutual TLS")
         val tls=keys.context(host.pin,attempt::event).socketFactory.createSocket(tcp,host.address,host.port,true) as SSLSocket
         installSocket(tls);tls.useClientMode=true;tls.enabledProtocols=tls.supportedProtocols.filter{it=="TLSv1.2"||it=="TLSv1.3"}.toTypedArray();tls.soTimeout=5000
         // Socket.close from lifecycle/disconnect also interrupts a blocked handshake/read/write.
-        progress(attempt,LinkStage.TLS_STARTED,"Negotiating pinned mutual TLS")
         val handshakeGuard=launch {delay(5000);attempt.handshakeTimedOut=true;tls.close()}
         try{tls.startHandshake()}finally{handshakeGuard.cancel()}
         if(tls.session.localCertificates.isNullOrEmpty())throw ConnectionProblem(LinkFailure.CLIENT_IDENTITY_NOT_SELECTED)

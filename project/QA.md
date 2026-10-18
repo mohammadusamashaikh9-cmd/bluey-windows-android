@@ -189,6 +189,10 @@ remains unknown. F3-R1 adds fixed-vocabulary bounded in-memory logs, local attem
 IDs and client source ports. It instruments pin verification, client alias/chain/
 key selection, local handshake, hello/enrollment, approval and session closure.
 No packet, exception message, certificate subject, secret or full URI is logged.
+A source-level cancellation defect is also repaired: a cancelled blocking socket
+read could raise IOException, allowing the active-error handler to clear a newer
+pairing intent. A real loopback read/coroutine regression failed before the active
+context guard. This mechanism is distinct from any unproven physical root cause.
 
 [Windows instructions](../windows/README.md#f3-r1-one-safe-physical-pairing-retest)
 provide the exact single-attempt paired-device retest and safe diagnostic-copy

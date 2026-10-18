@@ -10,6 +10,9 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.net.ssl.SSLException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.CancellationException
 
 enum class LinkStage {
     INVITATION_VALIDATED, INVITATION_INVALID, IDENTITY_LOADING, IDENTITY_READY,
@@ -96,4 +99,8 @@ class LinkAttempt(val id:String,private val log:SafeDiagnostics) {
 }
 
 // Error-handler boundary, kept separate so cancelled blocking socket reads can be regression-tested.
-suspend fun LinkAttempt.failureIfActive(error:Throwable):LinkFailure=failed(error)
+suspend fun LinkAttempt.failureIfActive(error:Throwable):LinkFailure {
+    try {currentCoroutineContext().ensureActive()}
+    catch(cancel:CancellationException){cancelled();throw cancel}
+    return failed(error)
+}
