@@ -22,7 +22,7 @@ internal sealed class OverlayWindow : Window
         WindowStyle = WindowStyle.None; ResizeMode = ResizeMode.NoResize;
         AllowsTransparency = true; Background = Brushes.Transparent;
         Topmost = true; ShowInTaskbar = false; ShowActivated = false; Focusable = false;
-        IsHitTestVisible = false; ClipToBounds = true;
+        IsHitTestVisible = false;
         art = new(engine, visuals); Content = art;
         SourceInitialized += (_, _) =>
         {

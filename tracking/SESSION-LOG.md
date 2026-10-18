@@ -303,3 +303,10 @@ Added explicit GitHub error annotation to the native smoke step so a failure's
 actual exception is available through the already-working GitHub API, rather
 than relying solely on the inaccessible log download. This is diagnostic only;
 no failing assertion disabled or behavior acceptance weakened.
+
+Native exception observed through run 39115191543 annotations: WPF rejects
+`ClipToBounds=true` on a Window (`Window.CoerceClipToBounds`), during overlay
+construction. Removed that Window assignment; the inner OverlayArt Canvas already
+clips artwork. This fixes startup without weakening the native check. Original
+source and pure engine unchanged. Also corrected lingering Windows-planned text
+in PORTING/TRD to the D008-selected implementation boundary.

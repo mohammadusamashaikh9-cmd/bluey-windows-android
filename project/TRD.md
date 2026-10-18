@@ -10,7 +10,7 @@ source observations are identified separately.
 | --- | --- | --- |
 | Windows | F2 selects C#/.NET 10 + WPF/Win32 vectors, Windows 11 x64; D008 | Transparency, click-through, pacing, mixed DPI, capture exclusion, tray/hotkeys, packaging spike in F2 |
 | Android | F1 selected Kotlin/Compose Canvas, API 26+, compile/target 36; D007 | Landscape crop/lifecycle/font/device pacing acceptance pending; platform audio/NSD remain future F3/F4 |
-| OS/architecture | Windows 11 x64 initial candidate; Android minimum/target SDK and supported CPUs undecided | Confirm official SDK support and available physical devices; record exact matrix before build setup |
+| OS/architecture | Windows 11 x64 selected for F2; Android API 26+/target 36 under D007, physical matrix open | Confirm official SDK support and available physical devices; record exact matrix before build setup |
 | Persistence | App-private versioned JSON initially; Windows user settings plus OS-protected secrets | Atomic writes/recovery, migration, backup exclusions, ACL/secret-store behavior |
 | LAN | Authenticated TLS with locally verified device trust; DNS-SD discovery | Pairing threat review, selected platform TLS APIs, firewall/network evidence in F3 |
 
