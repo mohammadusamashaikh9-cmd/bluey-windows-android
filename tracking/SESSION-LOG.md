@@ -547,3 +547,70 @@ passed. Final tracking commit/push and PR metadata confirmation follow. No merge
   hardware provider/key behavior, successful pairing/live sync/recovery and latency
   remain unverified. Exact next action: one paired-device attempt using final builds,
   then Copy safe diagnostics on both devices as detailed in HANDOFF/Windows README.
+
+## 2026-10-19 (Asia/Karachi) — F3-R2 Keystore TLS interoperability correction
+
+Continued existing branch/PR #4 from clean R1 closeout `1bb5576`, without reset,
+rebase, duplicate PR, merge, delegate or unrelated source edits. User supplies two
+October 18 physical failures at 21:57:00/53148 and 21:59:10/53192: TCP accepted,
+server pin verified, EC key/chain selected, then TLS fails before Windows callback,
+hello/enrollment. This is physical evidence supplied by the user, not agent testing;
+TCP is now established and prior firewall/discovery speculation is superseded.
+
+Investigated Android KeyGenParameterSpec/KeyInfo, certificate shape/signature/KU/EKU,
+Conscrypt CryptoUpcalls and KeyStore ECDSA SignatureSpi, and Microsoft Learn
+server-certificate-selection/Schannel return semantics. Found omitted DIGEST_NONE:
+SHA permissions do not authorize raw prehashed EC signing used by Conscrypt. D009
+records the narrow correction before reliance. No evidence justifies EKU, cipher,
+certificate/pin, TLS version, approval or OS-storage replacement. Authorize NONE for
+new keys; preserve old keys until explicit confirmed replacement/forget/re-enroll.
+The UI/off-UI preflight performs actual SHA and prehashed signing plus verification
+with the corresponding public cert; fixed metadata and safe error stages only.
+No private export, challenge/signature/URI/secret/exception-message/raw-traffic log.
+Windows records selection, callback not reached, native/HRESULT and fixed categories.
+
+Regression evidence: `9863cb2` [Android CI 39171259060](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39171259060)
+ran 43 tests; ClientKeyPolicyTest alone failed because DIGEST_NONE was missing.
+Candidate `c0ebf69` then passed both CI workflows, Android 48 and Windows 24 link
+checks. Superseded 7162ff7 workflows were cancelled by workflow concurrency after
+final diagnostic additions; cancelled runs are not passes. A shell test-edit attempt
+used the wrong relative cwd and failed before writing; corrected it before final
+build. Final source `3f6ca5afb49ec404a2ad0533af28ab890242cdb7` has actual results:
+
+- `/workspace/bluey-tools/dotnet-run test Bluey.Link.Tests -c Release --logger trx...`
+  locally passes 26/26, zero skipped/failed (`windows/TestResults/r2-final.trx`).
+- [Windows 39171721298](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39171721298): 27 core + 26 link tests passed,
+  zero skipped/failed; WPF zero warnings/errors; self-contained publish; 12 actual
+  native checks and 12 offscreen frames. Real TLS 1.2 and TLS 1.3 independently
+  exercise presentation/proof, EnrollmentValidated/ApprovalPending, approval/confirm,
+  ready/face and revoked/missing/untrusted/pin-rejected peers. No hardware claim.
+- [Android 39171721076](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39171721076): 48 tests passed, zero failure/error/
+  skips; lint 0 errors/15 warnings; apksigner signature verify + debug APK, 17 renders.
+  Includes production-spec policy, real JCA SHA/NONE sign+verify/mismatch, opaque-key
+  failure without export, per-version JSSE positive/missing-client handshakes,
+  safe fixed categories and retained 40 shared fixtures/animation checks.
+- PR merge-tree Windows 39171723385 and Android 39171723392 also passed.
+
+Downloads: [Windows + manifest](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39171721298/artifacts/12152781645), [Windows evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39171721298/artifacts/12152926030),
+[APK + manifest/signer](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39171721076/artifacts/12152857235), [Android evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39171721076/artifacts/12153061376), retention 14 days.
+Observed CI SHA-256: EXE `8fc454681c871f14b658479de3a9538262aea06807f4404f5535da9d5fa09af9`,
+DLL `b8eb51f668cadb274af26e6d6e40405dc48ad09a604eed599a671a50f2a8622a`, Windows
+manifest `f21fb5ad82961b1a881f8b100272e45b90ee74492ae195c541f5e0120e156563`.
+Downloaded APK digest `51b0e4f6478bf457f840594b210677636ff3212ccf09e3aab5f535e43e6b7da6` matches manifest; inspected JUnit/lint,
+17 renders, all six original font/OFL bytes and APK-v2 public signer versus CI report.
+New signer `de4459d57c8d3441698a3aba9a37dc4a7ffeef67a87925aaf235d7c47e540134` differs from delivered R1
+`1ee1aef4c6f8eb8c7b0b2ceddf289ebdaf7d3eac2755f9c4a6aa7369020a7bff`; uninstall/reinstall/re-enroll needed for that baseline.
+No signing private key exported/persisted in repo/artifacts. APK signer is not a TLS pin.
+
+Windows app and evidence download denied by cloud proxy CONNECT policy at exact
+host productionresultssa7.blob.core.windows.net. Native/build/test/hash/upload
+results are observed CI logs/API metadata; R2 Windows archive is NOT locally hash-
+verified. No direct/proxy bypass, alternate rehosting or disabled TLS verification.
+Saved only the added artifact hostname in environment config draft, preserving
+existing destinations; tool confirms saved/requires_publish, not runtime applied.
+This does not block published artifacts or final application CI results.
+
+Original Apple/Shared/previews and target motion/render source unchanged. Physical
+Keystore/Schannel mechanism and repaired ApprovalPending/authenticated sync remain
+UNVERIFIED. F1/F2 QA stays separate; F2 smoke remains user-reported accepted. Next:
+run HANDOFF's exact signing-first physical sequence with these matching artifacts.

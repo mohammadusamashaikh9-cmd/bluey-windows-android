@@ -188,3 +188,10 @@ confirmed replacement and forget local host trust; tell the user to revoke the o
 phone on Windows and enroll anew. The old certificate stays intact until that
 choice. Test TLS 1.2/1.3 independently without a production version override.
 Phone confirmation of this correction and ApprovalPending/session remain pending.
+
+R2 Windows diagnostics use the documented
+[ServerCertificateSelectionCallback](https://learn.microsoft.com/en-us/dotnet/api/system.net.security.sslserverauthenticationoptions.servercertificateselectioncallback?view=net-10.0)
+to select the same stored identity and record a fixed event, without logging SNI.
+[Schannel AcceptSecurityContext](https://learn.microsoft.com/en-us/windows/win32/secauthn/acceptsecuritycontext--schannel)
+return categories inform numeric native-error labels; no unavailable TLS alert is
+invented. Unknown/cancelled errors remain distinct and carry no provider text.
