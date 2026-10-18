@@ -85,5 +85,6 @@ class ClientIdentityKeyManagerTest {
     }
     @Test fun actualJsseTls12UsesTheProductionClientKeyManager()=handshake("TLSv1.2",true)
     @Test fun actualJsseTls13UsesTheProductionClientKeyManager()=handshake("TLSv1.3",true)
-    @Test fun actualJsseTlsRejectsAMissingClientIdentity()=handshake("TLSv1.3",false)
+    @Test fun actualJsseTls12RejectsAMissingClientIdentity()=handshake("TLSv1.2",false)
+    @Test fun actualJsseTls13RejectsAMissingClientIdentity()=handshake("TLSv1.3",false)
 }

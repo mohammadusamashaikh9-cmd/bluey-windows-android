@@ -3,6 +3,7 @@ package dev.bluey.port.link
 import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import android.security.keystore.KeyInfo
 import android.util.AtomicFile
 import com.google.gson.JsonParser
 import java.io.File
@@ -26,11 +27,16 @@ class AndroidIdentity(context:Context) {
         // Kept separately so the actual generated-key authorizations are regression tested.
         fun clientKeySpec(alias:String,deviceId:String,now:Long)=KeyGenParameterSpec.Builder(alias,KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY)
             .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
-            .setDigests(KeyProperties.DIGEST_SHA256,KeyProperties.DIGEST_SHA384,KeyProperties.DIGEST_SHA512)
+            .setDigests(KeyProperties.DIGEST_NONE,KeyProperties.DIGEST_SHA256,KeyProperties.DIGEST_SHA384,KeyProperties.DIGEST_SHA512)
             .setCertificateSubject(X500Principal("CN=Bluey Android $deviceId"))
             .setCertificateSerialNumber(java.math.BigInteger.ONE)
             .setCertificateNotBefore(Date(now-86400000))
             .setCertificateNotAfter(Date(now+10L*365*86400000)).build()
+        fun replaceIdentity(context:Context) {
+            // Called only after the user confirms, with the session stopped and initGate held.
+            eraseTrust(context)
+            KeyStore.getInstance("AndroidKeyStore").apply{load(null);deleteEntry("bluey.f3.client")}
+        }
         fun eraseTrust(context:Context) { AtomicFile(File(context.noBackupFilesDir,"bluey-peer.gcm")).delete() }
     }
     private val keys=KeyStore.getInstance("AndroidKeyStore").apply{load(null)}
@@ -53,6 +59,20 @@ class AndroidIdentity(context:Context) {
             init(KeyGenParameterSpec.Builder(protection,KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM).setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE).build());generateKey()
         }
+    }
+    fun signingSelfTest(event:(LinkStage)->Unit) {
+        val privateKey=keys.getKey(identity,null) as? PrivateKey?:throw ClientIdentityFailure()
+        try {
+            val info=KeyFactory.getInstance(privateKey.algorithm,"AndroidKeyStore").getKeySpec(privateKey,KeyInfo::class.java)
+            event(if(info.digests.contains(KeyProperties.DIGEST_NONE))LinkStage.DIGEST_NONE_AUTHORIZED else LinkStage.DIGEST_NONE_NOT_AUTHORIZED)
+        } catch(_:GeneralSecurityException) {event(LinkStage.DIGEST_AUTHORIZATION_UNKNOWN)}
+        try {certificate.verify(certificate.publicKey);event(LinkStage.CLIENT_CERT_SELF_SIGNATURE_VALID)}
+        catch(_:GeneralSecurityException){event(LinkStage.CLIENT_CERT_SELF_SIGNATURE_INVALID)}
+        val eku=certificate.extendedKeyUsage
+        val ku=certificate.keyUsage
+        event(if((eku==null||eku.contains("1.3.6.1.5.5.7.3.2")||eku.contains("2.5.29.37.0"))&&(ku==null||ku.firstOrNull()==true))
+            LinkStage.CLIENT_CERT_CLIENT_AUTH_ALLOWED else LinkStage.CLIENT_CERT_CLIENT_AUTH_EXCLUDED)
+        IdentitySigning.check(privateKey,certificate.publicKey,event)
     }
     fun load():TrustedHost? {
         if(!file.baseFile.exists())return null

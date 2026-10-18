@@ -16,6 +16,12 @@ import kotlinx.coroutines.CancellationException
 
 enum class LinkStage {
     INVITATION_VALIDATED, INVITATION_INVALID, IDENTITY_LOADING, IDENTITY_READY,
+    DIGEST_NONE_AUTHORIZED, DIGEST_NONE_NOT_AUTHORIZED, DIGEST_AUTHORIZATION_UNKNOWN,
+    SIGN_SHA256_STARTED, SIGN_SHA256_PASSED, SIGN_SHA256_FAILED,
+    SIGN_PREHASH_STARTED, SIGN_PREHASH_PASSED, SIGN_PREHASH_FAILED,
+    CLIENT_CERT_SELF_SIGNATURE_VALID, CLIENT_CERT_SELF_SIGNATURE_INVALID,
+    CLIENT_CERT_CLIENT_AUTH_ALLOWED, CLIENT_CERT_CLIENT_AUTH_EXCLUDED,
+    IDENTITY_REPLACED,
     TCP_CONNECTING, TCP_CONNECTED, TLS_STARTED, SERVER_PIN_VERIFIED, SERVER_CERTIFICATE_REJECTED,
     CLIENT_ALIAS_REQUESTED, CLIENT_EC_OFFERED, CLIENT_EC_NOT_OFFERED, CLIENT_ALIAS_SELECTED,
     CLIENT_ALIAS_AVAILABLE, CLIENT_ALIAS_UNAVAILABLE, CLIENT_CHAIN_PROVIDED, CLIENT_KEY_PROVIDED, CLIENT_KEY_UNAVAILABLE,
@@ -34,7 +40,46 @@ class PeerCertificateFailure(val category:LinkFailure):CertificateException(cate
 class ClientIdentityFailure(cause:Throwable?=null):GeneralSecurityException(LinkFailure.CLIENT_IDENTITY_UNAVAILABLE.name,cause)
 class ConnectionProblem(val category:LinkFailure):IOException(category.name)
 
-data class LinkDiagnostic(val at:Long,val attempt:String,val stage:LinkStage,val failure:LinkFailure,val port:Int)
+enum class TlsDetail {
+    NONE, INVALID_KEY, SIGNATURE_FAILED, PROVIDER_FAILED, CERTIFICATE_FAILED,
+    ALERT_BAD_CERTIFICATE, ALERT_UNKNOWN_CA, ALERT_CERTIFICATE_UNKNOWN, ALERT_UNSUPPORTED_CERTIFICATE,
+    ALERT_DECRYPT_ERROR, ALERT_HANDSHAKE_FAILURE, ALERT_INTERNAL_ERROR, ALERT_ILLEGAL_PARAMETER,
+    NO_SHARED_SIGNATURE_ALGORITHM, TLS_PROTOCOL, TLS_HANDSHAKE, IO_CLOSED
+}
+// Inspect provider text only for these fixed markers; never include text itself in diagnostic output.
+fun tlsDetail(error:Throwable):TlsDetail {
+    var next:Throwable?=error
+    var fallback=TlsDetail.NONE
+    repeat(8) {
+        val c=next?:return fallback
+        when(c) {
+            is java.security.InvalidKeyException->return TlsDetail.INVALID_KEY
+            is java.security.SignatureException->return TlsDetail.SIGNATURE_FAILED
+            is java.security.ProviderException->return TlsDetail.PROVIDER_FAILED
+            is CertificateException->return TlsDetail.CERTIFICATE_FAILED
+            is SSLException->{
+                val text=c.message.orEmpty().take(4096).lowercase(java.util.Locale.ROOT)
+                val markers=listOf("alert bad certificate" to TlsDetail.ALERT_BAD_CERTIFICATE,
+                    "alert_bad_certificate" to TlsDetail.ALERT_BAD_CERTIFICATE,
+                    "alert unknown ca" to TlsDetail.ALERT_UNKNOWN_CA,"alert_unknown_ca" to TlsDetail.ALERT_UNKNOWN_CA,
+                    "alert certificate unknown" to TlsDetail.ALERT_CERTIFICATE_UNKNOWN,"alert_certificate_unknown" to TlsDetail.ALERT_CERTIFICATE_UNKNOWN,
+                    "alert unsupported certificate" to TlsDetail.ALERT_UNSUPPORTED_CERTIFICATE,"alert_unsupported_certificate" to TlsDetail.ALERT_UNSUPPORTED_CERTIFICATE,
+                    "alert decrypt error" to TlsDetail.ALERT_DECRYPT_ERROR,"alert_decrypt_error" to TlsDetail.ALERT_DECRYPT_ERROR,
+                    "alert handshake failure" to TlsDetail.ALERT_HANDSHAKE_FAILURE,"alert_handshake_failure" to TlsDetail.ALERT_HANDSHAKE_FAILURE,
+                    "alert internal error" to TlsDetail.ALERT_INTERNAL_ERROR,"alert_internal_error" to TlsDetail.ALERT_INTERNAL_ERROR,
+                    "alert illegal parameter" to TlsDetail.ALERT_ILLEGAL_PARAMETER,"alert_illegal_parameter" to TlsDetail.ALERT_ILLEGAL_PARAMETER,
+                    "no suitable signature algorithm" to TlsDetail.NO_SHARED_SIGNATURE_ALGORITHM,
+                    "no shared signature algorithms" to TlsDetail.NO_SHARED_SIGNATURE_ALGORITHM)
+                markers.firstOrNull{text.contains(it.first)}?.let{return it.second}
+                fallback=if(c is javax.net.ssl.SSLProtocolException)TlsDetail.TLS_PROTOCOL else TlsDetail.TLS_HANDSHAKE
+            }
+            is IOException->if(fallback==TlsDetail.NONE)fallback=TlsDetail.IO_CLOSED
+        }
+        next=c.cause
+    }
+    return fallback
+}
+data class LinkDiagnostic(val at:Long,val attempt:String,val stage:LinkStage,val failure:LinkFailure,val port:Int,val detail:TlsDetail)
 // Deliberately no free-form message/exception/URI/payload parameter. The only strings are local IDs.
 class SafeDiagnostics {
     companion object {const val CAPACITY=96}
@@ -42,11 +87,11 @@ class SafeDiagnostics {
     private val entries=MutableStateFlow<List<LinkDiagnostic>>(emptyList())
     val events:StateFlow<List<LinkDiagnostic>> = entries
     fun begin()=LinkAttempt("A%08x".format(next.incrementAndGet()),this)
-    @Synchronized internal fun record(id:String,stage:LinkStage,failure:LinkFailure,port:Int) {
-        entries.value=(entries.value+LinkDiagnostic(System.currentTimeMillis(),id,stage,failure,port)).takeLast(CAPACITY)
+    @Synchronized internal fun record(id:String,stage:LinkStage,failure:LinkFailure,port:Int,detail:TlsDetail=TlsDetail.NONE) {
+        entries.value=(entries.value+LinkDiagnostic(System.currentTimeMillis(),id,stage,failure,port,detail)).takeLast(CAPACITY)
     }
-    fun text()="Bluey safe connection diagnostics v1 (UTC; ids local; port=client TCP source port)\n"+
-        entries.value.joinToString("\n"){"${Instant.ofEpochMilli(it.at)} ${it.attempt} port=${it.port} ${it.stage} ${it.failure}"}
+    fun text()="Bluey safe connection diagnostics v2 (UTC; ids local; port=client TCP source port)\n"+
+        entries.value.joinToString("\n"){"${Instant.ofEpochMilli(it.at)} ${it.attempt} port=${it.port} ${it.stage} ${it.failure} detail=${it.detail}"}
 }
 class LinkAttempt(val id:String,private val log:SafeDiagnostics) {
     @Volatile var current=LinkStage.IDENTITY_LOADING;private set
@@ -62,7 +107,7 @@ class LinkAttempt(val id:String,private val log:SafeDiagnostics) {
     }
     fun failed(error:Throwable):LinkFailure {
         val code=classify(error)
-        log.record(id,current,code,port);return code
+        log.record(id,current,code,port,tlsDetail(error));return code
     }
     fun cancelled(){log.record(id,LinkStage.LIFECYCLE_CANCELLED,LinkFailure.CANCELLED,port)}
     private fun classify(error:Throwable):LinkFailure {

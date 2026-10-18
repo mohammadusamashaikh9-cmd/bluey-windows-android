@@ -28,4 +28,19 @@ class FailureCategoryTest {
         assertEquals(SafeDiagnostics.CAPACITY,log.events.value.size)
         assertEquals(SafeDiagnostics.CAPACITY+1,log.text().lines().size)
     }
+    @Test fun tlsProviderDetailsNeverEchoExceptionTextOrSecrets() {
+        val cases=listOf(
+            SSLHandshakeException("error SSLV3_ALERT_BAD_CERTIFICATE NEVER_LOG") to TlsDetail.ALERT_BAD_CERTIFICATE,
+            SSLHandshakeException("NO SUITABLE SIGNATURE ALGORITHM NEVER_LOG") to TlsDetail.NO_SHARED_SIGNATURE_ALGORITHM,
+            SSLHandshakeException("NEVER_LOG").apply{initCause(java.security.InvalidKeyException("PRIVATE_KEY_TEXT"))} to TlsDetail.INVALID_KEY,
+            java.security.SignatureException("PRIVATE_SIGNATURE") to TlsDetail.SIGNATURE_FAILED,
+            java.security.ProviderException("PRIVATE_PROVIDER") to TlsDetail.PROVIDER_FAILED)
+        val log=SafeDiagnostics()
+        for((error,expected) in cases) {
+            assertEquals(expected,tlsDetail(error))
+            log.begin().apply{phase(LinkStage.TLS_STARTED);failed(error)}
+        }
+        assertFalse(log.text().contains("NEVER_LOG"));assertFalse(log.text().contains("PRIVATE_"))
+    }
+
 }

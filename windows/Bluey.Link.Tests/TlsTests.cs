@@ -65,12 +65,15 @@ public sealed class TlsTests
         }
         await Denied(async()=>{using var c=await Connect(server,cert);});
     }
-    [Fact] public async Task WrongPinMissingCertificateUnknownAndPlaintextPeersFailClosed()
+    [Theory]
+    [InlineData(SslProtocols.Tls12)]
+    [InlineData(SslProtocols.Tls13)]
+    public async Task WrongPinMissingCertificateUnknownAndPlaintextPeersFailClosed(SslProtocols protocol)
     {
         using var store=new MemoryStore();await using var s=new LinkServer(store);s.Start(IPAddress.Loopback);using var cert=Identity.Create("phone",false);
-        s.StartPairing();await Denied(async()=>{using var c=await Connect(s,cert,new string('0',64));});
-        await Denied(async()=>{using var c=await Connect(s,null);});s.StopPairing();
-        await Denied(async()=>{using var c=await Connect(s,cert);});
+        s.StartPairing();await Denied(async()=>{using var c=await Connect(s,cert,new string('0',64),protocol);});
+        await Denied(async()=>{using var c=await Connect(s,null,protocols:protocol);});s.StopPairing();
+        await Denied(async()=>{using var c=await Connect(s,cert,protocols:protocol);});
         using var tcp=new TcpClient();await tcp.ConnectAsync(IPAddress.Loopback,s.Port);
         var raw=tcp.GetStream();await raw.WriteAsync("{}\n"u8.ToArray());tcp.Client.Shutdown(SocketShutdown.Send);
         using var deadline=new CancellationTokenSource(5000);var b=new byte[1024];var n=await raw.ReadAsync(b,deadline.Token);
@@ -177,6 +180,19 @@ public sealed class TlsTests
         for(var i=0;i<100 && server.Pending==null;i++)await Task.Delay(10);
         Assert.NotNull(server.Pending);Assert.Empty(store.Peers);
         Assert.Contains(server.Diagnostics.Snapshot(),e=>e.Stage==ConnectionStage.MutualTlsCompleted && e.Protocol==protocol);
-        server.StopPairing();await Denied(async()=>{await client.Wire.Read(default);});
+        var trace=server.Diagnostics.Snapshot();
+        Assert.Contains(trace,e=>e.Stage==ConnectionStage.ServerCertificateSelected);
+        Assert.Contains(trace,e=>e.Stage==ConnectionStage.ClientCertificatePresent);
+        Assert.Contains(trace,e=>e.Stage==ConnectionStage.EnrollmentValidated);
+        Assert.Contains(trace,e=>e.Stage==ConnectionStage.ApprovalPending);
+        var pending=server.Pending!;
+        server.Decide(pending.Pin,true,pending.RequestId);
+        var approve=await client.Wire.Read(default);Assert.Equal("approve",approve.Type);
+        await client.Wire.Send("confirm",new{requestId=pending.RequestId},default);
+        Assert.Equal("ready",(await client.Wire.Read(default)).Type);Assert.Single(store.Peers);
+        server.Publish(.25,-.5,"talking",.5);
+        Assert.Equal("talking",Wire.Face(await client.Wire.Read(default)).Mood);
+        server.Revoke(pending.Pin);server.StopPairing();
+        await Denied(async()=>{using var rejected=await Connect(server,cert,protocols:protocol);});
     }
 }

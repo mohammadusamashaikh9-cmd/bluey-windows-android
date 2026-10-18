@@ -21,6 +21,7 @@ fun ConnectionPanel(link:DeviceLink,incoming:String?,close:()->Unit) {
     val state by link.ui.collectAsState()
     val log by link.diagnostics.collectAsState()
     val context=LocalContext.current
+    var replaceIdentity by remember {mutableStateOf(false)}
     var showLog by remember {mutableStateOf(false)}
     var invitation by remember(incoming){mutableStateOf(incoming?:"")}
     val displayedInvitation=invitation
@@ -29,6 +30,8 @@ fun ConnectionPanel(link:DeviceLink,incoming:String?,close:()->Unit) {
     AlertDialog(onDismissRequest=close,title={Text("Secure Windows connection")},
         text={Column(Modifier.verticalScroll(rememberScrollState())) {
             Text(state.status)
+            TextButton(onClick=link::testIdentity){Text("Test protected signing identity")}
+            TextButton(onClick={replaceIdentity=true}){Text("Replace phone identity / forget host…")}
             TextButton(onClick={showLog=!showLog}){Text(if(showLog)"Hide safe diagnostics" else "Show safe diagnostics")}
             TextButton(onClick={
                 context.getSystemService(ClipboardManager::class.java).setPrimaryClip(ClipData.newPlainText("Bluey safe diagnostics",link.diagnosticText()))
@@ -52,4 +55,9 @@ fun ConnectionPanel(link:DeviceLink,incoming:String?,close:()->Unit) {
             if(Build.VERSION.SDK_INT>=33)TextButton(onClick={nearby.launch(Manifest.permission.NEARBY_WIFI_DEVICES)}){Text("Allow Nearby devices if Android 16 local-network opt-in requires it")}
             Text("No camera permission: use your system QR scanner or paste privately. Backgrounding closes the link. No plaintext fallback. Forgetting here does not revoke this phone on Windows; revoke it there too.")
         }},confirmButton={TextButton(onClick=close){Text("Done")}})
+    if(replaceIdentity)AlertDialog(onDismissRequest={replaceIdentity=false},
+        title={Text("Replace this phone identity?")},
+        text={Text("This stops the session, deletes this phone's signing key and saved Windows trust. Revoke the old phone entry on Windows, then use a fresh invitation and approve both devices again. Nothing is replaced automatically.")},
+        confirmButton={TextButton(onClick={replaceIdentity=false;link.replaceIdentity()}){Text("Replace identity and forget host")}},
+        dismissButton={TextButton(onClick={replaceIdentity=false}){Text("Cancel")}})
 }

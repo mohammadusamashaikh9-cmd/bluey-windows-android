@@ -67,6 +67,7 @@ class DeviceLink(context:Context) {
     @Volatile private var socket:Socket?=null
     @Volatile private var foreground=false
     @Volatile private var desired=true
+    @Volatile private var replacingIdentity=false
     @Volatile private var invitation:Bootstrap?=null
     @Volatile private var currentHost:TrustedHost?=null
     private var worker:Job?=null
@@ -86,8 +87,9 @@ class DeviceLink(context:Context) {
     }
     @Synchronized fun resume(){foreground=true;discovery.start();restart()}
     @Synchronized fun pause(){foreground=false;worker?.cancel();closeSocket();latest.value=null;mutable.update{snapshot->snapshot.copy(connected=false,status="Paused — connection closed")};discovery.stop()}
-    @Synchronized private fun restart(){worker?.cancel();closeSocket();latest.value=null;mutable.update{it.copy(connected=false)};if(foreground && desired)worker=scope.launch{sessionGate.withLock{loop()}}}
-    fun pair(text:String) {
+    @Synchronized private fun restart(){worker?.cancel();closeSocket();latest.value=null;mutable.update{it.copy(connected=false)};if(foreground && desired && !replacingIdentity)worker=scope.launch{sessionGate.withLock{loop()}}}
+    @Synchronized fun pair(text:String) {
+        if(replacingIdentity){status("Identity replacement in progress");return}
         val attempt=safeLog.begin()
         try {
             invitation=Bootstrap.parse(text,System.currentTimeMillis()/1000);enrollmentAttempt=attempt
@@ -97,7 +99,8 @@ class DeviceLink(context:Context) {
             status("${attempt.id}: INVITATION_INVALID. Copy the complete fresh Windows URI; check both device clocks.")
         }
     }
-    fun connect(selected:DiscoveredHost?=null) {
+    @Synchronized fun connect(selected:DiscoveredHost?=null) {
+        if(replacingIdentity){status("Identity replacement in progress");return}
         if(selected!=null && currentHost!=null)currentHost=currentHost!!.copy(address=selected.address,port=selected.port)
         invitation=null;enrollmentAttempt=null;desired=true;restart()
     }
@@ -106,6 +109,37 @@ class DeviceLink(context:Context) {
         try {initGate.withLock{AndroidIdentity.eraseTrust(app);currentHost=null;mutable.update{snapshot->snapshot.copy(trusted=null)}}}
         catch(_:Exception){status("Saved trust could not be removed. Check protected storage.")}
     }}
+    fun testIdentity() {
+        if(replacingIdentity)return
+        scope.launch {
+            val attempt=safeLog.begin()
+            try {initGate.withLock {
+                attempt.phase(LinkStage.IDENTITY_LOADING)
+                val value=identity?:AndroidIdentity(app).also{identity=it;currentHost=it.load()}
+                value.signingSelfTest(attempt::event)
+                mutable.update{it.copy(clientPin=PeerIdentity.fingerprint(value.certificate))}
+                attempt.phase(LinkStage.IDENTITY_READY)
+                status("${attempt.id}: SHA-256 and TLS prehashed signing checks passed. This is not a TLS session test.")
+            }} catch(e:Exception){attempt.failed(e);status("${attempt.id}: Identity self-test failed; inspect safe diagnostics. No identity was replaced.")}
+        }
+    }
+    @Synchronized fun replaceIdentity() {
+        if(replacingIdentity)return
+        replacingIdentity=true
+        disconnect()
+        scope.launch {
+            // Wait for cancelled session cleanup before deleting the key it could still be using.
+            try {sessionGate.withLock {initGate.withLock {
+                val attempt=safeLog.begin()
+                try {
+                    AndroidIdentity.replaceIdentity(app);identity=null;currentHost=null
+                    mutable.update{it.copy(trusted=null,clientPin=null)}
+                    attempt.phase(LinkStage.IDENTITY_REPLACED)
+                    status("${attempt.id}: Old phone identity removed. Revoke its Windows trust entry; use a fresh invitation to enroll a new identity.")
+                } catch(e:Exception){attempt.failed(e);status("${attempt.id}: Identity replacement failed; inspect safe diagnostics.")}
+            }}} finally {replacingIdentity=false}
+        }
+    }
     fun close(){pause();scope.cancel()}
     private suspend fun loop() {
         val retry=RetrySchedule()
@@ -115,7 +149,7 @@ class DeviceLink(context:Context) {
                 val attempt=if(enroll!=null)enrollmentAttempt?:safeLog.begin() else safeLog.begin()
                 try {
                     progress(attempt,LinkStage.IDENTITY_LOADING,"Loading protected client identity")
-                    val keys=keys();attempt.phase(LinkStage.IDENTITY_READY);currentCoroutineContext().ensureActive()
+                    val keys=keys();keys.signingSelfTest(attempt::event);attempt.phase(LinkStage.IDENTITY_READY);currentCoroutineContext().ensureActive()
                     var host=enroll?.host?:currentHost
                     if(host==null){status("No trusted host. Scan/paste a Windows invitation, then Pair.");return}
                     if(enroll==null)mutable.value.hosts.firstOrNull{it.name.startsWith("Bluey-"+host!!.hostId.take(8))}
@@ -143,7 +177,7 @@ class DeviceLink(context:Context) {
     private fun failureHint(code:LinkFailure)=when(code) {
         LinkFailure.TCP_CONNECT_FAILED,LinkFailure.TCP_TIMEOUT->"TCP was not established; verify the endpoint and LAN reachability."
         LinkFailure.SERVER_PIN_MISMATCH->"Server certificate pin mismatch; verify the intended Windows identity. No fallback."
-        LinkFailure.CLIENT_IDENTITY_UNAVAILABLE,LinkFailure.CLIENT_IDENTITY_NOT_SELECTED->"Client identity unavailable/not selected; inspect both safe logs."
+        LinkFailure.CLIENT_IDENTITY_UNAVAILABLE,LinkFailure.CLIENT_IDENTITY_NOT_SELECTED->"Inspect signing diagnostics. If the old key lacks DIGEST_NONE, explicitly replace the phone identity, revoke it on Windows and enroll anew."
         LinkFailure.HELLO_REJECTED->"TLS completed locally but Windows hello was rejected/closed; inspect Windows client-certificate diagnostics."
         LinkFailure.ENROLLMENT_REJECTED_OR_EXPIRED,LinkFailure.APPROVAL_TIMEOUT->"Check invitation expiry and Windows approval diagnostics."
         else->"Inspect both safe logs. If approval already completed, check Windows trusted devices before re-enrolling."

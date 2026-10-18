@@ -69,7 +69,7 @@ public sealed class LinkServer : IAsyncDisposable
     private async Task Handle(TcpClient client,string attempt,int port)
     {
         string? pin = null; WireConnection? wire = null; Enrollment? request = null;
-        var stage=ConnectionStage.TlsStarted;var failure=ConnectionFailure.None;
+        var stage=ConnectionStage.TlsStarted;var failure=ConnectionFailure.None;var validationReached=false;
         void Stage(ConnectionStage value) {stage=value;Diagnostics.Record(attempt,value,port);}
         using var stop = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token);
         try
@@ -77,6 +77,7 @@ public sealed class LinkServer : IAsyncDisposable
             using (client)
             using (var tls = new SslStream(client.GetStream(), false, (_, certificate, _, _) =>
             {
+                validationReached=true;
                 if(certificate==null) {failure=ConnectionFailure.ClientCertificateAbsent;Stage(ConnectionStage.ClientCertificateAbsent);return false;}
                 Stage(ConnectionStage.ClientCertificatePresent);
                 if (certificate is not X509Certificate2 c || !Identity.Valid(c)) {
@@ -93,7 +94,10 @@ public sealed class LinkServer : IAsyncDisposable
                 {
                     deadline.CancelAfter(5000);
                     await tls.AuthenticateAsServerAsync(new SslServerAuthenticationOptions {
-                        ServerCertificate = store.Certificate, ClientCertificateRequired = true,
+                        ServerCertificateSelectionCallback = (_, _) => {
+                            Diagnostics.Record(attempt,ConnectionStage.ServerCertificateSelected,port);
+                            return store.Certificate;
+                        }, ClientCertificateRequired = true,
                         EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
                         CertificateRevocationCheckMode = X509RevocationMode.NoCheck }, deadline.Token);
                 }
@@ -159,11 +163,14 @@ public sealed class LinkServer : IAsyncDisposable
                 TimeoutException=>ConnectionFailure.TimedOut,
                 AuthenticationException=>stage<=ConnectionStage.MutualTlsCompleted?ConnectionFailure.TlsHandshakeFailed:ConnectionFailure.ProtocolRejected,
                 SocketException=>ConnectionFailure.SocketFailure,
-                IOException=>stage==ConnectionStage.TrustPersisting?ConnectionFailure.StorageFailure:ConnectionFailure.PeerClosed,
+                IOException=>stage==ConnectionStage.TrustPersisting?ConnectionFailure.StorageFailure:stage<ConnectionStage.MutualTlsCompleted?ConnectionFailure.TlsPeerClosed:ConnectionFailure.PeerClosed,
                 System.Security.Cryptography.CryptographicException=>ConnectionFailure.StorageFailure,
                 _=>ConnectionFailure.Unexpected
             };
-            Diagnostics.Record(attempt,stage,port,failure,ConnectionDiagnostics.NativeError(e));
+            var duringTls=stage<ConnectionStage.MutualTlsCompleted;
+            if(duringTls&&!validationReached)Diagnostics.Record(attempt,ConnectionStage.ClientValidationNotReached,port);
+            Diagnostics.Record(attempt,stage,port,failure,ConnectionDiagnostics.NativeError(e),
+                errorHResult:e.HResult,tlsDetail:duringTls?ConnectionDiagnostics.TlsDetailFor(e):TlsFailureDetail.None);
         }
         finally
         {

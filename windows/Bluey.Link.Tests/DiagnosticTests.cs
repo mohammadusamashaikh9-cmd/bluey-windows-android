@@ -32,4 +32,21 @@ public sealed class DiagnosticTests
         for(var i=0;i<1000;i++)log.Record(log.Begin(),ConnectionStage.TlsStarted,1234);
         Assert.Equal(ConnectionDiagnostics.Capacity,log.Snapshot().Length);Assert.Equal(ConnectionDiagnostics.Capacity+1,log.Text().Split('\n').Length);
     }
+    [Theory]
+    [InlineData(unchecked((int)0x80090331),TlsFailureDetail.AlgorithmMismatch)]
+    [InlineData(unchecked((int)0x80090326),TlsFailureDetail.InvalidTlsMessage)]
+    [InlineData(unchecked((int)0x80090327),TlsFailureDetail.CertificateRejected)]
+    [InlineData(unchecked((int)0x8009030f),TlsFailureDetail.InvalidSignature)]
+    [InlineData(unchecked((int)0x8009030e),TlsFailureDetail.CredentialsUnavailable)]
+    public void NativeTlsErrorsKeepFixedCategoriesWithoutProviderMessages(int code,TlsFailureDetail expected)
+    {
+        var error=new IOException("NEVER_LOG",new System.Security.Authentication.AuthenticationException("SECRET",
+            new System.ComponentModel.Win32Exception(code,"PRIVATE_PROVIDER_TEXT")));
+        Assert.Equal(expected,ConnectionDiagnostics.TlsDetailFor(error));
+        var log=new ConnectionDiagnostics();log.Record(log.Begin(),ConnectionStage.TlsStarted,1234,
+            tlsDetail:ConnectionDiagnostics.TlsDetailFor(error),errorHResult:error.HResult);
+        Assert.Contains("hr=0x",log.Text());Assert.DoesNotContain("NEVER_LOG",log.Text());
+        Assert.DoesNotContain("SECRET",log.Text());Assert.DoesNotContain("PRIVATE_PROVIDER_TEXT",log.Text());
+    }
+
 }
