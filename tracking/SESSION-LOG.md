@@ -324,3 +324,12 @@ initial velocity to animation-distances/second, matching source API units. Added
 four deterministic cases for spring/endpoints/cloud-tail paths: cloud **27 passed,
 0 failed/skipped**; WPF cross-build **0 warnings/errors**. This is independent of
 the unresolved native smoke diagnosis; no platform result is promoted.
+
+Run 39115541861 captured the actual fatal exception: nonfinite engine coordinates
+during WPF MediaContext.Resize/HWND creation. Native ConfigureOverlay's frame
+change can dispatch Rendering before FitPrimary initializes DisplayTransform;
+zero DPI caused nonfinite logical mouse coordinates. Added a lifecycle guard
+(`IsLoaded`, initialized DPI, and not resizing) before ticking; clear the HWND
+after close. The engine's finite-input assertion remains. Native smoke also refits
+a live HWND and checks opaque blueberry interior pixels in each render, not just
+nonempty images. These checks use real WPF/Win32, not mocked styles.

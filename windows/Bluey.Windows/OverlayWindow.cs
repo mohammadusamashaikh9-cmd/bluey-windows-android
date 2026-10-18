@@ -31,7 +31,7 @@ internal sealed class OverlayWindow : Window
             Native.ConfigureOverlay(hwnd); FitPrimary();
         };
         CompositionTarget.Rendering += Render;
-        Closed += (_, _) => CompositionTarget.Rendering -= Render;
+        Closed += (_, _) => { CompositionTarget.Rendering -= Render; hwnd = 0; };
     }
     private nint Hook(nint window, int msg, nint wparam, nint lparam, ref bool handled)
     {
@@ -69,7 +69,7 @@ internal sealed class OverlayWindow : Window
     {
         if (args is RenderingEventArgs frame && frame.RenderingTime == lastRendering) return;
         if (args is RenderingEventArgs rendered) lastRendering = rendered.RenderingTime;
-        if (hwnd == 0 || ActualWidth <= 0 || ActualHeight <= 0) return;
+        if (resizing || !IsLoaded || hwnd == 0 || coordinates.DpiX <= 0 || coordinates.DpiY <= 0 || ActualWidth <= 0 || ActualHeight <= 0) return;
         engine.Tick(coordinates.ToLogical(Native.Mouse()), new(ActualWidth, ActualHeight));
         art.Advance(); Frame?.Invoke();
     }

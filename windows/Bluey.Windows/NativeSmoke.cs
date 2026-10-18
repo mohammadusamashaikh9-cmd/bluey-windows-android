@@ -28,6 +28,7 @@ internal static class NativeSmoke
             Check(Native.GetForegroundWindow() == before, "Show did not change foreground HWND in CI session");
             Check(Native.SendMessageW(window.Handle, Native.WmNcHitTest, 0, 0) == -1, "Actual WM_NCHITTEST handler returns HTTRANSPARENT");
             Check(Native.SendMessageW(window.Handle, Native.WmMouseActivate, 0, 0) == 3, "Actual WM_MOUSEACTIVATE handler returns MA_NOACTIVATE");
+            window.FitPrimary(); // Exercise a refit with a live HWND and compositor callbacks.
             var b = Native.PrimaryBounds(); var dpi = Native.GetDpiForWindow(window.Handle);
             Check(Math.Abs(window.Width - (b.Right - b.Left) * 96.0 / dpi) < .1, "Primary HWND logical width follows physical monitor/DPI");
             window.Hide(); window.Show(); Check(Native.IsWindowVisible(window.Handle), "Hidden native overlay can be shown again");
@@ -67,6 +68,10 @@ internal static class NativeSmoke
         art.UpdateLayout(); var bitmap = new RenderTargetBitmap(1000, 700, 96, 96, PixelFormats.Pbgra32); bitmap.Render(art);
         var pixels = new byte[1000 * 700 * 4]; bitmap.CopyPixels(pixels, 4000, 0);
         if (pixels[3] != 0 || !pixels.Where((_, i) => i % 4 == 3).Any(a => a > 200)) throw new InvalidOperationException("Offscreen renderer lost transparency or character.");
+        var interior = new V2(size * .5, size * .8).Rotate(e.Angle) * e.PressScale(e.Now) + e.Tip + new V2(0, e.Hover(e.Now));
+        var offset = ((int)Math.Round(interior.Y) * 1000 + (int)Math.Round(interior.X)) * 4;
+        if (pixels[offset + 3] < 240 || pixels[offset] <= pixels[offset + 2] + 5)
+            throw new InvalidOperationException("WPF vector body interior must be opaque blueberry, not just eyes/shadow.");
         var encoder = new PngBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(bitmap));
         using var stream = File.Create(Path.Combine(output, name + ".png")); encoder.Save(stream);
     }
