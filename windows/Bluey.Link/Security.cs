@@ -4,8 +4,16 @@ namespace Bluey.Link;
 public static class Identity
 {
     public static string Fingerprint(X509Certificate2 c) => Convert.ToHexStringLower(SHA256.HashData(c.RawData));
-    public static bool Valid(X509Certificate2? c) => c != null && c.NotBefore.ToUniversalTime() <= DateTime.UtcNow && c.NotAfter.ToUniversalTime() > DateTime.UtcNow && c.GetECDsaPublicKey() != null;
-    public static X509Certificate2 Create(string name, bool server)
+    public static bool Valid(X509Certificate2? c) {
+        if(c==null || c.NotBefore.ToUniversalTime()>DateTime.UtcNow || c.NotAfter.ToUniversalTime()<=DateTime.UtcNow)return false;
+        using var key=c.GetECDsaPublicKey();return key?.KeySize==256;
+    }
+    public static X509Certificate2 Create(string name, bool server) {
+        var pfx=CreatePfx(name,server);
+        try { return X509CertificateLoader.LoadPkcs12(pfx,null); }
+        finally { CryptographicOperations.ZeroMemory(pfx); }
+    }
+    public static byte[] CreatePfx(string name, bool server)
     {
         using var key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
         var request = new CertificateRequest("CN=" + name, key, HashAlgorithmName.SHA256);
@@ -13,7 +21,7 @@ public static class Identity
         request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature, true));
         request.CertificateExtensions.Add(new X509EnhancedKeyUsageExtension(new OidCollection { new(server ? "1.3.6.1.5.5.7.3.1" : "1.3.6.1.5.5.7.3.2") }, false));
         using var cert = request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(10));
-        return X509CertificateLoader.LoadPkcs12(cert.Export(X509ContentType.Pkcs12), null);
+        return cert.Export(X509ContentType.Pkcs12);
     }
 }
 public sealed record Peer(string DeviceId, string Name, string Pin);
@@ -47,4 +55,9 @@ public static class FaceFilter
 {
     public static bool Significant(LinkFace? old, LinkFace current, long lastSent, long now) => old == null || now - lastSent >= 1000 || old.Mood != current.Mood ||
         Math.Abs(old.GazeX-current.GazeX) >= .004 || Math.Abs(old.GazeY-current.GazeY) >= .004 || Math.Abs(old.Talk-current.Talk) >= .02;
+}
+public sealed class MessageRate
+{
+    private long start; private int count;
+    public void Accept(long now) { if(now-start>=1000){start=now;count=0;} if(++count>120)throw new ProtocolException("rate"); }
 }

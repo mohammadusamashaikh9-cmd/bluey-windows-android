@@ -1,7 +1,7 @@
 # Ordered implementation plan
 
 F0 is complete; F1 implementation is merged with device QA open. F2 Windows
-implementation is authorized under D008; F3–F6 remain planned.
+implementation is merged under D008; F3 is authorized/active under D009, F4–F6 planned.
 F1 implementation/build checks and physical-device acceptance are separate.
 Use [checkpoint states](../tracking/CHECKPOINTS.md) and [QA](QA.md); gate numbers
 are not evidence of progress. Changes of scope require [a decision](../tracking/DECISIONS.md).
@@ -55,3 +55,11 @@ F2 scope now authorizes `windows/`, `.github/workflows/windows.yml` and relevant
 canonical guidance/tracking. Pure C# and WPF/Win32 implementation is separate
 from physical click-through, focus, DPI/capture interaction, fidelity and pacing
 acceptance. No F3/F4/F5 capabilities are included. See [Windows workflow](../windows/README.md).
+
+
+F3 authorization now covers the strict shared contract/fixtures, native secure
+Windows host and Android client, protected identities, discovery, explicit pairing
+and revocation, passive face synchronization, both CI artifacts, and canonical
+evidence. F1/F2 graphics/math stay intact. The developer reports F2 functional
+smoke acceptance; measured performance QA remains open. Physical F3 pairing,
+reconnect and latency need the produced EXE/APK on the actual laptop/phone.

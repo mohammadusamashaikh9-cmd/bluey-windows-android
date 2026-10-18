@@ -30,8 +30,11 @@ internal sealed class ProtectedTrust : ITrustStore
         }
         else
         {
-            Certificate = Identity.Create("Bluey secure desktop", true);
-            ledger = new(Guid.NewGuid().ToString(), Convert.ToBase64String(Certificate.Export(X509ContentType.Pkcs12)), []); Save(ledger);
+            var pfx=Identity.CreatePfx("Bluey secure desktop", true);
+            try {
+                Certificate=X509CertificateLoader.LoadPkcs12(pfx,null);
+                ledger = new(Guid.NewGuid().ToString(), Convert.ToBase64String(pfx), []); Save(ledger);
+            } finally { CryptographicOperations.ZeroMemory(pfx); }
         }
     }
     private void Save(Ledger value)

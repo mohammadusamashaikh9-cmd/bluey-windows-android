@@ -17,7 +17,8 @@ Maximum frame: 4096 bytes excluding LF, including incomplete input. Strict UTF-8
 JSON depth <=4, no duplicate keys, no unknown fields, no empty frames or truncated
 EOF. Numeric fields must be JSON numbers, finite and within range. Sequence,
 version and time fields use unsigned decimal integer syntax within signed Int64.
-Strings are nonempty, bounded, and reject control characters. All failures close
+Strings are nonempty, bounded, and reject control characters. Each direction is
+limited to 120 messages per one-second window. All failures close
 the connection; the optional bounded `error` envelope never exposes credentials.
 
 | Type | Exact payload |

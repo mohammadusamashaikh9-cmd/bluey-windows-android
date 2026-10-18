@@ -6,6 +6,7 @@ import android.os.SystemClock
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.io.EOFException
@@ -15,7 +16,7 @@ import java.util.UUID
 import javax.net.ssl.SSLSocket
 
 class SocketWire(private val socket:SSLSocket,val session:String,hello:Message) {
-    private val frames=Frames();private val waiting=ArrayDeque<ByteArray>();val incoming=SequenceGuard(session)
+    private val frames=Frames();private val rate=MessageRate();private val waiting=ArrayDeque<ByteArray>();val incoming=SequenceGuard(session)
     private var outgoing=0L;private val input=socket.inputStream;private val output=socket.outputStream
     init{incoming.accept(hello)}
     fun read(timeoutMs:Int=5000):Message {
@@ -25,6 +26,7 @@ class SocketWire(private val socket:SSLSocket,val session:String,hello:Message) 
             socket.soTimeout=remaining.toInt();val bytes=ByteArray(1024);val n=input.read(bytes)
             if(n<0){frames.end();throw EOFException()};waiting.addAll(frames.feed(bytes.copyOf(n)))
         }
+        rate.accept(SystemClock.elapsedRealtime())
         return Wire.decode(waiting.removeFirst()).also{incoming.accept(it)}
     }
     private val sendGate=Mutex()
@@ -46,7 +48,6 @@ class SocketWire(private val socket:SSLSocket,val session:String,hello:Message) 
         }
     }
 }
-data class RemoteFace(val face:LinkFace,val receivedMs:Long,val id:String)
 data class LinkUi(val status:String="Disconnected — offline demo",val hosts:List<DiscoveredHost> = emptyList(),val trusted:TrustedHost?=null,val connected:Boolean=false,val clientPin:String?=null)
 
 // Foreground-only lifetime, one read task and one heartbeat task. Latest face is a conflated single slot.
@@ -62,14 +63,14 @@ class DeviceLink(context:Context) {
     @Volatile private var invitation:Bootstrap?=null
     @Volatile private var currentHost:TrustedHost?=null
     private var worker:Job?=null
-    private val discovery=Discovery(app,{hosts->mutable.value=mutable.value.copy(hosts=hosts)},{message->if(!mutable.value.connected)status(message)})
-    private fun status(message:String){mutable.value=mutable.value.copy(status=message,trusted=currentHost)}
+    private val discovery=Discovery(app,{hosts->mutable.update{snapshot->snapshot.copy(hosts=hosts)}},{message->mutable.update{if(it.connected)it else it.copy(status=message)}})
+    private fun status(message:String){mutable.update{snapshot->snapshot.copy(status=message,trusted=currentHost)}}
     private suspend fun keys():AndroidIdentity=initGate.withLock {
-        identity?:AndroidIdentity(app).also{identity=it;currentHost=it.load();mutable.value=mutable.value.copy(trusted=currentHost,clientPin=PeerIdentity.fingerprint(it.certificate))}
+        identity?:AndroidIdentity(app).also{identity=it;currentHost=it.load();mutable.update{snapshot->snapshot.copy(trusted=currentHost,clientPin=PeerIdentity.fingerprint(it.certificate))}}
     }
     @Synchronized fun resume(){foreground=true;discovery.start();restart()}
-    @Synchronized fun pause(){foreground=false;worker?.cancel();socket?.close();socket=null;latest.value=null;mutable.value=mutable.value.copy(connected=false,status="Paused — connection closed");discovery.stop()}
-    @Synchronized private fun restart(){worker?.cancel();socket?.close();if(foreground && desired)worker=scope.launch{sessionGate.withLock{loop()}}}
+    @Synchronized fun pause(){foreground=false;worker?.cancel();socket?.close();socket=null;latest.value=null;mutable.update{snapshot->snapshot.copy(connected=false,status="Paused — connection closed")};discovery.stop()}
+    @Synchronized private fun restart(){worker?.cancel();socket?.close();latest.value=null;mutable.update{it.copy(connected=false)};if(foreground && desired)worker=scope.launch{sessionGate.withLock{loop()}}}
     fun pair(text:String) {
         try {invitation=Bootstrap.parse(text,System.currentTimeMillis()/1000);desired=true;restart()}
         catch(_:Exception){status("Invalid or expired invitation. Copy the complete fresh Windows URI.")}
@@ -78,8 +79,8 @@ class DeviceLink(context:Context) {
         if(selected!=null && currentHost!=null)currentHost=currentHost!!.copy(address=selected.address,port=selected.port)
         invitation=null;desired=true;restart()
     }
-    @Synchronized fun disconnect(){desired=false;invitation=null;worker?.cancel();socket?.close();latest.value=null;mutable.value=mutable.value.copy(connected=false,status="Disconnected — offline demo")}
-    fun forget(){disconnect();scope.launch{initGate.withLock{identity?.forget();currentHost=null;mutable.value=mutable.value.copy(trusted=null)}}}
+    @Synchronized fun disconnect(){desired=false;invitation=null;worker?.cancel();socket?.close();latest.value=null;mutable.update{snapshot->snapshot.copy(connected=false,status="Disconnected — offline demo")}}
+    fun forget(){disconnect();scope.launch{initGate.withLock{identity?.forget();currentHost=null;mutable.update{snapshot->snapshot.copy(trusted=null)}}}}
     fun close(){pause();scope.cancel()}
     private suspend fun loop() {
         try {
@@ -96,7 +97,7 @@ class DeviceLink(context:Context) {
                     throw EOFException()
                 } catch(e:CancellationException){throw e}
                 catch(e:Exception) {
-                    latest.value=null;mutable.value=mutable.value.copy(connected=false)
+                    latest.value=null;mutable.update{snapshot->snapshot.copy(connected=false)}
                     if(enroll!=null){invitation=null;desired=false;status("Pairing failed or rejected. Nothing newly trusted here. Start a fresh invitation; check Windows trusted devices if approval completed.");return}
                     if(e is javax.net.ssl.SSLException || e is ProtocolException || e is java.security.GeneralSecurityException) {
                         desired=false;status("Authentication/protocol failed. No insecure fallback. Check host identity/revocation and pair again explicitly.");return
@@ -107,7 +108,7 @@ class DeviceLink(context:Context) {
             }
         } catch(e:CancellationException){throw e}
         catch(_:Exception){status("Protected identity/storage unavailable. No connection opened.")}
-        finally{latest.value=null;mutable.value=mutable.value.copy(connected=false)}
+        finally{latest.value=null;mutable.update{snapshot->snapshot.copy(connected=false)}}
     }
     private suspend fun session(keys:AndroidIdentity,host:TrustedHost,enroll:Bootstrap?)=coroutineScope {
         if(enroll!=null && System.currentTimeMillis()/1000>=enroll.expires)throw ProtocolException("expired")
@@ -131,7 +132,7 @@ class DeviceLink(context:Context) {
         if(ready.type!="ready"||Wire.text(ready.payload,"hostId")!=host.hostId||Wire.text(ready.payload,"deviceId")!=keys.deviceId)throw ProtocolException("ready")
         ensureActive();if(!foreground||!desired)throw CancellationException()
         keys.save(host);currentHost=host;invitation=null
-        mutable.value=mutable.value.copy(connected=true,trusted=host,status="Authenticated TLS — Windows face connected")
+        mutable.update{snapshot->snapshot.copy(connected=true,trusted=host,status="Authenticated TLS — Windows face connected")}
         // Timeout closes the socket even if the platform's blocking write is backpressured.
         val heartbeat=launch(Dispatchers.IO) {
             while(isActive){delay(1000);val guard=launch{delay(2000);tls.close()};try{wire.send("ping",Wire.payload())}finally{guard.cancel()}}

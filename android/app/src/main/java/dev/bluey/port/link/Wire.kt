@@ -118,3 +118,7 @@ class SequenceGuard(private val session: String) {
         if(lag>2500 || lag < -5000)throw ProtocolException("stale")
     }
 }
+class MessageRate {
+    private var start=0L;private var count=0
+    fun accept(now:Long){if(now-start>=1000){start=now;count=0};if(++count>120)throw ProtocolException("rate")}
+}

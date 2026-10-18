@@ -4,9 +4,9 @@ Overall port design; Android F1 is implemented, remaining platform boundaries
 remain [proposals](TRD.md).
 Source owners are in [PORTING-MAP](PORTING-MAP.md).
 
-F1 implements only the Android animator/renderer plus an offline demo in
-`android/`. D007 selects Kotlin/Compose Canvas. All session/voice/network/Windows
-components except the F2 overlay remain planned; neither offline demo has such connections.
+F1 supplies the Android animator/renderer in `android/` (D007); F2 supplies the
+Windows overlay (D008). F3 adds the authenticated local face link (D009). Voice,
+capture/OCR, action and cloud components below remain future boundaries.
 
 ```mermaid
 flowchart LR
@@ -69,5 +69,22 @@ change the trust boundary while retaining face/event semantics.
 `windows/Bluey.Core` contains renderer-independent motion, geometry, effects and
 FaceState output. `windows/Bluey.Windows` is a WPF/Win32 primary-monitor overlay
 with separately accessible controls and local nonsecret settings; D008 selects
-.NET 10/Windows 11 x64. No coordinator, capture/OCR/actions, audio or sockets
-are implemented. Physical desktop behavior remains unverified even after CI.
+.NET 10/Windows 11 x64. F2 itself contains no network logic. F3 networking stays outside the pure engine;
+physical desktop/performance measurements remain separate from CI.
+
+## F3 implemented link boundary
+
+`windows/Bluey.Link` owns strict framing/codec, invitation state, TLS host, bounded
+connection/session loops and significant-face filtering. It has no dependency on
+WPF or Bluey.Core. `Bluey.Windows/Connection` adapts DNS-SD, CurrentUser DPAPI,
+QR enrollment and explicit controls. Renderer frames publish one immutable face
+sample; crypto/storage/socket work runs on background tasks.
+
+Android `link/` separates strict pure wire/bootstrap/face delivery from NSD,
+Android Keystore, TLS socket lifecycle and connection UI. It retains one latest
+validated face and translates fresh receipt time once into the animator's active
+clock. Existing animation/geometry/render files are unchanged. Both codecs execute
+the same corpus in `protocol/`; the exact wire/security state machine is documented
+there. Four host slots, bounded frames/rates/deadlines, conflated face data and
+foreground-only client cleanup prevent unbounded animation queues. This F3 link
+has no generalized privileged dispatcher or F4/F5 endpoint.

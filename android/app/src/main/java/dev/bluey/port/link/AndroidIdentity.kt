@@ -88,6 +88,6 @@ object PeerIdentity {
     fun verify(chain:Array<out X509Certificate>?,pin:String) {
         if(chain==null||chain.isEmpty()||chain.size>4||!Wire.pin(pin))throw java.security.cert.CertificateException("identity")
         val c=chain[0];c.checkValidity()
-        if(c.publicKey.algorithm!="EC"||!MessageDigest.isEqual(fingerprint(c).toByteArray(Charsets.US_ASCII),pin.toByteArray(Charsets.US_ASCII)))throw java.security.cert.CertificateException("identity mismatch")
+        if((c.publicKey as? java.security.interfaces.ECPublicKey)?.params?.curve?.field?.fieldSize!=256||!MessageDigest.isEqual(fingerprint(c).toByteArray(Charsets.US_ASCII),pin.toByteArray(Charsets.US_ASCII)))throw java.security.cert.CertificateException("identity mismatch")
     }
 }

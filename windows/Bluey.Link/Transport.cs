@@ -2,7 +2,7 @@ using System.Net.Security;
 namespace Bluey.Link;
 public sealed class WireConnection(SslStream stream, string session)
 {
-    private readonly Frames frames = new(); private readonly Queue<byte[]> waiting = new();
+    private readonly Frames frames = new(); private readonly MessageRate rate=new(); private readonly System.Diagnostics.Stopwatch clock=System.Diagnostics.Stopwatch.StartNew(); private readonly Queue<byte[]> waiting = new();
     private readonly SemaphoreSlim sendGate = new(1); private readonly SequenceGuard incoming = new(session); private long sequence;
     public async Task<Message> Read(CancellationToken stop, int timeoutMs = 5000)
     {
@@ -13,7 +13,7 @@ public sealed class WireConnection(SslStream stream, string session)
             if (n == 0) { frames.End(); throw new EndOfStreamException(); }
             foreach (var f in frames.Feed(buffer.AsSpan(0, n))) waiting.Enqueue(f);
         }
-        var message = Wire.Decode(waiting.Dequeue()); incoming.Accept(message); return message;
+        rate.Accept(clock.ElapsedMilliseconds); var message = Wire.Decode(waiting.Dequeue()); incoming.Accept(message); return message;
     }
     public void SeedIncoming(Message hello) => incoming.Accept(hello);
     public async Task<string> Send(string type, object payload, CancellationToken stop)

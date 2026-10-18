@@ -41,4 +41,11 @@ public sealed class ProtocolTests
         Assert.True(FaceFilter.Significant(f,f,0,1000));Assert.True(FaceFilter.Significant(f,f with {GazeX=.004},0,1));
         Assert.True(FaceFilter.Significant(f,f with {Talk=.02},0,1));Assert.True(FaceFilter.Significant(f,f with {Mood="happy"},0,1));
     }
+    [Fact] public void MessageRateAndIncompleteFramesAreBounded()
+    {
+        var rate=new MessageRate();for(var i=0;i<120;i++)rate.Accept(0);
+        Assert.Throws<ProtocolException>(()=>rate.Accept(999));rate.Accept(1000);
+        Assert.Throws<ProtocolException>(()=>new Frames().Feed(new byte[4097]));
+        var frames=new Frames();frames.Feed("{"u8);Assert.Throws<ProtocolException>(frames.End);
+    }
 }

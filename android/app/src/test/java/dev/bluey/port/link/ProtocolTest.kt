@@ -51,4 +51,7 @@ class ProtocolTest {
         fails{Frames().apply{feed("{".toByteArray());end()}}
         fails{Wire.decode("{\"x\":{\"y\":{\"z\":{\"w\":{}}}}}".toByteArray())}
     }
+    @Test fun messageRateHasABoundedOneSecondWindow() {
+        val rate=MessageRate();repeat(120){rate.accept(0)};fails{rate.accept(999)};rate.accept(1000)
+    }
 }

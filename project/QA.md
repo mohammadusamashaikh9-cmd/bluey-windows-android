@@ -112,7 +112,7 @@ background-clock suspension and invalid time. Robolectric native graphics on
 SDK 35 uses the actual Android Canvas renderer to produce seven fixed mood PNGs,
 blink, scaling/crop cases and happy transition keyframes under
 `android/app/build/renders/`. It also checks vector bounds, font notices and
-absence of system permissions. These are offscreen tests, not physical GPU tests.
+the minimal F3 LAN permission allowlist. These are offscreen tests, not physical GPU tests.
 
 Success uploads `bluey-android-debug-<commit>` with `app-debug.apk` and
 `SHA256SUMS.txt`; `android-test-evidence-<commit>` contains reports/XML/renders.
@@ -144,3 +144,30 @@ not a user click-routing test. No physical Windows click-through/focus/Alt+Tab,
 100/150/200% DPI, capture interaction, visual fidelity, frame pacing, CPU or
 8 GB laptop performance result may be inferred. F2 stays active until that
 separate evidence is recorded. No screenshot/capture feature is implemented.
+
+
+## F3 automated and physical acceptance
+
+Both language suites execute all 35 shared `protocol/v1-cases.jsonl` cases.
+Run `dotnet test windows/Bluey.Link.Tests -c Release` for real loopback mTLS
+(enrollment approval/confirm, reconnect/revoke, wrong pin/secret, missing/unknown
+certificate, plaintext rejection, role rejection, slot cleanup and fast latest-slot
+publishing) plus deterministic codec/invitation/rate/sequence/freshness tests.
+Windows CI additionally runs real CurrentUser DPAPI identity/trust reload,
+persistent revocation and corruption rejection, alongside F2 regression checks.
+Android CI tests the same codec corpus, bootstrap limits, pin matching, bounded
+retry schedule, and once-only fresh delivery into the unchanged animator.
+
+Physical acceptance remains pending. Install the exact checksum-verified Windows
+folder and debug APK from the same tested commit. Record laptop/phone model, OS,
+Wi-Fi/router topology, private IPv4, permissions and artifact digests. Start host,
+pair with the full QR/URI, compare both full fingerprints, explicitly approve on
+both devices; confirm authenticated status and gaze following mouse movement.
+Exercise all seven Windows-generated moods and Talk output; verify touch override,
+2.5-second stale behavior, disconnect/offline demo, background/resume, host restart,
+Wi-Fi disable/re-enable and device revocation. Try wrong/expired invitation and
+changed server identity; no face must reach an untrusted session. Record actual
+latency distribution and frame/CPU/memory impact without inferring these from CI.
+Do not record invitation secrets or private keys in submitted evidence. Existing
+F1/F2 measured-performance acceptance remains separate. F2 functional acceptance
+is user-reported; no new physical observations are claimed by the agent.

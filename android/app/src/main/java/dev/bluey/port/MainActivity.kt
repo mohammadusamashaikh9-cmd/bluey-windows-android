@@ -5,6 +5,7 @@ import android.graphics.Typeface
 import android.content.Intent
 import android.os.SystemClock
 import dev.bluey.port.link.DeviceLink
+import dev.bluey.port.link.FaceDelivery
 import dev.bluey.port.link.ConnectionPanel
 import android.os.Build
 import android.os.Bundle
@@ -113,21 +114,16 @@ private fun FaceDemo(incoming: String?) {
     LaunchedEffect(lifecycle, animator) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             timeline.pause()
-            var delivered: String? = null
+            val delivery = FaceDelivery()
             while (true) withFrameNanos { nanos ->
                 val input = inputs
                 if (!input.motion) timeline.pause()
                 val now = timeline.tick(nanos)
                 val packet = remoteInput
-                val fresh = packet != null && SystemClock.elapsedRealtime() - packet.receivedMs < 2500
+                val fresh = delivery.apply(animator, packet, SystemClock.elapsedRealtime(), now)
                 animator.localMood = if (fresh) null else input.mood
                 animator.awake = input.awake
                 animator.localTalk = { if (fresh) 0.0 else input.talk.toDouble() }
-                if (fresh && packet != null && delivered != packet.id) {
-                    delivered = packet.id
-                    val f = packet.face
-                    animator.receive(FaceState(f.gazeX, f.gazeY, Mood.valueOf(f.mood), f.talk), now)
-                }
                 if (!fresh && !input.wander) animator.receive(
                     FaceState(input.x.toDouble(), input.y.toDouble(), input.mood, input.talk.toDouble()), now)
                 frame.value = animator.step(now)
