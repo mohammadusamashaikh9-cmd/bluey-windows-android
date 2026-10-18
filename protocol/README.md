@@ -1,7 +1,8 @@
 # Bluey secure link v1
 
 `v1-cases.jsonl` is the single C#/Kotlin codec corpus: outer JSON provides a name,
-expected acceptance, and Base64 chunks of an actual UTF-8/LF stream. Both suites
+expected acceptance, Base64 chunks of an actual UTF-8/LF stream, and exact decoded
+message values for valid streams. Both suites
 feed identical bytes through incremental framing and strict decoding. The public
 `test-server.pem` is an identity-test certificate; no associated private key is
 stored in the repository.

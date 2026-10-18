@@ -46,7 +46,9 @@ public sealed class TlsTests
             var request=await c.Wire.Send("enroll",new{deviceId=id,name="Test phone",secret},default);
             for(var i=0;i<100 && server.Pending==null;i++)await Task.Delay(10);
             Assert.NotNull(server.Pending);Assert.Empty(store.Peers);Assert.Equal(0,server.Connections);
-            server.Decide(Identity.Fingerprint(cert),true);
+            server.Decide(Identity.Fingerprint(cert),true,Guid.NewGuid().ToString());
+            Assert.False(server.Pending!.Decision.Task.IsCompleted); // A different reviewed request cannot approve this one.
+            server.Decide(Identity.Fingerprint(cert),true,server.Pending.RequestId);
             var approve=await c.Wire.Read(default);Assert.Equal("approve",approve.Type);Assert.Empty(store.Peers);
             await c.Wire.Send("confirm",new{requestId=request},default);
             Assert.Equal("ready",(await c.Wire.Read(default)).Type);Assert.Single(store.Peers);
@@ -84,7 +86,7 @@ public sealed class TlsTests
         {
             await c.Wire.Send("enroll",new{deviceId=Guid.NewGuid().ToString(),name="reject",secret},default);
             for(var i=0;i<100 && s.Pending==null;i++)await Task.Delay(10);
-            s.Decide(Identity.Fingerprint(cert),false);await Denied(async()=>{await c.Wire.Read(default);});Assert.Empty(store.Peers);
+            s.Decide(Identity.Fingerprint(cert),false,s.Pending!.RequestId);await Denied(async()=>{await c.Wire.Read(default);});Assert.Empty(store.Peers);
         }
     }
     [Fact] public async Task PendingApprovalCancelAndSlotTimeoutCleanup()
@@ -148,5 +150,12 @@ public sealed class TlsTests
         });
         Assert.True(failure is OperationCanceledException or IOException,$"Expected bounded write cancellation, got {failure?.GetType().Name}");
         Assert.InRange(sent,1,99999);Assert.True(clock.Elapsed<TimeSpan.FromSeconds(8));
+    }
+    [Fact] public async Task AuthenticatedCertificateCannotClaimAnotherDeviceIdentityOnReconnect()
+    {
+        using var store=new MemoryStore();await using var s=new LinkServer(store);s.Start(IPAddress.Loopback);using var cert=Identity.Create("phone",false);
+        var device=Guid.NewGuid().ToString();store.Add(new(device,"phone",Identity.Fingerprint(cert)));
+        using var c=await Connect(s,cert);await c.Wire.Send("connect",new{hostId=s.HostId,deviceId=Guid.NewGuid().ToString()},default);
+        await Denied(async()=>{await c.Wire.Read(default);});Assert.Equal(device,store.Peers.Single().DeviceId);Assert.Equal(0,s.Connections);
     }
 }

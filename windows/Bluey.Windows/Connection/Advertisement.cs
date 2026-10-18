@@ -44,7 +44,7 @@ internal sealed class Advertisement
     internal void Stop()
     {
         lock(gate) {
-            if(request==0) return;
+            if(request==0 || stopping) return;
             // If registration is still pending, its completion will initiate deregistration.
             if(!registered) { stoppingRequested=true; return; }
             stopping=true; var result=DnsServiceDeRegister(request,0);

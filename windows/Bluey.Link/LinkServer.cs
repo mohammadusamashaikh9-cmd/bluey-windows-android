@@ -34,9 +34,9 @@ public sealed class LinkServer : IAsyncDisposable
     }
     public string StartPairing() { StopPairing(); return Invitation.Start(); }
     public void StopPairing() { Invitation.Stop(); Pending?.Decision.TrySetResult(false); }
-    public void Decide(string pin, bool approved) { var p = Pending; if (p?.Pin == pin) p.Decision.TrySetResult(approved); }
+    public void Decide(string pin, bool approved, string requestId) { var p = Pending; if (p?.Pin == pin && p.RequestId==requestId) p.Decision.TrySetResult(approved); }
     public void Revoke(string pin) { lock(trustGate) {
-        store.Remove(pin); if(Pending is {} p && p.Pin==pin) p.Stop.Cancel();
+        store.Remove(pin); if(Pending is {} p && p.Pin==pin) { try {p.Stop.Cancel();} catch(ObjectDisposedException) { } }
         if (sessions.TryGetValue(pin, out var session)) { try { session.Cancel(); } catch(ObjectDisposedException) { } }
     } }
     // O(1), no serialization, crypto, storage, socket work or waiting on the animation thread.
@@ -111,7 +111,7 @@ public sealed class LinkServer : IAsyncDisposable
                         }
                     }
                     peer = new(request.DeviceId, request.Name, pin);
-                    lock(trustGate) { stop.Token.ThrowIfCancellationRequested(); store.Add(peer); }
+                    lock(trustGate) { stop.Token.ThrowIfCancellationRequested(); if(store.Peers.Any(p=>p.DeviceId==peer.DeviceId && p.Pin!=peer.Pin))throw new AuthenticationException(); store.Add(peer); }
                     Interlocked.CompareExchange(ref pending, null, request); request = null;
                 }
                 else if (first.Type != "connect" || peer == null || Wire.Text(first.Payload,"hostId") != HostId || Wire.Text(first.Payload,"deviceId") != peer.DeviceId)
@@ -159,7 +159,7 @@ public sealed class LinkServer : IAsyncDisposable
     }
     public async ValueTask DisposeAsync()
     {
-        StopPairing(); lifetime.Cancel(); listener?.Stop(); foreach (var s in sessions.Values) s.Cancel();
+        StopPairing(); lifetime.Cancel(); listener?.Stop(); foreach (var s in sessions.Values) { try {s.Cancel();} catch(ObjectDisposedException) { } }
         if (accepting != null) await accepting;
         try { await Task.WhenAll(tasks.Values).WaitAsync(TimeSpan.FromSeconds(6)); } catch (TimeoutException) { }
     }

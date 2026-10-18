@@ -16,7 +16,8 @@ import androidx.compose.ui.unit.dp
 fun ConnectionPanel(link:DeviceLink,incoming:String?,close:()->Unit) {
     val state by link.ui.collectAsState()
     var invitation by remember(incoming){mutableStateOf(incoming?:"")}
-    val parsed=remember(invitation){runCatching{Bootstrap.parse(invitation,System.currentTimeMillis()/1000)}.getOrNull()}
+    val displayedInvitation=invitation
+    val parsed=remember(displayedInvitation){runCatching{Bootstrap.parse(displayedInvitation,System.currentTimeMillis()/1000)}.getOrNull()}
     val nearby=rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()){granted->if(granted){link.pause();link.resume()}}
     AlertDialog(onDismissRequest=close,title={Text("Secure Windows connection")},
         text={Column(Modifier.verticalScroll(rememberScrollState())) {
@@ -28,7 +29,7 @@ fun ConnectionPanel(link:DeviceLink,incoming:String?,close:()->Unit) {
             if(state.hosts.isEmpty())Text("No host discovered. Start Windows secure host; QR/URI works without discovery.")
             OutlinedTextField(value=invitation,onValueChange={if(it.length<=2048)invitation=it},label={Text("Complete Windows pairing URI")},modifier=Modifier.fillMaxWidth(),maxLines=4)
             parsed?.let{Text("Invitation host: ${it.host.hostId}\n${it.host.address}:${it.host.port}\nServer SHA-256: ${it.host.pin}\nCompare this fingerprint with the Windows invitation. Pair explicitly approves this identity; Windows will also ask for approval.")}
-            Button(onClick={link.pair(invitation);invitation=""},enabled=parsed!=null){Text("Pair with this Windows identity")}
+            Button(onClick={link.pair(displayedInvitation);invitation=""},enabled=parsed!=null){Text("Pair with this Windows identity")}
             TextButton(onClick={link.connect()}){Text("Reconnect saved host")}
             TextButton(onClick={link.disconnect()}){Text("Disconnect / use offline demo")}
             TextButton(onClick={link.forget()}){Text("Forget saved Windows trust")}

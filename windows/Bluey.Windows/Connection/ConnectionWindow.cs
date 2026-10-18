@@ -15,7 +15,7 @@ internal sealed class ConnectionWindow : Window
     private readonly Image qr=new(){Width=260,Height=260,HorizontalAlignment=HorizontalAlignment.Left};
     private readonly ComboBox address=new(){MinWidth=160};
     private readonly DispatcherTimer timer=new(){Interval=TimeSpan.FromMilliseconds(500)};
-    private bool busy; private string? uri;
+    private bool busy; private string? uri; private Bluey.Link.Enrollment? displayed;
     internal ConnectionWindow(WindowsLinkHost host)
     {
         this.host=host; Title="Bluey — secure local connection"; Width=620; Height=850;
@@ -32,13 +32,18 @@ internal sealed class ConnectionWindow : Window
         panel.Children.Add(qr);panel.Children.Add(invite);
         panel.Children.Add(new TextBlock{Text="Scan with the phone's system QR scanner, or copy the complete URI privately and paste it in Android Connection settings. Verify the host fingerprint there, then choose Pair. Approve the requesting device below.",TextWrapping=TextWrapping.Wrap});
         panel.Children.Add(pending);
-        Add(panel,"Approve requesting device",()=>Task.Run(()=>{if(host.Server?.Pending is {} p)host.Server.Decide(p.Pin,true);}));
-        Add(panel,"Reject requesting device",()=>Task.Run(()=>{if(host.Server?.Pending is {} p)host.Server.Decide(p.Pin,false);}));
+        Add(panel,"Approve requesting device",()=>Decide(true));
+        Add(panel,"Reject requesting device",()=>Decide(false));
         panel.Children.Add(new TextBlock{Text="Trusted devices (select to revoke)",Margin=new(0,12,0,3)});panel.Children.Add(peers);
         Add(panel,"Revoke selected device",async()=>{var peer=peers.SelectedItem as DeviceRow;if(peer!=null)await Task.Run(()=>host.Server?.Revoke(peer.Pin));});
         timer.Tick+=(_,_)=>Refresh();timer.Start();
         Closed+=(_,_)=>{timer.Stop();ClearInvite();};
         Loaded+=async(_,_)=>{address.ItemsSource=await Task.Run(WindowsLinkHost.Addresses);address.SelectedIndex=0;Refresh();};
+    }
+    private Task Decide(bool approved) {
+        // Bind the action to the identity/request actually displayed, across refresh/network races.
+        var reviewed=displayed;
+        return Task.Run(()=>{if(reviewed!=null)host.Server?.Decide(reviewed.Pin,approved,reviewed.RequestId);});
     }
     private sealed record DeviceRow(string Pin,string Label) { public override string ToString()=>Label; }
     private void ClearInvite(){uri=null;invite.Clear();qr.Source=null;}
@@ -47,7 +52,8 @@ internal sealed class ConnectionWindow : Window
         if(!busy)status.Text=host.Status;
         var s=host.Server;
         if(s?.Invitation.Active!=true && uri!=null)ClearInvite();
-        pending.Text=s?.Pending is {} p?$"REQUEST: {p.Name}\nClient certificate SHA-256: {p.Pin}\nCompare this fingerprint with Connection on the phone before approving.":"No enrollment awaiting approval.";
+        displayed=s?.Pending;
+        pending.Text=displayed is {} p?$"REQUEST: {p.Name}\nClient certificate SHA-256: {p.Pin}\nCompare this fingerprint with Connection on the phone before approving.":"No enrollment awaiting approval.";
         var selected=(peers.SelectedItem as DeviceRow)?.Pin;
         var rows=s?.Peers.Select(p=>new DeviceRow(p.Pin,$"{p.Name} · {p.DeviceId}\n{p.Pin}")).ToArray()??[];
         if(!rows.SequenceEqual(peers.Items.Cast<DeviceRow>())) {peers.ItemsSource=rows;peers.SelectedItem=rows.FirstOrDefault(p=>p.Pin==selected);}

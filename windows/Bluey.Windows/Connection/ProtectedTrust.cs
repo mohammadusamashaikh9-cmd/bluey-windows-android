@@ -46,7 +46,8 @@ internal sealed class ProtectedTrust : ITrustStore
     public void Add(Peer peer)
     {
         lock(gate) {
-            var peers = ledger.Peers.Where(p=>p.Pin != peer.Pin && p.DeviceId != peer.DeviceId).Append(peer).ToList();
+            if(ledger.Peers.Any(p=>p.DeviceId==peer.DeviceId && p.Pin!=peer.Pin))throw new IOException("Device identity already belongs to another key");
+            var peers = ledger.Peers.Where(p=>p.Pin != peer.Pin).Append(peer).ToList();
             if(peers.Count>8) throw new IOException("Trust limit");
             var next = ledger with { Peers = peers }; Save(next); ledger = next;
         }
