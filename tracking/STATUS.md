@@ -26,7 +26,7 @@ physical Windows desktop acceptance remains UNVERIFIED.
 - F2 now has a pure C# motion/geometry/effect library and native WPF/Win32
   primary-monitor demo, separate recoverable controls, hotkeys and local settings.
   D008 selects .NET 10/WPF, Windows 11 x64; no third-party runtime libraries.
-- Cloud Linux .NET SDK 10.0.402: 23 pure xUnit tests passed, zero failures/skips.
+- Cloud Linux .NET SDK 10.0.402: 27 pure xUnit tests passed, zero failures/skips.
   WPF cross-build and self-contained win-x64 publish passed, zero warnings/errors.
   These results do not execute Windows desktop behavior. Windows CI is pending.
 - Apple/Mac/iOS/Shared/build/history, previews and Android files are unchanged.

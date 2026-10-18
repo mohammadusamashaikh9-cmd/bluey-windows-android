@@ -55,32 +55,5 @@ internal static class VectorDrawing
         }
         group.Freeze(); var image = new DrawingImage(group); image.Freeze(); return image;
     }
-    internal static Geometry Speech(SpeechPlacement p)
-    {
-        // Translate the source y-up cloud path into y-down WPF, including curved tail.
-        var w = p.Box.Width; var h = p.Box.Height; var r = Math.Min(24, h / 2);
-        var x = p.BaseX; var tip = x + p.Lean; const double half = 13, tail = 18;
-        var g = new StreamGeometry();
-        using (var c = g.Open())
-        {
-            c.BeginFigure(new(r, 0), true, true);
-            if (p.TailUp)
-            {
-                c.LineTo(new(x - half, 0), true, false);
-                c.BezierTo(new(x - half * .4, 0), new(tip - 2, -tail * .45), new(tip, -tail), true, false);
-                c.BezierTo(new(tip + 1, -tail * .5), new(x + half * .3, 0), new(x + half, 0), true, false);
-            }
-            c.LineTo(new(w - r, 0), true, false); c.ArcTo(new(w, r), new(r, r), 0, false, SweepDirection.Clockwise, true, false);
-            c.LineTo(new(w, h - r), true, false); c.ArcTo(new(w - r, h), new(r, r), 0, false, SweepDirection.Clockwise, true, false);
-            if (!p.TailUp)
-            {
-                c.LineTo(new(x + half, h), true, false);
-                c.BezierTo(new(x + half * .4, h), new(tip + 2, h + tail * .45), new(tip, h + tail), true, false);
-                c.BezierTo(new(tip - 1, h + tail * .5), new(x - half * .3, h), new(x - half, h), true, false);
-            }
-            c.LineTo(new(r, h), true, false); c.ArcTo(new(0, h - r), new(r, r), 0, false, SweepDirection.Clockwise, true, false);
-            c.LineTo(new(0, r), true, false); c.ArcTo(new(r, 0), new(r, r), 0, false, SweepDirection.Clockwise, true, false);
-        }
-        g.Freeze(); return g;
-    }
+    internal static Geometry Speech(SpeechPlacement p) => Path(CursorGeometry.Speech(p));
 }

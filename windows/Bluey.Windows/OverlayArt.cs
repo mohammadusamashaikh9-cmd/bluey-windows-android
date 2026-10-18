@@ -82,8 +82,6 @@ internal sealed class OverlayArt : Canvas
             dc.Pop();
         }
     }
-    private static readonly TimingCurve RingEase = new(.2, .7, .3, 1);
-    private static readonly TimingCurve StarEase = new(.1, .8, .3, 1);
     private void DrawBack(DrawingContext dc)
     {
         if (!engine.Settings.ShowCursor) return;
@@ -99,20 +97,19 @@ internal sealed class OverlayArt : Canvas
         }
         foreach (var e in state.Effects)
         {
-            var p = Math.Clamp((engine.Now - e.Born) / e.Duration, 0, 1);
+            var sample = Presentation.Sample(e, engine.Now);
             if (e.Kind == EffectKind.Ring)
             {
-                var eased = RingEase.Value(p); var radius = e.Radius * (.3 + .7 * eased);
-                dc.PushOpacity((1 - eased) * e.Alpha); dc.DrawEllipse(null, new(Brush(e.Color), 3.5), P(e.Point), radius, radius); dc.Pop();
+                dc.PushOpacity(sample.Opacity); dc.DrawEllipse(null, new(Brush(e.Color), 3.5), P(sample.Point), sample.Radius, sample.Radius); dc.Pop();
             }
             else
             {
-                var at = e.Point + e.Travel * StarEase.Value(p); var scale = 1 - .6 * p;
-                dc.PushOpacity(p < .45 ? 1 : (1 - p) / .55);
+                var at = sample.Point;
+                dc.PushOpacity(sample.Opacity);
                 dc.PushTransform(new TranslateTransform(at.X, at.Y));
                 // Core Animation spin is y-up, so negate for WPF.
-                dc.PushTransform(new RotateTransform(-e.Spin * p * 180 / Math.PI));
-                dc.DrawGeometry(Brush(e.Color), null, Polygon(CursorGeometry.Star(e.Radius * scale)));
+                dc.PushTransform(new RotateTransform(-sample.Rotation * 180 / Math.PI));
+                dc.DrawGeometry(Brush(e.Color), null, Polygon(CursorGeometry.Star(sample.Radius)));
                 dc.Pop(); dc.Pop(); dc.Pop();
             }
         }
@@ -122,20 +119,14 @@ internal sealed class OverlayArt : Canvas
         if (!engine.Settings.ShowCursor) return;
         DrawLabel(dc); DrawSpeech(dc);
     }
-    // Explicit underdamped spring, rather than a renderer-specific animation default.
-    private static double Pop(double t, double from, double stiffness, double damping, double initialVelocity)
-    {
-        var a = damping / 2; var w = Math.Sqrt(stiffness - a * a); var offset = from - 1;
-        return 1 + Math.Exp(-a * t) * (offset * Math.Cos(w * t) + (initialVelocity + a * offset) / w * Math.Sin(w * t));
-    }
     private void DrawLabel(DrawingContext dc)
     {
         var age = engine.Now - labelBorn;
         if (label == null || age > labelLife || labelText == null) return;
         var size = new Size2(Math.Ceiling(labelText.Width) + 28, Math.Ceiling(labelText.Height) + 14);
         var box = CaptionLayout.Label(size, engine.Bounds, engine.Tip, engine.Settings.Size, engine.Opacity, engine.Settings.PhonePosition, age);
-        dc.PushOpacity(Math.Clamp(Math.Min(age / .12, (labelLife - age) / .3), 0, 1));
-        var pop = Pop(age, .4, 100, 11, 6);
+        var (pop, opacity) = Presentation.Label(age, labelLife);
+        dc.PushOpacity(opacity);
         dc.PushTransform(new ScaleTransform(pop, pop, box.MidX, box.Y + box.Height / 2));
         dc.DrawRoundedRectangle(Brush(Palette.Ink, .92), new(Brush(Palette.Berry2, .9), 2), new(box.X, box.Y, box.Width, box.Height), 14, 14);
         dc.DrawText(labelText, new(box.X + 14, box.Y + 7)); dc.Pop(); dc.Pop();
@@ -157,8 +148,7 @@ internal sealed class OverlayArt : Canvas
         }
         var age = engine.Now - speechBorn;
         var p = CaptionLayout.Place(captionSize, engine.Bounds, engine.Tip, engine.Settings.Size, engine.Opacity > .1 && !engine.IsHome, engine.Settings.PhonePosition, SpeechTarget, age);
-        var opacity = Math.Min(1, age / .12); var pop = Pop(age, .55, 260, 12, 4);
-        if (caption == null) { var fade = Math.Clamp((engine.Now - fadeBorn) / .22, 0, 1); var ease = new TimingCurve(.42, 0, 1, 1).Value(fade); opacity *= 1 - ease; pop = 1 - .15 * ease; }
+        var (pop, opacity) = Presentation.Speech(age, caption == null ? engine.Now - fadeBorn : null);
         dc.PushOpacity(Math.Clamp(opacity, 0, 1));
         dc.PushTransform(new ScaleTransform(pop, pop, p.Box.MidX, p.Box.Y + p.Box.Height / 2));
         dc.PushTransform(new TranslateTransform(p.Box.X, p.Box.Y));

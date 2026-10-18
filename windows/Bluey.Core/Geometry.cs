@@ -18,6 +18,33 @@ public static class CursorGeometry
         var a = i * Math.PI / 4 - Math.PI / 2;
         return new V2(Math.Cos(a), Math.Sin(a)) * (i % 2 == 0 ? radius : radius * .4);
     }).ToArray();
+    public static PathPart[] Speech(SpeechPlacement p)
+    {
+        var w = p.Box.Width; var h = p.Box.Height; var r = Math.Min(24, h / 2);
+        var x = p.BaseX; var tip = x + p.Lean; const double half = 13, tail = 18;
+        var parts = new List<PathPart> { new(PathVerb.Move, new(r, 0)) };
+        if (p.TailUp)
+        {
+            parts.Add(new(PathVerb.Line, new(x - half, 0)));
+            parts.Add(new(PathVerb.Cubic, new(tip, -tail), new(x - half * .4, 0), new(tip - 2, -tail * .45)));
+            parts.Add(new(PathVerb.Cubic, new(x + half, 0), new(tip + 1, -tail * .5), new(x + half * .3, 0)));
+        }
+        parts.Add(new(PathVerb.Line, new(w - r, 0)));
+        parts.Add(new(PathVerb.Arc, new(w, r), Radius: r));
+        parts.Add(new(PathVerb.Line, new(w, h - r)));
+        parts.Add(new(PathVerb.Arc, new(w - r, h), Radius: r));
+        if (!p.TailUp)
+        {
+            parts.Add(new(PathVerb.Line, new(x + half, h)));
+            parts.Add(new(PathVerb.Cubic, new(tip, h + tail), new(x + half * .4, h), new(tip + 2, h + tail * .45)));
+            parts.Add(new(PathVerb.Cubic, new(x - half, h), new(tip - 1, h + tail * .5), new(x - half * .3, h)));
+        }
+        parts.Add(new(PathVerb.Line, new(r, h)));
+        parts.Add(new(PathVerb.Arc, new(0, h - r), Radius: r));
+        parts.Add(new(PathVerb.Line, new(0, r)));
+        parts.Add(new(PathVerb.Arc, new(r, 0), Radius: r)); parts.Add(new(PathVerb.Close));
+        return parts.ToArray();
+    }
     public static V2 EyeCenter(int eye, double side) => new V2(43 + eye * 24, 49) * (side / 96);
     public static V2[] Comet(IReadOnlyList<V2> samples, double side)
     {

@@ -125,3 +125,14 @@ power mode. Keep F1's outstanding phone performance QA separate.
 5. Record 60 seconds of frame times, median/p95/dropped frames and CPU/memory on the
    ~8 GB laptop, with glow and string/comet separately. 60 Hz and p95 <=16.7 ms
    are targets, not achieved claims. WPF layered-window performance needs measurement.
+
+## Native API references
+
+Microsoft Learn's [layered window hit-testing](https://learn.microsoft.com/en-us/windows/win32/winmsg/window-features#layered-windows)
+states that WS_EX_TRANSPARENT on a layered window passes mouse events underneath.
+[Extended window styles](https://learn.microsoft.com/en-us/windows/win32/winmsg/extended-window-styles)
+defines NOACTIVATE and TOOLWINDOW.
+[WM_DPICHANGED](https://learn.microsoft.com/en-us/windows/win32/hidpi/wm-dpichanged)
+and [RegisterHotKey](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey)
+guide DPI/refit and conflict/no-repeat behavior. These were read during F2;
+the API contracts are not evidence that a particular laptop behaved correctly.

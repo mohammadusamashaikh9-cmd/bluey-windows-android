@@ -48,7 +48,7 @@ public readonly record struct TimingCurve(double X1, double Y1, double X2, doubl
 }
 public sealed record Flight(V2 From, V2 C1, V2 C2, V2 To, double Start, double Duration, TimingCurve Timing, bool Pointing)
 {
-    public bool Landed { get; set; }
+    public bool Landed { get; internal set; }
     public double Progress(double now) => Duration <= 0 ? 1 : Math.Clamp((now - Start) / Duration, 0, 1);
     public V2 Position(double e)
     {

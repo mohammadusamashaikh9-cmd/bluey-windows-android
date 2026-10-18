@@ -310,3 +310,17 @@ construction. Removed that Window assignment; the inner OverlayArt Canvas alread
 clips artwork. This fixes startup without weakening the native check. Original
 source and pure engine unchanged. Also corrected lingering Windows-planned text
 in PORTING/TRD to the D008-selected implementation boundary.
+
+Further native run 39115349241 still failed after the clipping correction, before
+a normal failure report was written. Logs became accessible and showed the
+runner's diagnostic file lookup failed, hiding the process exit/exception. Added
+test-only AppDomain fatal-exception recording and redirected process stdout/stderr;
+normal assertions remain intact. Artifact redirects also used observed storage
+host productionresultssa0.blob.core.windows.net; saved additively.
+
+Integration review moved remaining effect sampling, spring-pop timing and speech
+path construction into the pure library (Presentation/Geometry). Normalized spring
+initial velocity to animation-distances/second, matching source API units. Added
+four deterministic cases for spring/endpoints/cloud-tail paths: cloud **27 passed,
+0 failed/skipped**; WPF cross-build **0 warnings/errors**. This is independent of
+the unresolved native smoke diagnosis; no platform result is promoted.
