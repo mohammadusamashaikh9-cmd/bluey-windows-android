@@ -136,3 +136,30 @@ defines NOACTIVATE and TOOLWINDOW.
 and [RegisterHotKey](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey)
 guide DPI/refit and conflict/no-repeat behavior. These were read during F2;
 the API contracts are not evidence that a particular laptop behaved correctly.
+
+## F3 secure phone demonstration
+
+Open **Secure device connection** in the existing control window. Refresh local
+addresses, select the laptop's private IPv4 Wi-Fi/LAN address, and Start secure
+host. If Windows Firewall asks, allow the application on your private home network
+only. Bluey does not modify firewall rules or request administrator privileges.
+Start pairing; on Android open Connection, scan the Windows QR with a trusted
+system scanner (or privately paste the entire displayed URI), compare the host
+fingerprint and choose Pair. Back on Windows, approve the requesting phone/cert.
+The Android status must say authenticated TLS before testing live gaze/mood/talk.
+Use Windows Follow, phone position, mood and Talk output to exercise synchronization.
+
+Stop pairing invalidates the invitation; Stop host closes sessions. Trusted-device
+Revoke closes that device's session and rejects reconnect. Android Forget clears
+its server trust. If enrollment was interrupted at final confirmation, revoke and
+forget on both sides before a fresh invitation. Leave Android foreground; background
+closes its network connection. On resume it reconnects with the saved pin, without
+plaintext fallback. Windows restart changes the port; DNS-SD supplies its new
+endpoint, authenticated with the stored full identity. Full URI paste works when
+discovery is unavailable. Initial scope is private IPv4 on the same LAN.
+
+Development artifacts remain self-contained, unsigned Windows x64 folders; no
+laptop SDK, IDE, WSL, Docker or extra desktop runtime is required. The Android APK
+is a debug development build. Verify supplied SHA256SUMS before use. Physical
+pairing, Wi-Fi loss/reconnect, OS-protected key behavior, latency and existing
+performance measurements remain pending until recorded on the actual devices.

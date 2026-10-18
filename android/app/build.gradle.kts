@@ -11,8 +11,8 @@ android {
         applicationId = "dev.bluey.port"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1-f1"
+        versionCode = 3
+        versionName = "0.3-f3"
     }
     buildFeatures { compose = true }
     compileOptions {
@@ -20,6 +20,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     // Reuse the original fonts AND their OFL notices; no duplicate binary assets.
+    sourceSets.getByName("test").resources.srcDir(rootProject.file("../protocol"))
     sourceSets.getByName("main").assets.srcDir(rootProject.file("../Shared/Fonts"))
     testOptions {
         unitTests.isIncludeAndroidResources = true
@@ -36,6 +37,7 @@ kotlin {
 }
 
 dependencies {
+    implementation("com.google.code.gson:gson:2.13.2")
     implementation(platform("androidx.compose:compose-bom:2025.12.01"))
     implementation("androidx.activity:activity-compose:1.12.2")
     implementation("androidx.compose.foundation:foundation")

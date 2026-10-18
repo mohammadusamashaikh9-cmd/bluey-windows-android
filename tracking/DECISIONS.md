@@ -83,3 +83,60 @@ holds only below that cap, while direction is retained above it. No networking,
 audio, APIs, capture, OCR or computer actions enter F2. Original Apple and Android
 files remain unchanged. Allowed changes: `windows/`, `.github/workflows/windows.yml`,
 additive README and relevant canonical project/tracking guidance.
+
+## D009 / 2026-10-18 — F3 authenticated local face link
+
+Accepted F3 scope starts from F2 squash merge `a80642ab2aa897e6f80baed081ce2beb3e9a6d3d`.
+Use `_bluey-sec._tcp` DNS-SD, TLS 1.2/1.3 with platform TLS and mutual certificate
+proof of possession, and strict version-1 LF-JSON. Legacy `_googly._tcp` is never
+used. DNS names/TXT/IP addresses are routing hints, not authentication.
+
+Bootstrap uses a Windows-displayed QR/deep link containing the SHA-256 fingerprint
+of the exact server certificate, host UUID, private IPv4 endpoint, five-minute
+expiry and a CSPRNG 256-bit one-time enrollment secret. Android verifies that pin
+before sending the secret. Native Android handles the QR URI from an OS scanner;
+pasting the complete URI is the fallback, with identical entropy and checks.
+No app camera permission/scanning dependency is needed. QRCoder is the sole new
+Windows UI dependency, for enrollment QR encoding only, not character rendering.
+A short numeric code, unauthenticated TOFU, plaintext compatibility, self-designed
+key exchange and hosted enrollment/relay were rejected.
+
+Android explicitly approves the displayed host before enrollment; Windows then
+approves the requesting client certificate fingerprint. The client confirms that
+approval on the same TLS channel before Windows persists trust and sends faces.
+Certificate pinning authenticates the intended bootstrap peer against an active
+LAN interceptor; client certificates bind subsequent authentication to the
+Android Keystore private key. A copied enrollment QR remains a bearer invitation:
+keep it private, limit attempts, expire/consume it, and inspect the requesting
+fingerprint on Windows. Compromised operating systems and malicious user approval
+are outside this profile. Lost confirmation may require explicit re-enrollment;
+it never weakens authentication.
+
+Windows protects its PFX and trust ledger with CurrentUser DPAPI, separately from
+nonsecret overlay settings. Android uses a nonexportable P-256 Android Keystore
+signing key and AES-GCM Keystore protection for pinned host metadata in no-backup
+storage. Self-signed certificates are accepted only by exact pin, or temporarily
+on the enrollment-only host path while an invitation is open. Missing client
+certificates are explicitly rejected: .NET ClientCertificateRequired merely
+requests a certificate and does not itself enforce presence. No face or other
+trusted session is available before approval. Revocation cancels live sessions.
+
+Initial scope is private IPv4 LAN, one saved Android host, at most eight trusted
+phones, four concurrent sockets and one pending enrollment. Socket/TLS work and
+certificate/storage operations run off render threads. Face queues hold only the
+latest sample, writes/handshakes have deadlines, unchanged data refreshes every
+second while the UI produces fresh input; significant thresholds remain 0.004
+for gaze and 0.02 for talk. Strict 4096-byte frames, depth 4, per-direction sequence,
+connection UUID and a bounded recent-ID window reject malformed/replayed data.
+Face monotonic timestamps detect growing delivery lag without synchronized clocks;
+Android animator receipt time and the original 2.5-second stale rule are preserved.
+
+Official Microsoft Learn DNS service registration, TLS and DPAPI documentation
+and Android NSD/Keystore/local-network permission documentation were read. SDK 36
+remains pinned: INTERNET is needed; Android 16 local-network restrictions are
+opt-in and temporarily use NEARBY_WIFI_DEVICES. Android 17 enforces
+ACCESS_LOCAL_NETWORK for target 37+, so a future target bump requires adapting
+the permission flow. F3 declares/request Nearby only when needed on API 33+;
+no location, microphone, storage or camera permission. Physical permission/NSD,
+Keystore/mTLS interoperability, firewall, pairing, latency and Wi-Fi loss still
+require the produced artifacts on real devices. No F4/F5 endpoint exists.

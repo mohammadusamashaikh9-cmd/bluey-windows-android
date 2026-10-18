@@ -2,6 +2,10 @@ package dev.bluey.port
 
 import android.animation.ValueAnimator
 import android.graphics.Typeface
+import android.content.Intent
+import android.os.SystemClock
+import dev.bluey.port.link.DeviceLink
+import dev.bluey.port.link.ConnectionPanel
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
@@ -37,8 +41,15 @@ import dev.bluey.port.animation.*
 import dev.bluey.port.render.FaceRenderer
 
 class MainActivity : ComponentActivity() {
+    private var pairingUri by mutableStateOf<String?>(null)
+    private fun readInvitation(intent: Intent?) {
+        val uri = intent?.dataString
+        if (uri != null && uri.length <= 2048 && uri.startsWith("bluey-secure://pair?")) pairingUri = uri
+    }
+    override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); setIntent(intent); readInvitation(intent) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        readInvitation(intent)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         if (Build.VERSION.SDK_INT >= 28) window.attributes = window.attributes.apply {
             layoutInDisplayCutoutMode = if (Build.VERSION.SDK_INT >= 30)
@@ -47,7 +58,7 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             MaterialTheme(colorScheme = darkColorScheme(primary = Color(0xFFA9BCFF))) {
-                FaceDemo()
+                FaceDemo(pairingUri)
             }
         }
     }
@@ -66,9 +77,23 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun FaceDemo() {
+private fun FaceDemo(incoming: String?) {
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val link = remember(context) { DeviceLink(context) }
+    val remote by link.face.collectAsState()
+    val remoteInput by rememberUpdatedState(remote)
+    var connectionPanel by remember { mutableStateOf(false) }
+    LaunchedEffect(incoming) { if (incoming != null) connectionPanel = true }
+    DisposableEffect(lifecycle, link) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) link.resume()
+            if (event == Lifecycle.Event.ON_PAUSE) link.pause()
+        }
+        lifecycle.addObserver(observer)
+        if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) link.resume()
+        onDispose { lifecycle.removeObserver(observer); link.close() }
+    }
     val timeline = remember { ActiveTimeline() }
     val animator = remember { FaceAnimator(AnimationClock { timeline.seconds }) }
     val renderer = remember(context) {
@@ -88,14 +113,22 @@ private fun FaceDemo() {
     LaunchedEffect(lifecycle, animator) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             timeline.pause()
+            var delivered: String? = null
             while (true) withFrameNanos { nanos ->
                 val input = inputs
                 if (!input.motion) timeline.pause()
                 val now = timeline.tick(nanos)
-                animator.localMood = input.mood
+                val packet = remoteInput
+                val fresh = packet != null && SystemClock.elapsedRealtime() - packet.receivedMs < 2500
+                animator.localMood = if (fresh) null else input.mood
                 animator.awake = input.awake
-                animator.localTalk = { input.talk.toDouble() }
-                if (!input.wander) animator.receive(
+                animator.localTalk = { if (fresh) 0.0 else input.talk.toDouble() }
+                if (fresh && packet != null && delivered != packet.id) {
+                    delivered = packet.id
+                    val f = packet.face
+                    animator.receive(FaceState(f.gazeX, f.gazeY, Mood.valueOf(f.mood), f.talk), now)
+                }
+                if (!fresh && !input.wander) animator.receive(
                     FaceState(input.x.toDouble(), input.y.toDouble(), input.mood, input.talk.toDouble()), now)
                 frame.value = animator.step(now)
             }
@@ -120,6 +153,10 @@ private fun FaceDemo() {
             }) {
             drawIntoCanvas { renderer.draw(it.nativeCanvas, size.width, size.height, frame.value) }
         }
+        TextButton(onClick = { connectionPanel = true }, modifier = Modifier.align(Alignment.TopStart).safeDrawingPadding()) {
+            Text("Connection", color = Color(0xFFB9B2CC))
+        }
+        if (connectionPanel) ConnectionPanel(link, incoming) { connectionPanel = false }
         TextButton(onClick = { panel = !panel }, modifier = Modifier.align(Alignment.TopEnd).safeDrawingPadding()) {
             Text(if (panel) "Hide demo" else "Demo", color = Color(0xFFB9B2CC))
         }

@@ -1,11 +1,11 @@
 name: Android face
 on:
   push:
-    branches: [main, port/android-face]
-    paths: ['android/**', 'Shared/Fonts/**', '.github/workflows/android.yml']
+    branches: [main, port/android-face, port/secure-device-link]
+    paths: ['android/**', 'Shared/Fonts/**', 'protocol/**', '.github/workflows/android.yml']
   pull_request:
     branches: [main]
-    paths: ['android/**', 'Shared/Fonts/**', '.github/workflows/android.yml']
+    paths: ['android/**', 'Shared/Fonts/**', 'protocol/**', '.github/workflows/android.yml']
   workflow_dispatch:
 permissions:
   contents: read
