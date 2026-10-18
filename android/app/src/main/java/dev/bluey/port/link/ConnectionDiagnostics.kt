@@ -94,3 +94,6 @@ class LinkAttempt(val id:String,private val log:SafeDiagnostics) {
         }
     }
 }
+
+// Error-handler boundary, kept separate so cancelled blocking socket reads can be regression-tested.
+suspend fun LinkAttempt.failureIfActive(error:Throwable):LinkFailure=failed(error)

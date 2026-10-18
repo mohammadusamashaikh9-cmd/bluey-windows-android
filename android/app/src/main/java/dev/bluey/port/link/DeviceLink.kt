@@ -124,8 +124,8 @@ class DeviceLink(context:Context) {
                     throw EOFException()
                 } catch(e:CancellationException){attempt.cancelled();throw e}
                 catch(e:Exception) {
+                    val code=attempt.failureIfActive(e)
                     latest.value=null;mutable.update{it.copy(connected=false)}
-                    val code=attempt.failed(e)
                     val failure="${attempt.id}: ${attempt.current} / $code. "+failureHint(code)
                     if(enroll!=null || attempt.current==LinkStage.IDENTITY_LOADING || e is javax.net.ssl.SSLException ||
                         e is ProtocolException || e is java.security.GeneralSecurityException || e is ConnectionProblem) {
