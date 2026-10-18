@@ -144,3 +144,13 @@ and those spring initial-velocity conventions require physical/source-recording
 calibration. Bounds clamps also protect labels/long captions near display edges.
 Fidelity, desktop input routing, display changes, frame pacing and CPU remain
 UNVERIFIED until the exact artifact is tested on Windows 11 hardware.
+
+F2 artifact review: all twelve WPF fixtures were inspected alongside the upstream
+PNG/GIF composition. A real temporary-label alignment defect was found (glyphs
+centered in a wider measurement region than the box) and corrected; the native
+render test now rejects stray glyph pixels in the fixture's right margin. The
+source teardrop/rim/eye orientation and trail layering are retained. WPF glow is
+visibly narrower/sharper than the upstream PNG reference; reference input/DPI is
+unknown, so the radius is not guessed to force a screenshot match. Physical/source
+recording calibration remains a material open fidelity item. Embedded original
+TTFs are verified byte-for-byte; notice text is retained with CI checkout CRLF.

@@ -376,3 +376,44 @@ Qualitative source comparison also shows WPF glow is narrower/sharper than the
 upstream preview; do not claim Core Graphics blur parity. Exact geometry/colors/
 timings remain source-matched numerically; kernel/text/pacing calibration and
 physical desktop acceptance remain open.
+
+### F2 final source CI
+
+The label fix source commit `f3506e00737f66502d2a3f5cf7961251e1291708` passed
+[push run 39116112594](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39116112594)
+and [PR run 39116116581](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39116116581).
+All 27 pure tests, WPF build (0 warnings/errors), self-contained publish, nine
+native checks and twelve render fixtures (including label containment) pass.
+Final [development archive](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39116112594/artifacts/12132670694)
+is 65,541,894 bytes; [test evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39116112594/artifacts/12132560972)
+is uploaded. The original four embedded font binaries were also extracted from
+the prior built assembly with System.Resources.ResourceReader and SHA-256 matched
+against each original Shared TTF; no font conversion or new art asset. The same
+resource links and assets are unchanged in final source.
+
+Final artifact host is observed productionresultssa17.blob.core.windows.net,
+saved additively for download verification. Final tracking closeout changes no
+Windows implementation/test/CI files after the successful source commit above.
+
+Final artifact access propagated successfully. Downloaded run 39116112594 using
+`gh run download`; **all 406 files** match SHA256SUMS, and the manifest covers
+every published file except itself. Final EXE SHA-256:
+`29d00ec3cfce61dd382eea81a66b6859bac93ec263f279d6a1d6784c1dcb9868`.
+Published directory total including manifest: 147,550,957 bytes.
+Final TRX independently confirms 27 executed/passed, 0 failed/errors/notExecuted;
+native JSON confirms nine checks, no failures. Reviewed the corrected speech-top
+and speech-center frames: temporary labels now contain their text. Body/glow,
+comet and string fixtures also inspected. ResourceReader extraction of final
+assembly confirms all four original TTF binaries are byte-identical. OFL notices
+are text-identical with Windows checkout CRLF normalization.
+
+The final code remains `f3506e00737f66502d2a3f5cf7961251e1291708`; closeout
+updates only canonical evidence/guidance, not tests/application/workflow. F2 is
+implementation/CI-passed, physical acceptance UNVERIFIED. F1 PR #2 remains merged
+with outstanding phone/performance QA, and F3–F6 remain planned.
+
+Final scoped closeout checks: **24 Markdown files / 188 local links and anchors**,
+C# project/props/manifest XML, **40 files** inside authorized F2 paths, original
+Apple/Android/Shared/previews/builds and upstream README body preserved, Windows
+source/tests/workflow identical to successful code commit, and `git diff --check`
+passed. Final tracking commit/push and PR metadata confirmation follow. No merge.
