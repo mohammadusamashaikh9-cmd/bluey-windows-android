@@ -245,3 +245,43 @@ source difference from successful CI commit `e231228188a515cef24d0b104d3b1ea5fd2
 digests; no device result inferred. PR #2 verified OPEN, main base, correct head,
 mergedAt null. Commit/push of this tracking/workflow closeout and final remote
 head/clean-worktree checks follow; no merge or additional feature work authorized.
+
+## 2026-10-18 (Asia/Karachi) — F2 Windows implementation
+
+User authorized .NET 10/WPF/Win32 Windows 11 x64, complete offline F2, commit/push
+and one PR into main without merge. Clean checkout originally at F0; native
+`git ls-remote origin refs/heads/main` returned accepted F1 merge
+`15194dec8356385b15dc6712630d45e4761cd1de`. Fetched main and created
+`port/windows-overlay` from `origin/main`. GitHub API independently confirms
+PR #2 merged at that SHA. No branch from `port/android-face`; no Android edits.
+
+Read AGENTS and source-porting/animation/checkpoint skills, F2 authority docs and
+original CursorOverlay/Settings/HotKeys/AppDelegate/Fonts/Palette. Inspected cursor
+and flight PNGs plus middle comet/string GIF frames; the latter show tail layering
+and phone tether but are not seeded numerical or physical Windows references.
+D008 records the authorized target and source-to-C# boundaries before scaffolding.
+
+Installed official SDK 10.0.402 from builds.dotnet.microsoft.com into cloud-only
+`/workspace/bluey-tools/dotnet`, with SHA-512 checked against official .NET 10
+release metadata. No local laptop SDK/IDE install. Cloud first-run required
+writable DOTNET_CLI_HOME/NUGET_PACKAGES under /workspace, then an approved SDK
+IPC/mutex sandbox escalation. No signature/checksum/TLS bypass.
+
+Git proxy read access worked immediately. Initial API/Learn requests received
+proxy 403; saved additive `api.github.com` and `learn.microsoft.com` destinations,
+then retried after propagation and both worked. No new credential was requested.
+Read official Microsoft Learn extended window styles, layered-window hit-testing,
+WM_DPICHANGED and RegisterHotKey: layered WS_EX_TRANSPARENT passes input through;
+HTTRANSPARENT alone has same-thread limits. Implementation combines layered/
+transparent/toolwindow/noactivate, MA_NOACTIVATE, no-activate positioning and a
+regular reachable control window. Physical input/focus behavior is still unverified.
+
+Actual cloud commands from `windows/` (SDK helper only initializes cloud paths):
+- `dotnet test Bluey.Core.Tests -c Release --logger 'trx;LogFileName=core.trx' --results-directory TestResults`: first execution 20 passed/3 failed. Independent source review corrected three test expectations: launch(.5)=0.7585734, above-target caption y=262, and a second launch puff when redirecting still near home. Rerun: **23 passed, 0 failed, 0 skipped**.
+- `dotnet build Bluey.Windows -c Release`: first build exposed WPF/Core VisualState name collision; explicit alias fixed it. Rerun: **passed, 0 warnings/errors** using Windows reference pack; WPF not executed on Linux.
+- `dotnet publish Bluey.Windows -c Release -r win-x64 --self-contained true -p:PublishTrimmed=false -o artifacts/bluey-win-x64`: **passed**, approximately 142 MB extracted. Native CI execution and artifact upload are next.
+
+The F0 checker has a foundation-only change allowlist; it is not appropriate for
+authorized F2. Use scoped links/manifest parsing, original-source preservation,
+actual C# tests/build and whitespace checks. No application networking, microphone,
+capture, input injection, backend, Docker, WSL, installer or release was added.

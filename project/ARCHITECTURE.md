@@ -6,7 +6,7 @@ Source owners are in [PORTING-MAP](PORTING-MAP.md).
 
 F1 implements only the Android animator/renderer plus an offline demo in
 `android/`. D007 selects Kotlin/Compose Canvas. All session/voice/network/Windows
-components in the diagram remain planned; the demo has no such connections.
+components except the F2 overlay remain planned; neither offline demo has such connections.
 
 ```mermaid
 flowchart LR
@@ -63,3 +63,11 @@ auto-selects a remembered service name or first result. [Keychain](../Mac/Source
 is a permission-restricted JSON file despite its name. These are not target
 security guarantees. New TLS/pairing and protected Windows storage deliberately
 change the trust boundary while retaining face/event semantics.
+
+## F2 implemented overlay boundary
+
+`windows/Bluey.Core` contains renderer-independent motion, geometry, effects and
+FaceState output. `windows/Bluey.Windows` is a WPF/Win32 primary-monitor overlay
+with separately accessible controls and local nonsecret settings; D008 selects
+.NET 10/Windows 11 x64. No coordinator, capture/OCR/actions, audio or sockets
+are implemented. Physical desktop behavior remains unverified even after CI.

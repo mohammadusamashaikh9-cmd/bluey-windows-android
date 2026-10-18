@@ -1,19 +1,15 @@
 # Handoff
 
-[F1 PR #2](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/2)
-is open from `port/android-face` to `main`; do not merge automatically.
-Accepted F0 is main commit `55a1c62abaf3fae19b944fc2335f2f2e8adc2299`.
+F2 Windows overlay is implemented on `port/windows-overlay`, from accepted main
+merge `15194dec8356385b15dc6712630d45e4761cd1de`. F1 PR #2 is confirmed merged;
+its physical-phone/performance QA remains outstanding and Android is unchanged.
 
-Last verified Android source: `e231228188a515cef24d0b104d3b1ea5fd2b70e0`,
-[successful run 39070720349](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39070720349):
-23/23 tests, lint zero errors/11 warnings, debug APK and 17 native offscreen renders.
-Later documentation/workflow changes do not change tested app source. No phone
-FPS/GPU or complete visual parity claim; F1 remains active.
+Cloud results: 23 pure C# tests passed; WPF cross-build and self-contained win-x64
+publish passed using .NET SDK 10.0.402. Windows CI/native/artifact evidence is
+pending; no real desktop acceptance is claimed. See [STATUS](STATUS.md).
 
-**Next action:** install the [debug APK](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39070720349/artifacts/12114897856)
-on a physical Android phone after matching SHA256SUMS. APK SHA-256:
-`9f7d5442ee6089f28c04dac6d34cb676b3e9d3e8d294ed3f53af86b567e83aed`.
-Record device/OS/API, resolution and refresh rate, then capture 60 seconds covering moods, gaze/talk,
-blinks, idle hops, transitions and background/resume with Demo hidden for visual
-comparison. Follow the [F1 procedure](../project/QA.md#android-f1-build-and-comparison).
-Do not start F2/network/audio/API work as part of phone acceptance.
+Exact next task: run the Windows CI workflow for this branch, inspect native HWND
+and render evidence and verify the uploaded development artifact SHA-256 manifest.
+No merge, signing, installer, release, networking, capture or computer actions.
+After CI, physical Windows 11 laptop checks in [Windows instructions](../windows/README.md)
+remain required before F2 can be marked fully verified.

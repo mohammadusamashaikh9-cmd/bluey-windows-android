@@ -1,7 +1,8 @@
 # QA and evidence plan
 
 F0 is static foundation validation. F1 execution is recorded in tracking;
-the wider F2–F6 test plans below have **not run**.
+F2 pure/build/native CI evidence is recorded in tracking; physical F1/F2 and
+wider F3–F6 acceptance remains unverified.
 See [CHECKPOINTS](../tracking/CHECKPOINTS.md) for gate ownership/evidence.
 
 ## Evidence rules
@@ -126,3 +127,20 @@ screen awake only while foreground. Compare upstream previews and record a 60 s
 trace; report FPS/frame times/thermal behavior from the device, not CI. On Android
 16 large displays, OS orientation policy can override landscape; cover crop still
 applies. No device is available to this agent; all such outcomes stay UNVERIFIED.
+
+## Windows F2 build and desktop acceptance
+
+See [Windows demo commands and acceptance](../windows/README.md) and
+[windows.yml](../.github/workflows/windows.yml). Pure xUnit tests cover cubic
+x-inversion/derivatives, trajectory/velocity, carry continuity/cap, landing-once,
+mode/fade, drag timing, rotation/press/hover, deterministic blink, gaze/mood,
+DPI coordinate round trips, teardrop/palette/eye/star geometry, caption bounds
+and trail/effect lifetimes. Run from `windows/` using SDK 10.0.402.
+
+CI builds WPF on Windows, runs real HWND styles/messages/nonactivation checks
+and twelve actual offscreen WPF render fixtures, then publishes an unsigned
+self-contained win-x64 folder plus per-file SHA-256 sums. A CI message return is
+not a user click-routing test. No physical Windows click-through/focus/Alt+Tab,
+100/150/200% DPI, capture interaction, visual fidelity, frame pacing, CPU or
+8 GB laptop performance result may be inferred. F2 stays active until that
+separate evidence is recorded. No screenshot/capture feature is implemented.

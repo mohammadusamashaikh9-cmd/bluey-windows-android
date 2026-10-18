@@ -48,3 +48,38 @@ unsupported GPU mask filters; blur kernel/antialiasing/text metrics need visual
 calibration. Android is now selected for F1; Windows choices remain proposed.
 Allowed changes: `android/`, `.github/workflows/android.yml`, additive README and
 relevant canonical project/tracking docs. Original Apple source/assets stay read-only.
+
+## D008 / 2026-10-18 — F2 native Windows overlay
+
+Accepted by the F2 request: C#/.NET 10, WPF and Win32 on Windows 11 x64,
+under `windows/`, based on main merge `15194dec8356385b15dc6712630d45e4761cd1de`.
+Pin SDK 10.0.402 (official .NET 10 release metadata). A pure `Bluey.Core` library
+owns timing, flight, state, effects and vector/layout geometry; `Bluey.Windows`
+uses WPF retained drawings and a transparent HWND. No second UI framework,
+renderer package or application dependency is needed. Win32 provides overlay
+styles, monitor/DPI, cursor reads and hotkeys. A regular WPF control window is
+always reachable independently of the hidden/click-through overlay.
+
+WPF is the smallest maintainable starting point: built-in paths/gradients/text,
+transparent topmost windows and direct HWND interoperability. WinUI would add
+packaging/composition complexity before an observed WPF blocker. Layered-window
+GPU behavior, blur kernels, antialiasing, font metrics, fullscreen interaction,
+click-through and 60 Hz performance are target-unverified until laptop testing.
+Primary monitor only: engine units are DIPs, y down; Win32 physical screen points
+are explicitly mapped through monitor origin and per-monitor DPI. No mixed-DPI
+multi-monitor support claim. Manifest requests PerMonitorV2.
+
+CI uses Windows and .NET 10; publish a self-contained, untrimmed win-x64 folder
+with SHA-256 sums (no installer/signing/release). The laptop only needs to extract
+and run the development EXE; no SDK, IDE, Docker or WSL. Retained assets are linked
+from original Shared fonts with OFL notices. Pure tests execute in Linux cloud
+and Windows CI; native window checks in CI are distinct from physical desktop QA.
+
+Deliberate adapter differences: y-down WPF needs no AppKit layer y flip; Ctrl+Alt
+shortcuts replace Control+Option, with conflict feedback. Demo settings are local
+nonsecret versioned JSON. Effects remain visual only, with no input injection.
+Source redirect carry is capped at 0.6*distance; exact speed continuity therefore
+holds only below that cap, while direction is retained above it. No networking,
+audio, APIs, capture, OCR or computer actions enter F2. Original Apple and Android
+files remain unchanged. Allowed changes: `windows/`, `.github/workflows/windows.yml`,
+additive README and relevant canonical project/tracking guidance.

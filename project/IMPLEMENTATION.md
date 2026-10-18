@@ -1,6 +1,7 @@
 # Ordered implementation plan
 
-F0 is complete; the authorized Android F1 slice is active. F2–F6 remain planned.
+F0 is complete; F1 implementation is merged with device QA open. F2 Windows
+implementation is authorized under D008; F3–F6 remain planned.
 F1 implementation/build checks and physical-device acceptance are separate.
 Use [checkpoint states](../tracking/CHECKPOINTS.md) and [QA](QA.md); gate numbers
 are not evidence of progress. Changes of scope require [a decision](../tracking/DECISIONS.md).
@@ -49,3 +50,8 @@ F1 follow-up authorization now covers `android/`, the Android CI workflow and
 relevant canonical docs/tracking. D007 selects the Android tool versions and
 renderer. This does not authorize Windows/network/API work. F1 cannot become
 fully verified until physical-device comparison and pacing checks have evidence.
+
+F2 scope now authorizes `windows/`, `.github/workflows/windows.yml` and relevant
+canonical guidance/tracking. Pure C# and WPF/Win32 implementation is separate
+from physical click-through, focus, DPI/capture interaction, fidelity and pacing
+acceptance. No F3/F4/F5 capabilities are included. See [Windows workflow](../windows/README.md).

@@ -1,8 +1,8 @@
 # Source-to-port map
 
 Baseline `6d84d91456f3bf7ad9b31caf31f19710b0ba8328`; all observations below
-come from source, not execution. Original paths remain untouched. Target owners
-are conceptual components, not scaffolded folders. C#/Kotlin are provisional.
+come from source, not execution. Original paths remain untouched. Android F1 and Windows F2 have concrete offline implementations under D007/D008;
+other target owners remain conceptual components.
 
 | Source authority | Observed semantics to retain | Translate / replace and gate |
 | --- | --- | --- |
@@ -48,3 +48,14 @@ ScreenReader requests accurate Vision OCR, up to 400 line observations, with a
 1100 and quality 0.72. ControlsReader defaults to 140 results, a 0.45 s traversal
 budget, 5000 visited elements and 0.25 s AX messaging timeout. These are observed
 implementation choices, not proven cross-platform performance requirements.
+
+## F2 concrete symbol map
+
+| Swift symbol | C# owner | Boundary |
+| --- | --- | --- |
+| TimingCurve, Flight | `windows/Bluey.Core/TimingCurve.cs` | Pure easing inversion, derivatives, trajectory |
+| CursorEngine, CursorMode | `windows/Bluey.Core/CursorEngine.cs`, `Primitives.cs` | Pure mode/flight/fade/rotation/press/hover/gaze |
+| Teardrop, renderTrail, renderString, effects | `Geometry.cs`, `VisualState.cs` in Bluey.Core | Pure paths, history, spring and lifetimes |
+| TeardropLayer, CursorView | `windows/Bluey.Windows/VectorDrawing.cs`, `OverlayArt.cs` | Cached vector body, native WPF drawing/text |
+| CursorOverlay, layerPoint | `windows/Bluey.Windows/OverlayWindow.cs`, `Native.cs` | Native transparent primary HWND; physical-to-DIP mapping, no layer y flip |
+| Settings, HotKeys, AppDelegate, Fonts | `SettingsStore.cs`, `ControlsWindow.cs`, `Program.cs`, `VectorDrawing.cs` | Offline UI/hotkeys/settings and embedded original fonts only |

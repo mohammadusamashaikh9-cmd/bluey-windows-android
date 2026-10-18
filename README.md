@@ -6,12 +6,12 @@ This repository is a source-based port foundation forked from
 [Riley's Bluey](https://github.com/rbrown101010/bluey-by-riley), pinned to
 [`6d84d91456f3bf7ad9b31caf31f19710b0ba8328`](https://github.com/rbrown101010/bluey-by-riley/commit/6d84d91456f3bf7ad9b31caf31f19710b0ba8328).
 It is unofficial and does not imply endorsement by the upstream author.
-**Android now has an offline native face demo; Windows is not implemented.**
+**Android has an offline native face demo; Windows F2 adds a native offline overlay.**
 
 Start with [PORTING](PORTING.md) for the canonical plan, [verified status](tracking/STATUS.md),
 [checkpoints](tracking/CHECKPOINTS.md) and [agent guidance](AGENTS.md).
 The plan preserves the original `Mac/`, `iOS/` and `Shared/` sources and assets.
-C#/.NET remains proposed; Android F1 uses Kotlin/Compose Canvas under D007. V1 needs
+Windows F2 uses C#/.NET 10 with WPF/Win32 under D008; Android F1 uses Kotlin/Compose Canvas under D007. V1 needs
 no hosted backend or cloud database; authenticated encrypted local pairing is new
 port work. See the [Android F1 checks](project/QA.md#android-f1-build-and-comparison)
 and [current results](tracking/STATUS.md) for build versus device evidence.
@@ -21,6 +21,13 @@ documentation. Its API model strings, security claims and commands describe that
 baseline; they are not verified target support or current API availability/pricing.
 Source-informed corrections and port differences are in [PRD](project/PRD.md),
 [schema](project/PROTOCOL-DATA-SCHEMA.md) and [security](project/SECURITY.md).
+
+## Windows offline overlay
+
+See [Windows demo instructions](windows/README.md) for controls, self-contained
+development artifacts, checksums and physical Windows acceptance. The primary-monitor
+character is rendered from vectors; no network, capture or computer actions are included.
+Build/test/CI results and unverified desktop checks are kept in [STATUS](tracking/STATUS.md).
 
 ## Original Mac + iPhone project
 

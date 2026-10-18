@@ -1,0 +1,64 @@
+name: Windows overlay
+on:
+  push:
+    branches: [main, port/windows-overlay]
+    paths: ['windows/**', 'Shared/Fonts/**', '.github/workflows/windows.yml']
+  pull_request:
+    branches: [main]
+    paths: ['windows/**', 'Shared/Fonts/**', '.github/workflows/windows.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: windows-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build-test:
+    runs-on: windows-2025
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: windows
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: windows/global.json
+      - name: Pure deterministic tests
+        run: dotnet test Bluey.Core.Tests -c Release --logger 'trx;LogFileName=core.trx' --results-directory TestResults
+      - name: Build native WPF application
+        run: dotnet build Bluey.Windows -c Release
+      - name: Publish self-contained development folder
+        run: dotnet publish Bluey.Windows -c Release -r win-x64 --self-contained true -p:PublishTrimmed=false -o artifacts/bluey-win-x64
+      - name: Actual HWND checks and WPF offscreen frames (not physical desktop acceptance)
+        run: |
+          $process = Start-Process -FilePath artifacts/bluey-win-x64/Bluey.Windows.exe -ArgumentList '--self-test', "$PWD/artifacts/native-evidence" -PassThru -Wait
+          if ($process.ExitCode -ne 0) { Get-Content artifacts/native-evidence/native-smoke-failure.txt; throw "Native smoke failed ($($process.ExitCode))" }
+          Get-Content artifacts/native-evidence/native-smoke.json
+      - name: Development instructions and SHA-256 sums
+        run: |
+          Copy-Item README.md artifacts/bluey-win-x64/README.md
+          $root = (Resolve-Path artifacts/bluey-win-x64).Path
+          Get-ChildItem $root -Recurse -File | Sort-Object FullName | ForEach-Object {
+            $relative = [IO.Path]::GetRelativePath($root, $_.FullName).Replace('\', '/')
+            '{0}  {1}' -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant(), $relative
+          } | Set-Content -Encoding utf8NoBOM artifacts/bluey-win-x64/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v6
+        if: success()
+        with:
+          name: bluey-windows-dev-${{ github.sha }}
+          path: windows/artifacts/bluey-win-x64/
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: windows-test-evidence-${{ github.sha }}
+          path: |
+            windows/TestResults/
+            windows/artifacts/native-evidence/
+          if-no-files-found: warn
+          retention-days: 14

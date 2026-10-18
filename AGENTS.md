@@ -23,7 +23,8 @@ No unattended pushes, releases or merges.
   Translate into separately authorized target-platform paths; do not reorganize
   originals as incidental cleanup. Keep upstream attribution and font licenses.
 - Android F1 uses Kotlin/Compose Canvas under D007 in [DECISIONS](tracking/DECISIONS.md).
-  C#/.NET and Windows framework/renderer/OS/packaging remain **proposals**.
+  Windows F2 selects C#/.NET 10, WPF/Win32 and Windows 11 x64 under D008;
+  physical desktop fidelity/performance acceptance remains unverified.
 - There is no required hosted backend or cloud database. Read
   [ARCHITECTURE](project/ARCHITECTURE.md) and [data schema](project/PROTOCOL-DATA-SCHEMA.md).
 - Label facts as source-observed, port-planned or target-unverified. A material
