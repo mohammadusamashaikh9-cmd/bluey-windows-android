@@ -245,3 +245,175 @@ source difference from successful CI commit `e231228188a515cef24d0b104d3b1ea5fd2
 digests; no device result inferred. PR #2 verified OPEN, main base, correct head,
 mergedAt null. Commit/push of this tracking/workflow closeout and final remote
 head/clean-worktree checks follow; no merge or additional feature work authorized.
+
+## 2026-10-18 (Asia/Karachi) — F2 Windows implementation
+
+User authorized .NET 10/WPF/Win32 Windows 11 x64, complete offline F2, commit/push
+and one PR into main without merge. Clean checkout originally at F0; native
+`git ls-remote origin refs/heads/main` returned accepted F1 merge
+`15194dec8356385b15dc6712630d45e4761cd1de`. Fetched main and created
+`port/windows-overlay` from `origin/main`. GitHub API independently confirms
+PR #2 merged at that SHA. No branch from `port/android-face`; no Android edits.
+
+Read AGENTS and source-porting/animation/checkpoint skills, F2 authority docs and
+original CursorOverlay/Settings/HotKeys/AppDelegate/Fonts/Palette. Inspected cursor
+and flight PNGs plus middle comet/string GIF frames; the latter show tail layering
+and phone tether but are not seeded numerical or physical Windows references.
+D008 records the authorized target and source-to-C# boundaries before scaffolding.
+
+Installed official SDK 10.0.402 from builds.dotnet.microsoft.com into cloud-only
+`/workspace/bluey-tools/dotnet`, with SHA-512 checked against official .NET 10
+release metadata. No local laptop SDK/IDE install. Cloud first-run required
+writable DOTNET_CLI_HOME/NUGET_PACKAGES under /workspace, then an approved SDK
+IPC/mutex sandbox escalation. No signature/checksum/TLS bypass.
+
+Git proxy read access worked immediately. Initial API/Learn requests received
+proxy 403; saved additive `api.github.com` and `learn.microsoft.com` destinations,
+then retried after propagation and both worked. No new credential was requested.
+Read official Microsoft Learn extended window styles, layered-window hit-testing,
+WM_DPICHANGED and RegisterHotKey: layered WS_EX_TRANSPARENT passes input through;
+HTTRANSPARENT alone has same-thread limits. Implementation combines layered/
+transparent/toolwindow/noactivate, MA_NOACTIVATE, no-activate positioning and a
+regular reachable control window. Physical input/focus behavior is still unverified.
+
+Actual cloud commands from `windows/` (SDK helper only initializes cloud paths):
+- `dotnet test Bluey.Core.Tests -c Release --logger 'trx;LogFileName=core.trx' --results-directory TestResults`: first execution 20 passed/3 failed. Independent source review corrected three test expectations: launch(.5)=0.7585734, above-target caption y=262, and a second launch puff when redirecting still near home. Rerun: **23 passed, 0 failed, 0 skipped**.
+- `dotnet build Bluey.Windows -c Release`: first build exposed WPF/Core VisualState name collision; explicit alias fixed it. Rerun: **passed, 0 warnings/errors** using Windows reference pack; WPF not executed on Linux.
+- `dotnet publish Bluey.Windows -c Release -r win-x64 --self-contained true -p:PublishTrimmed=false -o artifacts/bluey-win-x64`: **passed**, approximately 142 MB extracted. Native CI execution and artifact upload are next.
+
+The F0 checker has a foundation-only change allowlist; it is not appropriate for
+authorized F2. Use scoped links/manifest parsing, original-source preservation,
+actual C# tests/build and whitespace checks. No application networking, microphone,
+capture, input injection, backend, Docker, WSL, installer or release was added.
+
+### F2 first Windows CI diagnosis
+
+Initial unpublished push was rejected by GitHub email privacy. Corrected only the
+new unpublished commit using verified API user ID/login no-reply metadata; did
+not change account privacy or existing history. Pushed `a157c7413aa502057f80a9d06bee6969babf7d3e`
+and opened [PR #3](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/3),
+head `port/windows-overlay`, base main, unmerged.
+
+Windows run [39114965265](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39114965265)
+passed tests, native WPF build and publish; native smoke step failed. Runnable
+artifact upload was correctly skipped; failure evidence was uploaded. Log/artifact
+redirect hosts were blocked by environment proxy 403. Saved the two observed
+hostnames in environment draft; runtime access still requires settings propagation.
+Added explicit GitHub error annotation to the native smoke step so a failure's
+actual exception is available through the already-working GitHub API, rather
+than relying solely on the inaccessible log download. This is diagnostic only;
+no failing assertion disabled or behavior acceptance weakened.
+
+Native exception observed through run 39115191543 annotations: WPF rejects
+`ClipToBounds=true` on a Window (`Window.CoerceClipToBounds`), during overlay
+construction. Removed that Window assignment; the inner OverlayArt Canvas already
+clips artwork. This fixes startup without weakening the native check. Original
+source and pure engine unchanged. Also corrected lingering Windows-planned text
+in PORTING/TRD to the D008-selected implementation boundary.
+
+Further native run 39115349241 still failed after the clipping correction, before
+a normal failure report was written. Logs became accessible and showed the
+runner's diagnostic file lookup failed, hiding the process exit/exception. Added
+test-only AppDomain fatal-exception recording and redirected process stdout/stderr;
+normal assertions remain intact. Artifact redirects also used observed storage
+host productionresultssa0.blob.core.windows.net; saved additively.
+
+Integration review moved remaining effect sampling, spring-pop timing and speech
+path construction into the pure library (Presentation/Geometry). Normalized spring
+initial velocity to animation-distances/second, matching source API units. Added
+four deterministic cases for spring/endpoints/cloud-tail paths: cloud **27 passed,
+0 failed/skipped**; WPF cross-build **0 warnings/errors**. This is independent of
+the unresolved native smoke diagnosis; no platform result is promoted.
+
+Run 39115541861 captured the actual fatal exception: nonfinite engine coordinates
+during WPF MediaContext.Resize/HWND creation. Native ConfigureOverlay's frame
+change can dispatch Rendering before FitPrimary initializes DisplayTransform;
+zero DPI caused nonfinite logical mouse coordinates. Added a lifecycle guard
+(`IsLoaded`, initialized DPI, and not resizing) before ticking; clear the HWND
+after close. The engine's finite-input assertion remains. Native smoke also refits
+a live HWND and checks opaque blueberry interior pixels in each render, not just
+nonempty images. These checks use real WPF/Win32, not mocked styles.
+
+### F2 Windows CI success
+
+[Push run 39115697048](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39115697048)
+at exact source commit `533d30bc711e5a1f75d2f8816b1b855ee97fa673` succeeded.
+[PR run 39115700400](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39115700400)
+also succeeded on proposed merge tree `9cb38cc84c05d96f88901eae7d784c62621a74ed`.
+Runner windows-2025, reported Microsoft Windows NT 10.0.26100.0; SDK 10.0.402.
+Actual commands are in `.github/workflows/windows.yml` and Windows README.
+
+- Pure tests: **27 passed, 0 failed/skipped** on Windows (PR log duration 174 ms).
+- Native WPF build: **0 warnings, 0 errors**; self-contained untrimmed win-x64 publish passed.
+- Native smoke: **9 passed, 0 failed**: actual layered/transparent/noactivate/toolwindow styles, visible HWND, foreground unchanged on show in CI session, actual HTTRANSPARENT/MA_NOACTIVATE messages, primary-DPI/refit dimensions, hidden-window recovery, embedded Fredoka resolution, twelve current WPF renders. Pixel checks require transparent outside and an opaque blue body interior. No physical click injection or desktop capture.
+- Uploaded [development folder](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39115697048/artifacts/12132207156) (65,541,730-byte archive) with per-file SHA256SUMS, original font notices and LICENSE, plus [TRX/native/render evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39115697048/artifacts/12132103530). Retention 14 days. No installer/signing/release.
+
+First successful artifact downloads redirected to additional observed storage
+hosts productionresultssa8 (PR) and productionresultssa5 (push). Added both while
+preserving earlier allowed hosts; current downloads still need runtime settings
+propagation. No archive/hash/image inspection is claimed yet. API logs independently
+confirm the checks and uploads. Physical desktop/capture/fidelity/performance
+acceptance remains UNVERIFIED; original Apple and Android sources are unchanged.
+
+### F2 artifact inspection found and corrected label placement
+
+Downloaded push run 39115697048 after network propagation. All **406 published
+files** matched the per-file SHA256SUMS; self-contained coreclr and WPF framework
+were present. Original OFL text matched after newline normalization (Windows
+checkout uses CRLF). TRX independently confirms 27 executed/passed, no skipped
+or failed tests; native JSON confirms nine checks and twelve actual WPF frames.
+
+Reviewed a contact sheet of all twelve frames against source PNGs/GIF frames and
+literal geometry/timings. Body/rim/eyes/trails appear, but temporary-label glyphs
+escaped their background: FormattedText was centered in its maximum measurement
+width even though the background used the narrower measured text width. Set the
+label's text alignment width to the measured width. Added a native bitmap
+regression: the fixed speech fixtures' body/speech/label must draw no pixels in
+the rightmost 200 pixels of the 1000-DIP canvas. Existing smoke checks had not
+covered glyph containment. Rebuild/re-run and fresh final artifacts are required.
+
+Qualitative source comparison also shows WPF glow is narrower/sharper than the
+upstream preview; do not claim Core Graphics blur parity. Exact geometry/colors/
+timings remain source-matched numerically; kernel/text/pacing calibration and
+physical desktop acceptance remain open.
+
+### F2 final source CI
+
+The label fix source commit `f3506e00737f66502d2a3f5cf7961251e1291708` passed
+[push run 39116112594](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39116112594)
+and [PR run 39116116581](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39116116581).
+All 27 pure tests, WPF build (0 warnings/errors), self-contained publish, nine
+native checks and twelve render fixtures (including label containment) pass.
+Final [development archive](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39116112594/artifacts/12132670694)
+is 65,541,894 bytes; [test evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39116112594/artifacts/12132560972)
+is uploaded. The original four embedded font binaries were also extracted from
+the prior built assembly with System.Resources.ResourceReader and SHA-256 matched
+against each original Shared TTF; no font conversion or new art asset. The same
+resource links and assets are unchanged in final source.
+
+Final artifact host is observed productionresultssa17.blob.core.windows.net,
+saved additively for download verification. Final tracking closeout changes no
+Windows implementation/test/CI files after the successful source commit above.
+
+Final artifact access propagated successfully. Downloaded run 39116112594 using
+`gh run download`; **all 406 files** match SHA256SUMS, and the manifest covers
+every published file except itself. Final EXE SHA-256:
+`29d00ec3cfce61dd382eea81a66b6859bac93ec263f279d6a1d6784c1dcb9868`.
+Published directory total including manifest: 147,550,957 bytes.
+Final TRX independently confirms 27 executed/passed, 0 failed/errors/notExecuted;
+native JSON confirms nine checks, no failures. Reviewed the corrected speech-top
+and speech-center frames: temporary labels now contain their text. Body/glow,
+comet and string fixtures also inspected. ResourceReader extraction of final
+assembly confirms all four original TTF binaries are byte-identical. OFL notices
+are text-identical with Windows checkout CRLF normalization.
+
+The final code remains `f3506e00737f66502d2a3f5cf7961251e1291708`; closeout
+updates only canonical evidence/guidance, not tests/application/workflow. F2 is
+implementation/CI-passed, physical acceptance UNVERIFIED. F1 PR #2 remains merged
+with outstanding phone/performance QA, and F3–F6 remain planned.
+
+Final scoped closeout checks: **24 Markdown files / 188 local links and anchors**,
+C# project/props/manifest XML, **40 files** inside authorized F2 paths, original
+Apple/Android/Shared/previews/builds and upstream README body preserved, Windows
+source/tests/workflow identical to successful code commit, and `git diff --check`
+passed. Final tracking commit/push and PR metadata confirmation follow. No merge.

@@ -117,3 +117,40 @@ and animator mathematics structurally. CI renders fixed frames and a happy-mood
 transition with the same renderer, without an emulator. GPU pacing, actual font
 appearance, touch/lifecycle/fullscreen and visual fidelity remain physical-device
 checks. Hide the secondary demo panel before recording comparisons.
+
+## Windows F2 translation and comparison
+
+Source `CursorOverlay.swift` at the pinned Apple baseline remains the numerical
+authority. C# uses the three literal cubic timings with x-inversion and dy/dx;
+flight control points/durations, the 0.6-distance carry cap, arrival-once flag,
+0.42 s press, 2.4 rad/s hover and 1/480–1/20 dt clamp are translated explicitly.
+Tests compare curve samples to independent bisection and finite differences.
+
+The WPF path uses exact circular arcs: at side 96, start (6,0), line to (48,0),
+clockwise radius-48 arcs through (96,48),(48,96),(0,48), line to (0,6), radius-6
+arc to (6,0), close. Eye centers (43,49),(67,49), white radius 9, pupil radius 4.5
+and look reach 3.4 scale by side/96. Source cursor has no phone-face catchlights.
+All four palette/stops, gradient endpoints, radial shine and clipped 8*side/96
+rim are retained. WPF rotation is y-down positive, eliminating AppKit's y flip.
+
+Source cursor/flight PNGs and comet/string GIF frames are qualitative references
+for rim, teardrop, eye orientation and layering, not deterministic captures.
+Windows CI exports the same vector renderer at four sizes, glow on/off, trails
+and speech positions for comparison. No raster asset animates the app.
+
+WPF DropShadowEffect approximates Core Graphics blur; explicit damped spring
+math replaces Core Animation speech/label pops. Font metrics, blur, edge masks
+and those spring initial-velocity conventions require physical/source-recording
+calibration. Bounds clamps also protect labels/long captions near display edges.
+Fidelity, desktop input routing, display changes, frame pacing and CPU remain
+UNVERIFIED until the exact artifact is tested on Windows 11 hardware.
+
+F2 artifact review: all twelve WPF fixtures were inspected alongside the upstream
+PNG/GIF composition. A real temporary-label alignment defect was found (glyphs
+centered in a wider measurement region than the box) and corrected; the native
+render test now rejects stray glyph pixels in the fixture's right margin. The
+source teardrop/rim/eye orientation and trail layering are retained. WPF glow is
+visibly narrower/sharper than the upstream PNG reference; reference input/DPI is
+unknown, so the radius is not guessed to force a screenshot match. Physical/source
+recording calibration remains a material open fidelity item. Embedded original
+TTFs are verified byte-for-byte; notice text is retained with CI checkout CRLF.

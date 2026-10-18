@@ -1,7 +1,8 @@
 # Windows + Android port foundation
 
 This fork develops an unofficial source-based port. Android has an offline native
-face demo under `android/`; Windows is not implemented. The Apple source remains
+face demo under `android/`; Windows F2 adds a native offline overlay under `windows/`.
+The Apple source remains
 the unchanged baseline. See current tracking for build and device evidence.
 
 Start with [current status](tracking/STATUS.md), [next task](tracking/HANDOFF.md)

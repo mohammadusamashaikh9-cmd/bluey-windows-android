@@ -1,19 +1,23 @@
 # Handoff
 
-[F1 PR #2](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/2)
-is open from `port/android-face` to `main`; do not merge automatically.
-Accepted F0 is main commit `55a1c62abaf3fae19b944fc2335f2f2e8adc2299`.
+F2 Windows overlay is implemented on `port/windows-overlay`, from accepted main
+merge `15194dec8356385b15dc6712630d45e4761cd1de`. F1 PR #2 is confirmed merged;
+its physical-phone/performance QA remains outstanding and Android is unchanged.
 
-Last verified Android source: `e231228188a515cef24d0b104d3b1ea5fd2b70e0`,
-[successful run 39070720349](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39070720349):
-23/23 tests, lint zero errors/11 warnings, debug APK and 17 native offscreen renders.
-Later documentation/workflow changes do not change tested app source. No phone
-FPS/GPU or complete visual parity claim; F1 remains active.
+[PR #3](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/3)
+is open into main; do not merge automatically. Windows source at
+`f3506e00737f66502d2a3f5cf7961251e1291708` passed
+[CI 39116112594](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39116112594):
+27 pure tests, WPF build/publish, nine actual native checks and twelve offscreen
+frames. Artifact is self-contained win-x64, unsigned, with SHA256SUMS, retained
+14 days. See [STATUS](STATUS.md) for artifact/evidence links and verified EXE digest. All 406 file hashes and
+original embedded fonts were checked; corrected label/speech renders reviewed.
 
-**Next action:** install the [debug APK](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39070720349/artifacts/12114897856)
-on a physical Android phone after matching SHA256SUMS. APK SHA-256:
-`9f7d5442ee6089f28c04dac6d34cb676b3e9d3e8d294ed3f53af86b567e83aed`.
-Record device/OS/API, resolution and refresh rate, then capture 60 seconds covering moods, gaze/talk,
-blinks, idle hops, transitions and background/resume with Demo hidden for visual
-comparison. Follow the [F1 procedure](../project/QA.md#android-f1-build-and-comparison).
-Do not start F2/network/audio/API work as part of phone acceptance.
+Exact next task: on the Windows 11 x64 laptop, extract the development artifact,
+verify SHA256SUMS and execute the primary-monitor desktop acceptance sequence in
+[Windows instructions](../windows/README.md#required-physical-windows-acceptance--unverified).
+Record click-through/focus/Alt+Tab, hide/show/recovery, 100/150/200% DPI, external
+capture interaction, equivalent source/target animation and 60 s frame/CPU/memory
+measurements tied to that artifact hash. No SDK/IDE/WSL/Docker install is needed.
+F2 remains active until physical evidence exists. No F3, installer, signing,
+release, networking, capture feature or computer actions are included.
