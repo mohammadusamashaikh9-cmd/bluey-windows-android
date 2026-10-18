@@ -6,14 +6,15 @@ This repository is a source-based port foundation forked from
 [Riley's Bluey](https://github.com/rbrown101010/bluey-by-riley), pinned to
 [`6d84d91456f3bf7ad9b31caf31f19710b0ba8328`](https://github.com/rbrown101010/bluey-by-riley/commit/6d84d91456f3bf7ad9b31caf31f19710b0ba8328).
 It is unofficial and does not imply endorsement by the upstream author.
-**Windows and Android applications are not implemented yet.**
+**Android now has an offline native face demo; Windows is not implemented.**
 
 Start with [PORTING](PORTING.md) for the canonical plan, [verified status](tracking/STATUS.md),
 [checkpoints](tracking/CHECKPOINTS.md) and [agent guidance](AGENTS.md).
 The plan preserves the original `Mac/`, `iOS/` and `Shared/` sources and assets.
-Proposed C#/.NET and Kotlin/Compose choices await platform validation. V1 needs
+C#/.NET remains proposed; Android F1 uses Kotlin/Compose Canvas under D007. V1 needs
 no hosted backend or cloud database; authenticated encrypted local pairing is new
-port work. No target builds, device tests or live API validation are claimed.
+port work. See the [Android F1 checks](project/QA.md#android-f1-build-and-comparison)
+and [current results](tracking/STATUS.md) for build versus device evidence.
 
 The original Apple description and instructions below are retained as upstream
 documentation. Its API model strings, security claims and commands describe that

@@ -1,7 +1,12 @@
 # Architecture and boundaries
 
-Port-planned design; platform APIs remain [unverified proposals](TRD.md).
+Overall port design; Android F1 is implemented, remaining platform boundaries
+remain [proposals](TRD.md).
 Source owners are in [PORTING-MAP](PORTING-MAP.md).
+
+F1 implements only the Android animator/renderer plus an offline demo in
+`android/`. D007 selects Kotlin/Compose Canvas. All session/voice/network/Windows
+components in the diagram remain planned; the demo has no such connections.
 
 ```mermaid
 flowchart LR

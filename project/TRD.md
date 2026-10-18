@@ -4,17 +4,19 @@ See [architecture](ARCHITECTURE.md), [schema](PROTOCOL-DATA-SCHEMA.md) and
 [decisions](../tracking/DECISIONS.md). Requirements below are new port work;
 source observations are identified separately.
 
-## Proposed platform choices, not confirmed support
+## Platform choices and verification boundaries
 
 | Area | Proposal | Proof needed before commitment |
 | --- | --- | --- |
 | Windows | Native C#/.NET; evaluate WPF versus WinUI with a vector/composition renderer | Transparency, click-through, pacing, mixed DPI, capture exclusion, tray/hotkeys, packaging spike in F2 |
-| Android | Kotlin, Compose Canvas/custom drawing; platform audio and NSD | Landscape crop, frame pacing, lifecycle, font rendering and LAN discovery spike in F1/F3 |
+| Android | F1 selected Kotlin/Compose Canvas, API 26+, compile/target 36; D007 | Landscape crop/lifecycle/font/device pacing acceptance pending; platform audio/NSD remain future F3/F4 |
 | OS/architecture | Windows 11 x64 initial candidate; Android minimum/target SDK and supported CPUs undecided | Confirm official SDK support and available physical devices; record exact matrix before build setup |
 | Persistence | App-private versioned JSON initially; Windows user settings plus OS-protected secrets | Atomic writes/recovery, migration, backup exclusions, ACL/secret-store behavior |
 | LAN | Authenticated TLS with locally verified device trust; DNS-SD discovery | Pairing threat review, selected platform TLS APIs, firewall/network evidence in F3 |
 
-No SDK version, renderer package or binary dependency is selected by F0.
+F0 selected no SDK or renderer package. F1 now pins versions in `android/` and
+D007; its actual build/test evidence is recorded in tracking. Windows remains
+unselected. API 26 is the code minimum, not a tested physical support matrix.
 
 ## Functional boundaries
 

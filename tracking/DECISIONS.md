@@ -20,3 +20,31 @@ service/envelope version, limits/media strategy and trust recovery. F4: current
 API/account/model/cost/retention and capture-consent UX; explicit storage migration
 version/units. F5: whether either optional feature is selected and retention budget.
 These are bounded gate inputs, not blockers to the documentation foundation.
+
+## D007 / 2026-10-18 — F1 Android implementation choices
+
+Accepted for the user-authorized F1 slice: Kotlin + Compose Canvas under `android/`,
+pure Kotlin animator and Android Canvas drawing inside Compose. Use AGP 8.13.2,
+Gradle 8.13, Kotlin/Compose compiler 2.2.21, Compose BOM 2025.12.01, JDK 17,
+compile/target SDK 36 and minimum SDK 26. Stable pinned versions rather than a
+preview/current-major migration minimize setup risk. AGP's [compatibility table](https://developer.android.com/build/releases/agp-8-13-0-release-notes)
+specifies Gradle 8.13/JDK 17 and supports API 36; [Compose BOM](https://developer.android.com/develop/ui/compose/bom)
+and [Kotlin Gradle compatibility](https://kotlinlang.org/docs/gradle-configure-project.html)
+were checked before selection. Exact dependency resolution still needs an actual build.
+
+No local Java/Gradle/Android SDK was found on PATH. CI installs SDK/build tooling;
+the laptop needs neither Studio nor emulator. CI uses setup-gradle's pinned
+distribution rather than adding a wrapper JAR/bootstrap script. Optional local
+builds must use the documented Gradle version. Robolectric 4.16.1 is test-only
+for offscreen Android-native bitmap comparisons on SDK 35/JDK 17, not an emulator
+or a substitute for physical-device acceptance. Runtime libraries are limited to
+Compose/activity/lifecycle. Reuse `Shared/Fonts` as assets with original notices.
+
+Preserve spring/state math literally. A monotonic active-time demo clock pauses
+in background; reject backwards/nonfinite input at the pure animator boundary.
+The standalone controls feed in-memory FaceState (no networking). Cached software
+blur masks let hardware Canvas draw the source glow/cheeks without relying on
+unsupported GPU mask filters; blur kernel/antialiasing/text metrics need visual
+calibration. Android is now selected for F1; Windows choices remain proposed.
+Allowed changes: `android/`, `.github/workflows/android.yml`, additive README and
+relevant canonical project/tracking docs. Original Apple source/assets stay read-only.
