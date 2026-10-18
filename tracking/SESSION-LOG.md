@@ -285,3 +285,21 @@ The F0 checker has a foundation-only change allowlist; it is not appropriate for
 authorized F2. Use scoped links/manifest parsing, original-source preservation,
 actual C# tests/build and whitespace checks. No application networking, microphone,
 capture, input injection, backend, Docker, WSL, installer or release was added.
+
+### F2 first Windows CI diagnosis
+
+Initial unpublished push was rejected by GitHub email privacy. Corrected only the
+new unpublished commit using verified API user ID/login no-reply metadata; did
+not change account privacy or existing history. Pushed `a157c7413aa502057f80a9d06bee6969babf7d3e`
+and opened [PR #3](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/3),
+head `port/windows-overlay`, base main, unmerged.
+
+Windows run [39114965265](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39114965265)
+passed tests, native WPF build and publish; native smoke step failed. Runnable
+artifact upload was correctly skipped; failure evidence was uploaded. Log/artifact
+redirect hosts were blocked by environment proxy 403. Saved the two observed
+hostnames in environment draft; runtime access still requires settings propagation.
+Added explicit GitHub error annotation to the native smoke step so a failure's
+actual exception is available through the already-working GitHub API, rather
+than relying solely on the inaccessible log download. This is diagnostic only;
+no failing assertion disabled or behavior acceptance weakened.

@@ -36,7 +36,11 @@ jobs:
       - name: Actual HWND checks and WPF offscreen frames (not physical desktop acceptance)
         run: |
           $process = Start-Process -FilePath artifacts/bluey-win-x64/Bluey.Windows.exe -ArgumentList '--self-test', "$PWD/artifacts/native-evidence" -PassThru -Wait
-          if ($process.ExitCode -ne 0) { Get-Content artifacts/native-evidence/native-smoke-failure.txt; throw "Native smoke failed ($($process.ExitCode))" }
+          if ($process.ExitCode -ne 0) {
+            $failure = (Get-Content artifacts/native-evidence/native-smoke-failure.txt) -join ' '
+            Write-Output "::error title=Native Windows smoke::$failure"
+            throw "Native smoke failed ($($process.ExitCode))"
+          }
           Get-Content artifacts/native-evidence/native-smoke.json
       - name: Development instructions and SHA-256 sums
         run: |
