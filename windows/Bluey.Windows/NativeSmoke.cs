@@ -72,6 +72,13 @@ internal static class NativeSmoke
         var offset = ((int)Math.Round(interior.Y) * 1000 + (int)Math.Round(interior.X)) * 4;
         if (pixels[offset + 3] < 240 || pixels[offset] <= pixels[offset + 2] + 5)
             throw new InvalidOperationException("WPF vector body interior must be opaque blueberry, not just eyes/shadow.");
+        // Fixed speech fixtures place body, speech and label entirely left of x=800.
+        // This catches a FormattedText alignment region larger than its measured box.
+        if (name.StartsWith("speech", StringComparison.Ordinal))
+            for (var y = 0; y < 700; y++)
+                for (var x = 800; x < 1000; x++)
+                    if (pixels[(y * 1000 + x) * 4 + 3] > 0)
+                        throw new InvalidOperationException("Speech/label glyphs escaped their measured fixture boxes.");
         var encoder = new PngBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(bitmap));
         using var stream = File.Create(Path.Combine(output, name + ".png")); encoder.Save(stream);
     }

@@ -51,6 +51,7 @@ internal sealed class OverlayArt : Canvas
     {
         label = text; labelBorn = engine.Now; labelLife = life;
         labelText = Text(text, 19, Brushes.White, VisualTreeHelper.GetDpi(this).PixelsPerDip, Math.Max(1, ActualWidth - 52), 80);
+        labelText.MaxTextWidth = Math.Max(1, Math.Ceiling(labelText.Width));
     }
     internal void Advance()
     {

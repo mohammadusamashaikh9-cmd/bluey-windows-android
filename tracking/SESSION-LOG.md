@@ -333,3 +333,46 @@ zero DPI caused nonfinite logical mouse coordinates. Added a lifecycle guard
 after close. The engine's finite-input assertion remains. Native smoke also refits
 a live HWND and checks opaque blueberry interior pixels in each render, not just
 nonempty images. These checks use real WPF/Win32, not mocked styles.
+
+### F2 Windows CI success
+
+[Push run 39115697048](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39115697048)
+at exact source commit `533d30bc711e5a1f75d2f8816b1b855ee97fa673` succeeded.
+[PR run 39115700400](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39115700400)
+also succeeded on proposed merge tree `9cb38cc84c05d96f88901eae7d784c62621a74ed`.
+Runner windows-2025, reported Microsoft Windows NT 10.0.26100.0; SDK 10.0.402.
+Actual commands are in `.github/workflows/windows.yml` and Windows README.
+
+- Pure tests: **27 passed, 0 failed/skipped** on Windows (PR log duration 174 ms).
+- Native WPF build: **0 warnings, 0 errors**; self-contained untrimmed win-x64 publish passed.
+- Native smoke: **9 passed, 0 failed**: actual layered/transparent/noactivate/toolwindow styles, visible HWND, foreground unchanged on show in CI session, actual HTTRANSPARENT/MA_NOACTIVATE messages, primary-DPI/refit dimensions, hidden-window recovery, embedded Fredoka resolution, twelve current WPF renders. Pixel checks require transparent outside and an opaque blue body interior. No physical click injection or desktop capture.
+- Uploaded [development folder](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39115697048/artifacts/12132207156) (65,541,730-byte archive) with per-file SHA256SUMS, original font notices and LICENSE, plus [TRX/native/render evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39115697048/artifacts/12132103530). Retention 14 days. No installer/signing/release.
+
+First successful artifact downloads redirected to additional observed storage
+hosts productionresultssa8 (PR) and productionresultssa5 (push). Added both while
+preserving earlier allowed hosts; current downloads still need runtime settings
+propagation. No archive/hash/image inspection is claimed yet. API logs independently
+confirm the checks and uploads. Physical desktop/capture/fidelity/performance
+acceptance remains UNVERIFIED; original Apple and Android sources are unchanged.
+
+### F2 artifact inspection found and corrected label placement
+
+Downloaded push run 39115697048 after network propagation. All **406 published
+files** matched the per-file SHA256SUMS; self-contained coreclr and WPF framework
+were present. Original OFL text matched after newline normalization (Windows
+checkout uses CRLF). TRX independently confirms 27 executed/passed, no skipped
+or failed tests; native JSON confirms nine checks and twelve actual WPF frames.
+
+Reviewed a contact sheet of all twelve frames against source PNGs/GIF frames and
+literal geometry/timings. Body/rim/eyes/trails appear, but temporary-label glyphs
+escaped their background: FormattedText was centered in its maximum measurement
+width even though the background used the narrower measured text width. Set the
+label's text alignment width to the measured width. Added a native bitmap
+regression: the fixed speech fixtures' body/speech/label must draw no pixels in
+the rightmost 200 pixels of the 1000-DIP canvas. Existing smoke checks had not
+covered glyph containment. Rebuild/re-run and fresh final artifacts are required.
+
+Qualitative source comparison also shows WPF glow is narrower/sharper than the
+upstream preview; do not claim Core Graphics blur parity. Exact geometry/colors/
+timings remain source-matched numerically; kernel/text/pacing calibration and
+physical desktop acceptance remain open.
