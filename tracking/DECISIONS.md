@@ -155,3 +155,9 @@ built debug APKs are public metadata and may differ; verify/report their SHA-256
 and explicitly uninstall/re-enroll when necessary instead of persisting/exporting
 CI signing keys. Hardware Keystore/SChannel and physical connectivity still need
 one paired-device retest with the produced artifacts.
+
+F3-R1 additionally guards the active failure-handler boundary after a cancelled
+blocking socket read: cancellation-caused IOException must not publish an active
+failure or clear a newer pairing intent. A real loopback/coroutine regression
+fails before the guard and passes after it. This preserves the existing lifecycle
+and enrollment authority; it does not establish the physical failure's cause.
