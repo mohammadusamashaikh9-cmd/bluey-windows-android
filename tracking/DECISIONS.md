@@ -161,3 +161,30 @@ blocking socket read: cancellation-caused IOException must not publish an active
 failure or clear a newer pairing intent. A real loopback/coroutine regression
 fails before the guard and passes after it. This preserves the existing lifecycle
 and enrollment authority; it does not establish the physical failure's cause.
+
+### D009 F3-R2 compatibility correction / 2026-10-19 (Asia/Karachi)
+
+User-reported October 18 attempts at 21:57:00 UTC/53148 and 21:59:10 UTC/53192
+establish TCP acceptance, exact server pin verification and EC identity selection,
+then failure before mutual TLS or enrollment. This supersedes R1's unknown TCP
+reachability; the actual provider rejection is still unobserved.
+
+Source investigation confirms client generation omits DIGEST_NONE. Android's
+[setDigests documentation](https://developer.android.com/reference/android/security/keystore/KeyGenParameterSpec.Builder#setDigests(java.lang.String...))
+says TLS keys usually require that authorization because TLS hashes before signing.
+[Conscrypt CryptoUpcalls](https://github.com/google/conscrypt/blob/master/common/src/main/java/org/conscrypt/CryptoUpcalls.java)
+uses NONEwithECDSA for opaque EC TLS keys; Android Keystore's ECDSA SignatureSpi
+passes KM_DIGEST_NONE to KeyMint for that operation. SHA-only authorizations cannot
+permit it. Authorize DIGEST_NONE in newly generated P-256 identities alongside the
+existing SHA digests. This authorizes signing a TLS-computed digest, not an unhashed
+TLS signature or weaker wire algorithm. No certificate extension/EKU, TLS version,
+pin, approval or storage change is justified by the current evidence.
+
+Run local SHA256withECDSA and NONEwithECDSA(SHA-256(challenge)) sign/verify checks
+using the existing opaque key/certificate off the UI thread. Never log challenge,
+signature or key; report fixed outcomes and whether NONE is authorized. Existing
+key permissions are immutable: never silently regenerate identity. Offer explicit
+confirmed replacement and forget local host trust; tell the user to revoke the old
+phone on Windows and enroll anew. The old certificate stays intact until that
+choice. Test TLS 1.2/1.3 independently without a production version override.
+Phone confirmation of this correction and ApprovalPending/session remain pending.

@@ -23,6 +23,14 @@ import javax.security.auth.x500.X500Principal
 // Never exports a private key. Android's TLS provider signs through AndroidKeyStore.
 class AndroidIdentity(context:Context) {
     companion object {
+        // Kept separately so the actual generated-key authorizations are regression tested.
+        fun clientKeySpec(alias:String,deviceId:String,now:Long)=KeyGenParameterSpec.Builder(alias,KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY)
+            .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
+            .setDigests(KeyProperties.DIGEST_SHA256,KeyProperties.DIGEST_SHA384,KeyProperties.DIGEST_SHA512)
+            .setCertificateSubject(X500Principal("CN=Bluey Android $deviceId"))
+            .setCertificateSerialNumber(java.math.BigInteger.ONE)
+            .setCertificateNotBefore(Date(now-86400000))
+            .setCertificateNotAfter(Date(now+10L*365*86400000)).build()
         fun eraseTrust(context:Context) { AtomicFile(File(context.noBackupFilesDir,"bluey-peer.gcm")).delete() }
     }
     private val keys=KeyStore.getInstance("AndroidKeyStore").apply{load(null)}
@@ -35,13 +43,7 @@ class AndroidIdentity(context:Context) {
         deviceId=prefs.getString("id",null)?:UUID.randomUUID().toString().also{check(prefs.edit().putString("id",it).commit())}
         if(!keys.containsAlias(identity)) {
             KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC,"AndroidKeyStore").apply {
-                initialize(KeyGenParameterSpec.Builder(identity,KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY)
-                    .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
-                    .setDigests(KeyProperties.DIGEST_SHA256,KeyProperties.DIGEST_SHA384,KeyProperties.DIGEST_SHA512)
-                    .setCertificateSubject(X500Principal("CN=Bluey Android $deviceId"))
-                    .setCertificateSerialNumber(java.math.BigInteger.ONE)
-                    .setCertificateNotBefore(Date(System.currentTimeMillis()-86400000))
-                    .setCertificateNotAfter(Date(System.currentTimeMillis()+10L*365*86400000)).build())
+                initialize(clientKeySpec(identity,deviceId,System.currentTimeMillis()))
                 generateKeyPair()
             }
         }
