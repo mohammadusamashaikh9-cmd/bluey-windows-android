@@ -417,3 +417,61 @@ C# project/props/manifest XML, **40 files** inside authorized F2 paths, original
 Apple/Android/Shared/previews/builds and upstream README body preserved, Windows
 source/tests/workflow identical to successful code commit, and `git diff --check`
 passed. Final tracking commit/push and PR metadata confirmation follow. No merge.
+
+## 2026-10-18 UTC — F3 secure device link implementation and CI
+
+- User resolved the prerequisite: GitHub confirms F2 PR #3 squash-merged into main
+  `a80642ab2aa897e6f80baed081ce2beb3e9a6d3d`. Fetched it, verified both F1/F2 source
+  trees and clean worktree, then created `port/secure-device-link` directly from
+  that baseline. No previous F3 source changes needed transfer. F1 PR #2 remains
+  merged. F2 functional acceptance is user-reported; measured QA is not inferred.
+- Read project authority/local protocol, source-porting and checkpoint skills;
+  inspected legacy GooglyLink/PhoneServer/MacLink and the existing engine/animator.
+  D009 recorded the concrete security profile before relying on it. Verified
+  official Microsoft DNS-SD/TLS/DPAPI and Android NSD/Keystore/permission semantics.
+- Implemented bounded v1 strict codecs/40 shared fixtures with expected values,
+  pinned mutual TLS, five-minute 256-bit out-of-band QR/URI enrollment, explicit
+  request/identity-bound approvals, protected storage, trust/revocation, native
+  discovery, bounded foreground reconnect and latest-slot face synchronization.
+  Android uses the existing animator with once-only active-clock receipt; original
+  math/render source and Apple assets remain unchanged. No F4+ capability added.
+- Actual early CI failures were fixed: missing Kotlin discovery brace, redundant
+  Windows ProtectedData package (NU1510), and Windows nonexportable-key re-export
+  during DPAPI initialization. The final implementation exports the new PFX once
+  before loading its nonexportable runtime certificate. Local plaintext rejection
+  test initially needed its network stream retained before socket half-close.
+- Final app source `c27a9d40020a5f1cb351771f8ab00087cd06c166`:
+  `/workspace/bluey-tools/dotnet-run test windows/Bluey.Link.Tests -c Release
+  --logger 'trx;LogFileName=link.trx' --results-directory windows/TestResults`
+  passed 13/13 locally (zero skipped). An earlier implementation WPF cross-build
+  passed with zero warnings/errors on Linux SDK 10.0.402; final compilation is
+  verified by Windows CI below. No physical Windows behavior is implied.
+- Windows [push CI 39125741305](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39125741305)
+  passed 27 Core + 13 Link tests, WPF build (0 warnings/errors), self-contained
+  win-x64 publish, 12 actual DPAPI/HWND/render checks and 12 PNGs. TRX/native JSON
+  downloaded and inspected: no failures/skips. Actual TLS tests include failed
+  authentication, both approvals, expiry logic, request/identity mismatches,
+  revoke/reconnect, disconnect cleanup, slot timeouts and real socket backpressure.
+- Android [push CI 39125741198](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39125741198)
+  passed compilation, 33 tests (17 animation, 6 renderer, 10 link), lint (0 errors,
+  15 warnings) and debug APK. JUnit XML confirms no failures/errors/skips; 17 PNGs.
+  Target 36 is retained; Nearby is optional for Android 16 opt-in restrictions.
+  Custom X509 lint warning was inspected: exact DER pin/date/P-256 verification
+  is intentional for the self-signed out-of-band profile, not accept-all trust.
+- PR merge-tree runs 39125744104 (Windows) and 39125744102 (Android) also passed.
+  Both push-run application artifacts and evidence downloads were retrieved.
+  Verified all 409 Windows manifest hashes and APK SHA256SUMS; packaged Android
+  fonts/OFL files match source bytes. EXE SHA-256:
+  `03cca249cfedf1858ba6abd521330c9d35c7c9bc507f53a51b542e19a795e0a9`;
+  APK SHA-256:
+  `3bb839420c5cf050a4022ac21e4f174e4d084ee44cbf99d33a5ed172d618f38d`.
+  [STATUS](STATUS.md) owns exact artifact links (14-day retention).
+- Static review: no diff in Mac/iOS/Shared, original Apple build/assets/previews,
+  Android animator/renderer or Bluey.Core; changed Markdown file links resolve and
+  whitespace checks pass. Opened one [PR #4](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/4)
+  into main; no merge. Cloud startup guidance was saved as an onboarding draft;
+  review/save/publish in environment settings is needed only for reuse.
+- Physical pairing, Keystore/SChannel device interoperability, NSD/firewall/OS
+  permission behavior, Wi-Fi loss/reconnect, live synchronization and measured
+  latency remain UNVERIFIED. F1/F2 performance QA remains open separately. Exact
+  next action is the paired-device artifact acceptance sequence in HANDOFF.
