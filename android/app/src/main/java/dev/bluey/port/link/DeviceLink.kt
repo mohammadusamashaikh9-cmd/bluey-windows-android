@@ -32,8 +32,11 @@ class SocketWire(private val socket:SSLSocket,val session:String,hello:Message) 
     private val sendGate=Mutex()
     suspend fun send(type:String,payload:com.google.gson.JsonObject):String = sendGate.withLock { coroutineScope {
         val id=UUID.randomUUID().toString();val bytes=Wire.encode(type,session,outgoing++,payload,id)
-        val guard=launch { delay(2000);socket.close() }
-        try { output.write(bytes);output.flush();id } finally { guard.cancel() }
+        val expired=java.util.concurrent.atomic.AtomicBoolean()
+        val guard=launch { delay(2000);expired.set(true);socket.close() }
+        try { output.write(bytes);output.flush();id }
+        catch(e:java.io.IOException){if(expired.get())throw ConnectionProblem(LinkFailure.WRITE_TIMEOUT);throw e}
+        finally { guard.cancel() }
     }}
     companion object {
         fun hello(socket:SSLSocket):Message {
@@ -53,6 +56,10 @@ data class LinkUi(val status:String="Disconnected — offline demo",val hosts:Li
 // Foreground-only lifetime, one read task and one heartbeat task. Latest face is a conflated single slot.
 class DeviceLink(context:Context) {
     private val app=context.applicationContext
+    private val safeLog=SafeDiagnostics()
+    val diagnostics get()=safeLog.events
+    fun diagnosticText()=safeLog.text()
+    @Volatile private var enrollmentAttempt:LinkAttempt?=null
     private val scope=CoroutineScope(SupervisorJob()+Dispatchers.IO)
     private val initGate=Mutex();private val sessionGate=Mutex();private var identity:AndroidIdentity?=null
     private val mutable=MutableStateFlow(LinkUi());val ui:StateFlow<LinkUi> = mutable
@@ -81,12 +88,18 @@ class DeviceLink(context:Context) {
     @Synchronized fun pause(){foreground=false;worker?.cancel();closeSocket();latest.value=null;mutable.update{snapshot->snapshot.copy(connected=false,status="Paused — connection closed")};discovery.stop()}
     @Synchronized private fun restart(){worker?.cancel();closeSocket();latest.value=null;mutable.update{it.copy(connected=false)};if(foreground && desired)worker=scope.launch{sessionGate.withLock{loop()}}}
     fun pair(text:String) {
-        try {invitation=Bootstrap.parse(text,System.currentTimeMillis()/1000);desired=true;restart()}
-        catch(_:Exception){status("Invalid or expired invitation. Copy the complete fresh Windows URI.")}
+        val attempt=safeLog.begin()
+        try {
+            invitation=Bootstrap.parse(text,System.currentTimeMillis()/1000);enrollmentAttempt=attempt
+            attempt.phase(LinkStage.INVITATION_VALIDATED);desired=true;restart()
+        } catch(_:Exception){
+            attempt.phase(LinkStage.INVITATION_INVALID);attempt.failed(ConnectionProblem(LinkFailure.INVITATION_INVALID))
+            status("${attempt.id}: INVITATION_INVALID. Copy the complete fresh Windows URI; check both device clocks.")
+        }
     }
     fun connect(selected:DiscoveredHost?=null) {
         if(selected!=null && currentHost!=null)currentHost=currentHost!!.copy(address=selected.address,port=selected.port)
-        invitation=null;desired=true;restart()
+        invitation=null;enrollmentAttempt=null;desired=true;restart()
     }
     @Synchronized fun disconnect(){desired=false;invitation=null;worker?.cancel();closeSocket();latest.value=null;mutable.update{snapshot->snapshot.copy(connected=false,status="Disconnected — offline demo")}}
     fun forget(){disconnect();scope.launch(NonCancellable){
@@ -95,56 +108,83 @@ class DeviceLink(context:Context) {
     }}
     fun close(){pause();scope.cancel()}
     private suspend fun loop() {
+        val retry=RetrySchedule()
         try {
-            val keys=keys();val retry=RetrySchedule()
             while(currentCoroutineContext().isActive && foreground && desired) {
                 val enroll=invitation
-                var host=enroll?.host?:currentHost
-                if(host==null){status("No trusted host. Scan/paste a Windows invitation, then Pair.");return}
-                // DNS-SD is only an address hint; full stored pin + host UUID still authenticate the endpoint.
-                if(enroll==null)mutable.value.hosts.firstOrNull{it.name.startsWith("Bluey-"+host!!.hostId.take(8))}?.let{host=host!!.copy(address=it.address,port=it.port)}
+                val attempt=if(enroll!=null)enrollmentAttempt?:safeLog.begin() else safeLog.begin()
                 try {
-                    status(if(enroll!=null)"Authenticating invitation…" else "Reconnecting to pinned Windows identity…")
-                    session(keys,host!!,enroll)
+                    progress(attempt,LinkStage.IDENTITY_LOADING,"Loading protected client identity")
+                    val keys=keys();attempt.phase(LinkStage.IDENTITY_READY);currentCoroutineContext().ensureActive()
+                    var host=enroll?.host?:currentHost
+                    if(host==null){status("No trusted host. Scan/paste a Windows invitation, then Pair.");return}
+                    if(enroll==null)mutable.value.hosts.firstOrNull{it.name.startsWith("Bluey-"+host!!.hostId.take(8))}
+                        ?.let{host=host!!.copy(address=it.address,port=it.port)}
+                    session(keys,host!!,enroll,attempt)
                     throw EOFException()
-                } catch(e:CancellationException){throw e}
+                } catch(e:CancellationException){attempt.cancelled();throw e}
                 catch(e:Exception) {
-                    latest.value=null;mutable.update{snapshot->snapshot.copy(connected=false)}
-                    if(enroll!=null){invitation=null;desired=false;status("Pairing failed or rejected. Nothing newly trusted here. Start a fresh invitation; check Windows trusted devices if approval completed.");return}
-                    if(e is javax.net.ssl.SSLException || e is ProtocolException || e is java.security.GeneralSecurityException) {
-                        desired=false;status("Authentication/protocol failed. No insecure fallback. Check host identity/revocation and pair again explicitly.");return
+                    latest.value=null;mutable.update{it.copy(connected=false)}
+                    val code=attempt.failed(e)
+                    val failure="${attempt.id}: ${attempt.current} / $code. "+failureHint(code)
+                    if(enroll!=null || attempt.current==LinkStage.IDENTITY_LOADING || e is javax.net.ssl.SSLException ||
+                        e is ProtocolException || e is java.security.GeneralSecurityException || e is ConnectionProblem) {
+                        if(enroll!=null){invitation=null;enrollmentAttempt=null}
+                        desired=false;status(failure);return
                     }
-                    status("Connection lost — offline demo; retrying securely")
-                    delay(retry.nextMs())
-                } finally {closeSocket()}
+                    status(failure+" Retrying securely; offline demo available.");delay(retry.nextMs())
+                } finally {closeSocket();attempt.event(LinkStage.SESSION_CLOSED)}
             }
-        } catch(e:CancellationException){throw e}
-        catch(_:Exception){status("Protected identity/storage unavailable. No connection opened.")}
-        finally{latest.value=null;mutable.update{snapshot->snapshot.copy(connected=false)}}
+        } finally{latest.value=null;mutable.update{it.copy(connected=false)}}
     }
-    private suspend fun session(keys:AndroidIdentity,host:TrustedHost,enroll:Bootstrap?)=coroutineScope {
-        if(enroll!=null && System.currentTimeMillis()/1000>=enroll.expires)throw ProtocolException("expired")
-        val tcp=Socket();installSocket(tcp);tcp.tcpNoDelay=true;tcp.connect(InetSocketAddress(host.address,host.port),5000)
-        val tls=keys.context(host.pin).socketFactory.createSocket(tcp,host.address,host.port,true) as SSLSocket
+    private fun progress(attempt:LinkAttempt,stage:LinkStage,message:String) {
+        attempt.phase(stage);status("${attempt.id}: $message")
+    }
+    private fun failureHint(code:LinkFailure)=when(code) {
+        LinkFailure.TCP_CONNECT_FAILED,LinkFailure.TCP_TIMEOUT->"TCP was not established; verify the endpoint and LAN reachability."
+        LinkFailure.SERVER_PIN_MISMATCH->"Server certificate pin mismatch; verify the intended Windows identity. No fallback."
+        LinkFailure.CLIENT_IDENTITY_UNAVAILABLE,LinkFailure.CLIENT_IDENTITY_NOT_SELECTED->"Client identity unavailable/not selected; inspect both safe logs."
+        LinkFailure.HELLO_REJECTED->"TLS completed locally but Windows hello was rejected/closed; inspect Windows client-certificate diagnostics."
+        LinkFailure.ENROLLMENT_REJECTED_OR_EXPIRED,LinkFailure.APPROVAL_TIMEOUT->"Check invitation expiry and Windows approval diagnostics."
+        else->"Inspect both safe logs. If approval already completed, check Windows trusted devices before re-enrolling."
+    }
+    private suspend fun session(keys:AndroidIdentity,host:TrustedHost,enroll:Bootstrap?,attempt:LinkAttempt)=coroutineScope {
+        if(enroll!=null && System.currentTimeMillis()/1000>=enroll.expires)throw ConnectionProblem(LinkFailure.ENROLLMENT_REJECTED_OR_EXPIRED)
+        progress(attempt,LinkStage.TCP_CONNECTING,"Connecting TCP to the invitation/saved endpoint")
+        val tcp=Socket();installSocket(tcp);tcp.tcpNoDelay=true
+        try {tcp.connect(InetSocketAddress(host.address,host.port),5000)}finally{attempt.port=tcp.localPort.coerceAtLeast(0)}
+        attempt.phase(LinkStage.TCP_CONNECTED)
+        val tls=keys.context(host.pin,attempt::event).socketFactory.createSocket(tcp,host.address,host.port,true) as SSLSocket
         installSocket(tls);tls.useClientMode=true;tls.enabledProtocols=tls.supportedProtocols.filter{it=="TLSv1.2"||it=="TLSv1.3"}.toTypedArray();tls.soTimeout=5000
         // Socket.close from lifecycle/disconnect also interrupts a blocked handshake/read/write.
-        val handshakeGuard=launch {delay(5000);tls.close()}
+        progress(attempt,LinkStage.TLS_STARTED,"Negotiating pinned mutual TLS")
+        val handshakeGuard=launch {delay(5000);attempt.handshakeTimedOut=true;tls.close()}
         try{tls.startHandshake()}finally{handshakeGuard.cancel()}
+        if(tls.session.localCertificates.isNullOrEmpty())throw ConnectionProblem(LinkFailure.CLIENT_IDENTITY_NOT_SELECTED)
+        attempt.phase(LinkStage.TLS_COMPLETED)
+        progress(attempt,LinkStage.HELLO_READING,"TLS completed locally; reading authenticated Windows hello")
         val hello=SocketWire.hello(tls)
         if(Wire.text(hello.payload,"hostId")!=host.hostId || Wire.text(hello.payload,"pin")!=host.pin)throw ProtocolException("host identity")
+        attempt.phase(LinkStage.HELLO_VALIDATED)
         val wire=SocketWire(tls,hello.session,hello)
         if(enroll!=null) {
+            progress(attempt,LinkStage.ENROLL_SENDING,"Sending enrollment over pinned mutual TLS")
             val request=wire.send("enroll",Wire.payload("deviceId" to keys.deviceId,"name" to (Build.MODEL.take(64).ifEmpty{"Android"}),"secret" to enroll.secret))
-            status("Server identity verified. Approve this phone in the Windows connection window.")
+            progress(attempt,LinkStage.AWAITING_WINDOWS_APPROVAL,"Server identity verified; awaiting Windows approval")
             val approve=wire.read(95000)
             if(approve.type!="approve"||Wire.text(approve.payload,"requestId")!=request||Wire.text(approve.payload,"clientPin")!=PeerIdentity.fingerprint(keys.certificate))throw ProtocolException("approval")
+            attempt.phase(LinkStage.WINDOWS_APPROVAL_VALIDATED)
+            attempt.phase(LinkStage.CONFIRM_SENDING)
             wire.send("confirm",Wire.payload("requestId" to request))
         } else wire.send("connect",Wire.payload("hostId" to host.hostId,"deviceId" to keys.deviceId))
+        progress(attempt,LinkStage.READY_READING,"Waiting for confirmed session")
         val ready=wire.read()
         if(ready.type!="ready"||Wire.text(ready.payload,"hostId")!=host.hostId||Wire.text(ready.payload,"deviceId")!=keys.deviceId)throw ProtocolException("ready")
         ensureActive();if(!foreground||!desired)throw CancellationException()
-        keys.save(host);currentHost=host;invitation=null
-        mutable.update{snapshot->snapshot.copy(connected=true,trusted=host,status="Authenticated TLS — Windows face connected")}
+        attempt.phase(LinkStage.TRUST_PERSISTING)
+        keys.save(host);currentHost=host;invitation=null;enrollmentAttempt=null
+        attempt.phase(LinkStage.SESSION_CONFIRMED)
+        mutable.update{snapshot->snapshot.copy(connected=true,trusted=host,status="${attempt.id}: Session confirmed — authenticated Windows face connected")}
         // Timeout closes the socket even if the platform's blocking write is backpressured.
         val heartbeat=launch(Dispatchers.IO) {
             while(isActive){delay(1000);val guard=launch{delay(2000);tls.close()};try{wire.send("ping",Wire.payload())}finally{guard.cancel()}}

@@ -18,14 +18,14 @@ public sealed class TlsTests
 {
     private sealed class Client(TcpClient socket,SslStream tls,WireConnection wire,Message hello) : IDisposable
     { public WireConnection Wire=>wire;public Message Hello=>hello;public void Dispose(){tls.Dispose();socket.Dispose();} }
-    private static async Task<Client> Connect(LinkServer server,X509Certificate2? cert,string? pin=null)
+    private static async Task<Client> Connect(LinkServer server,X509Certificate2? cert,string? pin=null,SslProtocols protocols=SslProtocols.Tls12|SslProtocols.Tls13)
     {
         var tcp=new TcpClient();await tcp.ConnectAsync(IPAddress.Loopback,server.Port);
         var ssl=new SslStream(tcp.GetStream(),false,(_,c,_,_)=>c is X509Certificate2 x && Identity.Fingerprint(x)==(pin??server.Pin));
         try
         {
             using var deadline=new CancellationTokenSource(5000);
-            await ssl.AuthenticateAsClientAsync(new SslClientAuthenticationOptions{TargetHost="Bluey",ClientCertificates=cert==null?[]:new X509CertificateCollection{cert},EnabledSslProtocols=SslProtocols.Tls12|SslProtocols.Tls13,CertificateRevocationCheckMode=X509RevocationMode.NoCheck},deadline.Token);
+            await ssl.AuthenticateAsClientAsync(new SslClientAuthenticationOptions{TargetHost="Bluey",ClientCertificates=cert==null?[]:new X509CertificateCollection{cert},EnabledSslProtocols=protocols,CertificateRevocationCheckMode=X509RevocationMode.NoCheck},deadline.Token);
             var bytes=new List<byte>();var one=new byte[1];
             while(true){var n=await ssl.ReadAsync(one,deadline.Token);if(n==0)throw new EndOfStreamException();if(one[0]==10)break;bytes.Add(one[0]);if(bytes.Count>4096)throw new IOException();}
             var hello=Wire.Decode(bytes.ToArray());Assert.Equal("hello",hello.Type);
@@ -46,6 +46,8 @@ public sealed class TlsTests
             var request=await c.Wire.Send("enroll",new{deviceId=id,name="Test phone",secret},default);
             for(var i=0;i<100 && server.Pending==null;i++)await Task.Delay(10);
             Assert.NotNull(server.Pending);Assert.Empty(store.Peers);Assert.Equal(0,server.Connections);
+            var trace=server.Diagnostics.Text();Assert.Contains("MutualTlsCompleted",trace);Assert.Contains("EnrollmentValidated",trace);Assert.Contains("ApprovalPending",trace);
+            Assert.DoesNotContain(secret,trace);Assert.DoesNotContain("Test phone",trace);
             server.Decide(Identity.Fingerprint(cert),true,Guid.NewGuid().ToString());
             Assert.False(server.Pending!.Decision.Task.IsCompleted); // A different reviewed request cannot approve this one.
             server.Decide(Identity.Fingerprint(cert),true,server.Pending.RequestId);
@@ -157,5 +159,24 @@ public sealed class TlsTests
         var device=Guid.NewGuid().ToString();store.Add(new(device,"phone",Identity.Fingerprint(cert)));
         using var c=await Connect(s,cert);await c.Wire.Send("connect",new{hostId=s.HostId,deviceId=Guid.NewGuid().ToString()},default);
         await Denied(async()=>{await c.Wire.Read(default);});Assert.Equal(device,store.Peers.Single().DeviceId);Assert.Equal(0,s.Connections);
+    }
+    [Theory]
+    [InlineData(SslProtocols.Tls12)]
+    [InlineData(SslProtocols.Tls13)]
+    public async Task AndroidShapedP256CertificateWithoutEkuCanReachApproval(SslProtocols protocol)
+    {
+        using var key=System.Security.Cryptography.ECDsa.Create(System.Security.Cryptography.ECCurve.NamedCurves.nistP256);
+        var request=new CertificateRequest("CN=Android shaped test",key,System.Security.Cryptography.HashAlgorithmName.SHA256);
+        // Android KeyGenParameterSpec creates a self-signed leaf without explicit KU/EKU by default.
+        using var leaf=request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1),DateTimeOffset.UtcNow.AddDays(1));
+        using var cert=X509CertificateLoader.LoadPkcs12(leaf.Export(X509ContentType.Pkcs12),null);
+        Assert.Empty(cert.Extensions.OfType<X509EnhancedKeyUsageExtension>());
+        using var store=new MemoryStore();await using var server=new LinkServer(store);server.Start(IPAddress.Loopback);var secret=server.StartPairing();
+        using var client=await Connect(server,cert,protocols:protocol);
+        await client.Wire.Send("enroll",new{deviceId=Guid.NewGuid().ToString(),name="Android shaped",secret},default);
+        for(var i=0;i<100 && server.Pending==null;i++)await Task.Delay(10);
+        Assert.NotNull(server.Pending);Assert.Empty(store.Peers);
+        Assert.Contains(server.Diagnostics.Snapshot(),e=>e.Stage==ConnectionStage.MutualTlsCompleted && e.Protocol==protocol);
+        server.StopPairing();await Denied(async()=>{await client.Wire.Read(default);});
     }
 }

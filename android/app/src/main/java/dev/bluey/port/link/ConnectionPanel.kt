@@ -1,6 +1,10 @@
 package dev.bluey.port.link
 
 import android.Manifest
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,6 +19,9 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ConnectionPanel(link:DeviceLink,incoming:String?,close:()->Unit) {
     val state by link.ui.collectAsState()
+    val log by link.diagnostics.collectAsState()
+    val context=LocalContext.current
+    var showLog by remember {mutableStateOf(false)}
     var invitation by remember(incoming){mutableStateOf(incoming?:"")}
     val displayedInvitation=invitation
     val parsed=remember(displayedInvitation){runCatching{Bootstrap.parse(displayedInvitation,System.currentTimeMillis()/1000)}.getOrNull()}
@@ -22,6 +29,14 @@ fun ConnectionPanel(link:DeviceLink,incoming:String?,close:()->Unit) {
     AlertDialog(onDismissRequest=close,title={Text("Secure Windows connection")},
         text={Column(Modifier.verticalScroll(rememberScrollState())) {
             Text(state.status)
+            TextButton(onClick={showLog=!showLog}){Text(if(showLog)"Hide safe diagnostics" else "Show safe diagnostics")}
+            TextButton(onClick={
+                context.getSystemService(ClipboardManager::class.java).setPrimaryClip(ClipData.newPlainText("Bluey safe diagnostics",link.diagnosticText()))
+            }){Text("Copy safe diagnostics")}
+            if(showLog) {
+                Text("Bounded local debug log; UTC/attempt IDs/client source ports only. Review before sharing. Do not include the QR/URI.")
+                Text(remember(log){link.diagnosticText()},style=MaterialTheme.typography.bodySmall)
+            }
             state.clientPin?.let{Text("This phone certificate SHA-256 (compare on Windows): $it")}
             state.trusted?.let{Text("Saved host: ${it.hostId}\nSHA-256: ${it.pin}")}
             Text("Secure hosts discovered (names are untrusted hints):")

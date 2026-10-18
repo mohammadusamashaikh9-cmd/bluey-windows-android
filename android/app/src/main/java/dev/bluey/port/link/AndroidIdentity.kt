@@ -9,6 +9,7 @@ import java.io.File
 import java.net.Socket
 import java.security.*
 import java.security.cert.X509Certificate
+import java.security.cert.CertificateException
 import java.security.spec.ECGenParameterSpec
 import java.util.Date
 import java.util.UUID
@@ -68,20 +69,15 @@ class AndroidIdentity(context:Context) {
         try {stream.write(bytes);file.finishWrite(stream)}catch(e:Exception){file.failWrite(stream);throw e}
     }
     fun forget(){file.delete()}
-    fun context(pin:String):SSLContext {
-        val manager=object:X509ExtendedKeyManager() {
-            override fun getClientAliases(keyType:String?,issuers:Array<out java.security.Principal>?)=if(keyType?.startsWith("EC")==true)arrayOf(identity)else null
-            override fun chooseClientAlias(keyType:Array<out String>?,issuers:Array<out java.security.Principal>?,socket:Socket?)=if(keyType?.any{it.startsWith("EC")}==true)identity else null
-            override fun chooseEngineClientAlias(keyType:Array<out String>?,issuers:Array<out java.security.Principal>?,engine:SSLEngine?)=chooseClientAlias(keyType,issuers,null)
-            override fun getServerAliases(keyType:String?,issuers:Array<out java.security.Principal>?)=null
-            override fun chooseServerAlias(keyType:String?,issuers:Array<out java.security.Principal>?,socket:Socket?)=null
-            override fun getCertificateChain(alias:String?)=if(alias==identity)arrayOf(certificate)else null
-            override fun getPrivateKey(alias:String?)=if(alias==identity)keys.getKey(identity,null) as PrivateKey else null
-        }
+    fun context(pin:String,event:(LinkStage)->Unit):SSLContext {
+        val manager=ClientIdentityKeyManager(identity,certificate,{keys.getKey(identity,null) as? PrivateKey},event)
         val trust=object:X509TrustManager {
             override fun getAcceptedIssuers()=emptyArray<X509Certificate>()
             override fun checkClientTrusted(chain:Array<out X509Certificate>?,authType:String?) {throw java.security.cert.CertificateException("client role")}
-            override fun checkServerTrusted(chain:Array<out X509Certificate>?,authType:String?) { PeerIdentity.verify(chain,pin) }
+            override fun checkServerTrusted(chain:Array<out X509Certificate>?,authType:String?) {
+                try {PeerIdentity.verify(chain,pin);event(LinkStage.SERVER_PIN_VERIFIED)}
+                catch(e:CertificateException){event(LinkStage.SERVER_CERTIFICATE_REJECTED);throw e}
+            }
         }
         return SSLContext.getInstance("TLS").apply{init(arrayOf(manager),arrayOf(trust),SecureRandom())}
     }
@@ -89,8 +85,10 @@ class AndroidIdentity(context:Context) {
 object PeerIdentity {
     fun fingerprint(c:X509Certificate)=MessageDigest.getInstance("SHA-256").digest(c.encoded).joinToString(""){"%02x".format(it)}
     fun verify(chain:Array<out X509Certificate>?,pin:String) {
-        if(chain==null||chain.isEmpty()||chain.size>4||!Wire.pin(pin))throw java.security.cert.CertificateException("identity")
-        val c=chain[0];c.checkValidity()
-        if((c.publicKey as? java.security.interfaces.ECPublicKey)?.params?.curve?.field?.fieldSize!=256||!MessageDigest.isEqual(fingerprint(c).toByteArray(Charsets.US_ASCII),pin.toByteArray(Charsets.US_ASCII)))throw java.security.cert.CertificateException("identity mismatch")
+        if(chain==null||chain.isEmpty()||chain.size>4||!Wire.pin(pin))throw PeerCertificateFailure(LinkFailure.SERVER_CERTIFICATE_INVALID)
+        val c=chain[0]
+        try {c.checkValidity()}catch(_:CertificateException){throw PeerCertificateFailure(LinkFailure.SERVER_CERTIFICATE_INVALID)}
+        if((c.publicKey as? java.security.interfaces.ECPublicKey)?.params?.curve?.field?.fieldSize!=256)throw PeerCertificateFailure(LinkFailure.SERVER_CERTIFICATE_INVALID)
+        if(!MessageDigest.isEqual(fingerprint(c).toByteArray(Charsets.US_ASCII),pin.toByteArray(Charsets.US_ASCII)))throw PeerCertificateFailure(LinkFailure.SERVER_PIN_MISMATCH)
     }
 }

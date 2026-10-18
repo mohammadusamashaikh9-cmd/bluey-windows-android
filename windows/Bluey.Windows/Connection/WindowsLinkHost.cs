@@ -6,6 +6,7 @@ namespace Bluey.Windows.Connection;
 internal sealed class WindowsLinkHost
 {
     private ProtectedTrust? store; private LinkServer? server; private Advertisement? advertisement; private IPAddress? address;
+    internal ConnectionDiagnostics Diagnostics {get;}=new();
     internal LinkServer? Server => Volatile.Read(ref server);
     internal string Status => Server is {} s ? $"TLS host {address}:{s.Port} · {s.Connections} authenticated connection(s)\n{advertisement?.Status}\nHost identity: {s.HostId}\nServer SHA-256: {s.Pin}" : "Secure host stopped";
     internal static bool Private(IPAddress ip) { var b=ip.GetAddressBytes(); return b.Length==4 && (b[0]==10 || b[0]==172 && b[1]>=16 && b[1]<=31 || b[0]==192 && b[1]==168); }
@@ -15,7 +16,7 @@ internal sealed class WindowsLinkHost
     {
         if(Server!=null) return;
         if(!IPAddress.TryParse(selected,out var ip)||!Private(ip)||!Addresses().Contains(selected)) throw new InvalidOperationException("Select this laptop's private IPv4 Wi-Fi/LAN address.");
-        store ??= new ProtectedTrust(); var next=new LinkServer(store); next.Start(ip); address=ip;
+        store ??= new ProtectedTrust(); var next=new LinkServer(store,Diagnostics); next.Start(ip); address=ip;
         Volatile.Write(ref server,next); advertisement=new(ip,next.Port,next.HostId);
     }
     internal string StartPairing()

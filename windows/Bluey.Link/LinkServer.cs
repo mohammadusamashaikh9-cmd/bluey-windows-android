@@ -20,13 +20,14 @@ public sealed class LinkServer : IAsyncDisposable
     private TcpListener? listener; private Task? accepting; private int taskId;
     private LinkFace? latest; private Enrollment? pending;
     public Invitation Invitation { get; }
+    public ConnectionDiagnostics Diagnostics { get; }
     public Enrollment? Pending => Volatile.Read(ref pending);
     public string HostId => store.HostId;
     public string Pin => Identity.Fingerprint(store.Certificate);
     public IReadOnlyList<Peer> Peers => store.Peers;
     public int Connections => sessions.Count;
     public int Port => ((IPEndPoint)listener!.LocalEndpoint).Port;
-    public LinkServer(ITrustStore store) { this.store = store; Invitation = new(() => clock.ElapsedMilliseconds); }
+    public LinkServer(ITrustStore store, ConnectionDiagnostics? diagnostics=null) { this.store = store; Diagnostics=diagnostics??new(); Invitation = new(() => clock.ElapsedMilliseconds); }
     public void Start(IPAddress address)
     {
         if (listener != null) throw new InvalidOperationException("already started");
@@ -52,29 +53,40 @@ public sealed class LinkServer : IAsyncDisposable
             while (!lifetime.IsCancellationRequested)
             {
                 var client = await listener!.AcceptTcpClientAsync(lifetime.Token);
-                if (!slots.Wait(0)) { client.Dispose(); continue; }
+                var attempt=Diagnostics.Begin();
+                var port=(client.Client.RemoteEndPoint as IPEndPoint)?.Port??0;
+                Diagnostics.Record(attempt,ConnectionStage.TcpAccepted,port);
+                if (!slots.Wait(0)) { Diagnostics.Record(attempt,ConnectionStage.TcpRejectedBusy,port);client.Dispose(); continue; }
                 var id = Interlocked.Increment(ref taskId);
-                var task = Handle(client); tasks[id] = task;
+                var task = Handle(client,attempt,port); tasks[id] = task;
                 _ = task.ContinueWith(_ => { tasks.TryRemove(id, out var unused); }, TaskScheduler.Default);
             }
         }
         catch (Exception e) when (e is OperationCanceledException or SocketException or ObjectDisposedException) { }
     }
-    private async Task Handle(TcpClient client)
+    private async Task Handle(TcpClient client,string attempt,int port)
     {
         string? pin = null; WireConnection? wire = null; Enrollment? request = null;
+        var stage=ConnectionStage.TlsStarted;var failure=ConnectionFailure.None;
+        void Stage(ConnectionStage value) {stage=value;Diagnostics.Record(attempt,value,port);}
         using var stop = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token);
         try
         {
             using (client)
             using (var tls = new SslStream(client.GetStream(), false, (_, certificate, _, _) =>
             {
-                if (certificate is not X509Certificate2 c || !Identity.Valid(c)) return false;
+                if(certificate==null) {failure=ConnectionFailure.ClientCertificateAbsent;Stage(ConnectionStage.ClientCertificateAbsent);return false;}
+                Stage(ConnectionStage.ClientCertificatePresent);
+                if (certificate is not X509Certificate2 c || !Identity.Valid(c)) {
+                    failure=ConnectionFailure.ClientCertificateInvalid;Stage(ConnectionStage.ClientCertificateRejected);return false;
+                }
                 pin = Identity.Fingerprint(c);
-                return store.Peers.Any(p => p.Pin == pin) || Invitation.Active;
+                if(store.Peers.Any(p=>p.Pin==pin)){Stage(ConnectionStage.ClientCertificateTrusted);return true;}
+                if(Invitation.Active){Stage(ConnectionStage.ClientCertificateEnrollmentCandidate);return true;}
+                failure=ConnectionFailure.EnrollmentRejectedOrExpired;Stage(ConnectionStage.ClientCertificateRejected);return false;
             }))
             {
-                client.NoDelay = true;
+                client.NoDelay = true;Stage(ConnectionStage.TlsStarted);
                 using (var deadline = CancellationTokenSource.CreateLinkedTokenSource(stop.Token))
                 {
                     deadline.CancelAfter(5000);
@@ -83,16 +95,26 @@ public sealed class LinkServer : IAsyncDisposable
                         EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
                         CertificateRevocationCheckMode = X509RevocationMode.NoCheck }, deadline.Token);
                 }
-                if (pin == null || tls.RemoteCertificate == null || !tls.IsMutuallyAuthenticated) throw new AuthenticationException();
+                if(pin==null || tls.RemoteCertificate==null) {
+                    failure=ConnectionFailure.ClientCertificateAbsent;Stage(ConnectionStage.ClientCertificateAbsent);throw new AuthenticationException();
+                }
+                if(!tls.IsMutuallyAuthenticated){failure=ConnectionFailure.MutualAuthenticationFailed;throw new AuthenticationException();}
+                failure=ConnectionFailure.None;stage=ConnectionStage.MutualTlsCompleted;
+                Diagnostics.Record(attempt,stage,port,protocol:tls.SslProtocol);
                 var session = Guid.NewGuid().ToString(); wire = new(tls, session);
-                await wire.Send("hello", new { hostId = HostId, pin = Pin }, stop.Token);
+                await wire.Send("hello", new { hostId = HostId, pin = Pin }, stop.Token);Stage(ConnectionStage.HelloSent);
                 var first = await wire.Read(stop.Token); var peer = store.Peers.SingleOrDefault(p => p.Pin == pin);
                 if (first.Type == "enroll")
                 {
+                    Stage(ConnectionStage.EnrollmentReceived);
                     var generation = Invitation.Generation;
-                    if (store.Peers.Count >= 8 || !Invitation.Check(Wire.Text(first.Payload, "secret"))) throw new AuthenticationException();
+                    if (store.Peers.Count >= 8 || !Invitation.Check(Wire.Text(first.Payload, "secret"))) {
+                        failure=ConnectionFailure.EnrollmentRejectedOrExpired;throw new AuthenticationException();
+                    }
+                    Stage(ConnectionStage.EnrollmentValidated);
                     request = new(Wire.Text(first.Payload,"deviceId"), Wire.Text(first.Payload,"name"), pin, first.Id, new(TaskCreationOptions.RunContinuationsAsynchronously), stop);
-                    if (Interlocked.CompareExchange(ref pending, request, null) != null) throw new AuthenticationException();
+                    if (Interlocked.CompareExchange(ref pending, request, null) != null) {failure=ConnectionFailure.EnrollmentRejectedOrExpired;throw new AuthenticationException();}
+                    Stage(ConnectionStage.ApprovalPending);
                     // Keep one TLS read outstanding during approval: disconnect/background releases
                     // the pending slot immediately. The same read receives confirm after approval.
                     using(var approvalStop=CancellationTokenSource.CreateLinkedTokenSource(stop.Token)) {
@@ -100,7 +122,8 @@ public sealed class LinkServer : IAsyncDisposable
                         try {
                             var decision=request.Decision.Task.WaitAsync(TimeSpan.FromSeconds(90),stop.Token);
                             if(await Task.WhenAny(decision,confirmation)==confirmation) { await confirmation; throw new AuthenticationException(); }
-                            if(!await decision) throw new AuthenticationException();
+                            if(!await decision) {failure=ConnectionFailure.ApprovalRejected;Stage(ConnectionStage.HostRejected);throw new AuthenticationException();}
+                            Stage(ConnectionStage.HostApproved);
                             await wire.Send("approve",new {requestId=first.Id,clientPin=pin},stop.Token);
                             approvalStop.CancelAfter(5000);
                             var confirm=await confirmation;
@@ -111,6 +134,7 @@ public sealed class LinkServer : IAsyncDisposable
                         }
                     }
                     peer = new(request.DeviceId, request.Name, pin);
+                    Stage(ConnectionStage.TrustPersisting);
                     lock(trustGate) { stop.Token.ThrowIfCancellationRequested(); if(store.Peers.Any(p=>p.DeviceId==peer.DeviceId && p.Pin!=peer.Pin))throw new AuthenticationException(); store.Add(peer); }
                     Interlocked.CompareExchange(ref pending, null, request); request = null;
                 }
@@ -118,7 +142,7 @@ public sealed class LinkServer : IAsyncDisposable
                     throw new AuthenticationException();
                 if (peer == null) throw new AuthenticationException();
                 if (sessions.TryGetValue(pin, out var old)) old.Cancel(); sessions[pin] = stop;
-                await wire.Send("ready", new { hostId = HostId, deviceId = peer.DeviceId }, stop.Token);
+                await wire.Send("ready", new { hostId = HostId, deviceId = peer.DeviceId }, stop.Token);Stage(ConnectionStage.SessionReady);
                 var writer = SendFaces(wire, pin, stop.Token);
                 var reader = ReadHeartbeats(wire, pin, stop.Token);
                 await Task.WhenAny(writer, reader); stop.Cancel();
@@ -126,10 +150,22 @@ public sealed class LinkServer : IAsyncDisposable
             }
         }
         catch (Exception e) when (e is IOException or AuthenticationException or OperationCanceledException or TimeoutException or SocketException or InvalidOperationException or System.Security.Cryptography.CryptographicException)
-        { /* Fail closed. Never log packet, invitation or private-key material. */ }
+        {
+            if(failure==ConnectionFailure.None)failure=e switch {
+                ProtocolException=>ConnectionFailure.ProtocolRejected,
+                OperationCanceledException=>stop.IsCancellationRequested?ConnectionFailure.Cancelled:ConnectionFailure.TimedOut,
+                TimeoutException=>ConnectionFailure.TimedOut,
+                AuthenticationException=>stage<=ConnectionStage.MutualTlsCompleted?ConnectionFailure.TlsHandshakeFailed:ConnectionFailure.ProtocolRejected,
+                SocketException=>ConnectionFailure.SocketFailure,
+                IOException=>stage==ConnectionStage.TrustPersisting?ConnectionFailure.StorageFailure:ConnectionFailure.PeerClosed,
+                System.Security.Cryptography.CryptographicException=>ConnectionFailure.StorageFailure,
+                _=>ConnectionFailure.Unexpected
+            };
+            Diagnostics.Record(attempt,stage,port,failure,ConnectionDiagnostics.NativeError(e));
+        }
         finally
         {
-            stop.Cancel(); client.Dispose();
+            stop.Cancel(); client.Dispose();Diagnostics.Record(attempt,ConnectionStage.SessionClosed,port,failure);
             if (request != null) Interlocked.CompareExchange(ref pending, null, request);
             if (pin != null) ((ICollection<KeyValuePair<string,CancellationTokenSource>>)sessions).Remove(new(pin, stop));
             slots.Release();
