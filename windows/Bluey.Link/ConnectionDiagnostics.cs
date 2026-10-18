@@ -52,7 +52,7 @@ public sealed class ConnectionDiagnostics
         0x8009030f => TlsFailureDetail.InvalidSignature,
         0x8009030e => TlsFailureDetail.CredentialsUnavailable,
         0x80090325 => TlsFailureDetail.UntrustedRoot,
-        0 => error is AuthenticationException?TlsFailureDetail.AuthenticationFailed:TlsFailureDetail.PeerClosed,
+        0 => error switch { AuthenticationException=>TlsFailureDetail.AuthenticationFailed, IOException=>TlsFailureDetail.PeerClosed, _=>TlsFailureDetail.None },
         _ => TlsFailureDetail.OtherNativeError
     };
     internal static int NativeError(Exception error)

@@ -60,4 +60,9 @@ public sealed class DiagnosticTests
         Assert.Empty(store.Peers);Assert.Null(server.Pending);
     }
 
+    [Fact] public void CancellationDoesNotInventAPeerAlertOrNativeTlsError()
+    {
+        Assert.Equal(TlsFailureDetail.None,ConnectionDiagnostics.TlsDetailFor(new OperationCanceledException()));
+    }
+
 }
