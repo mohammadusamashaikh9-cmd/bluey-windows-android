@@ -163,3 +163,50 @@ laptop SDK, IDE, WSL, Docker or extra desktop runtime is required. The Android A
 is a debug development build. Verify supplied SHA256SUMS before use. Physical
 pairing, Wi-Fi loss/reconnect, OS-protected key behavior, latency and existing
 performance measurements remain pending until recorded on the actual devices.
+
+## F3-R1: one safe physical pairing retest
+
+The initial phone attempt failed before Windows showed approval. TCP reachability
+and the failing TLS/enrollment stage were not captured, so the physical root cause
+is **not established**. These builds add bounded in-app stage diagnostics on both
+platforms, without changing D009, TLS versions, certificates or enrollment rules.
+The phone and server certificate fingerprints are supposed to differ.
+
+1. Verify both new artifact checksum files. Stop the old Windows process and
+   replace its development folder at the **same executable path already allowed
+   by your existing Private-profile application rule**. Keep LocalAppData/Bluey/Link
+   intact; do not delete the Windows identity. If you deliberately choose a new
+   folder, manually check that the existing application rule names that new EXE.
+   Bluey does not create or change firewall policy.
+2. Check Android APK signing continuity before updating (the artifact includes
+   `SIGNING-CERT.txt`). Independent CI runners may use different debug signers.
+   If Android rejects the update because its signer differs, uninstall the old
+   Bluey app and install the new APK using the phone's package installer. This
+   deletes its old app data/Keystore identity. Revoke any old phone entry in the
+   Windows trusted-device list, if one exists, and enroll anew; never bypass the
+   signature check or restore/export private keys. No local Android SDK is needed.
+3. Keep both apps foreground on the same private Wi-Fi. Start Windows secure host
+   on its current Wi-Fi IPv4, then Start pairing. Scan/paste that fresh invitation;
+   compare the **server** fingerprint with Android's invitation display and tap
+   Pair once. Compare the **phone** fingerprint across the two approval displays
+   only if Windows reaches ApprovalPending, then explicitly approve on Windows.
+4. After either success or failure, immediately choose **Copy safe diagnostics**
+   in each app's Connection window/panel. Share only these two text logs, plus
+   Windows/Android OS and phone model, approximate attempt time, and artifact
+   digests. Logs keep only the latest 96 events, in memory. They contain UTC,
+   local attempt IDs, client TCP source port, fixed stages/categories and (on
+   Windows) numeric native TLS error/negotiated protocol. Review/redact them before
+   sharing. **Do not share the QR, full URI, clipboard invitation, a full settings
+   screenshot, private keys, credentials or unrelated Logcat/event logs.**
+5. Match Android `TCP_CONNECTED port=N` to Windows `TcpAccepted port=N` near the
+   same UTC time (NAT can translate ports). IDs starting A/W are local IDs, not a
+   shared credential. No Windows TcpAccepted means this listener did not observe
+   the attempt in the retained log; it does not prove which router/firewall/path
+   blocked it. `TLS_COMPLETED` on Android means local handshake completion; TLS
+   1.3 may still be rejected by Windows before hello. Windows MutualTlsCompleted,
+   EnrollmentValidated and ApprovalPending locate progression precisely.
+
+If Session confirmed/SessionReady appears on both, test mouse gaze, mood and Talk
+output. Otherwise stop at the recorded failure and supply those safe logs. Actual
+phone Keystore/SChannel interoperability, LAN reachability and the physical root
+cause remain unverified until this retest; software-key/loopback CI is separate.

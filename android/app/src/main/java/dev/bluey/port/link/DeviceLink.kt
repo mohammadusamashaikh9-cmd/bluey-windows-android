@@ -51,7 +51,7 @@ class SocketWire(private val socket:SSLSocket,val session:String,hello:Message) 
         }
     }
 }
-data class LinkUi(val status:String="Disconnected — offline demo",val hosts:List<DiscoveredHost> = emptyList(),val trusted:TrustedHost?=null,val connected:Boolean=false,val clientPin:String?=null)
+data class LinkUi(val status:String="Disconnected — offline demo",val hosts:List<DiscoveredHost> = emptyList(),val trusted:TrustedHost?=null,val connected:Boolean=false,val clientPin:String?=null,val discoveryStatus:String="Discovery idle")
 
 // Foreground-only lifetime, one read task and one heartbeat task. Latest face is a conflated single slot.
 class DeviceLink(context:Context) {
@@ -79,7 +79,7 @@ class DeviceLink(context:Context) {
         if(!foreground||!desired){scope.launch(NonCancellable){runCatching{next.close()}};throw CancellationException()}
         socket=next
     }
-    private val discovery=Discovery(app,{hosts->mutable.update{snapshot->snapshot.copy(hosts=hosts)}},{message->mutable.update{if(it.connected)it else it.copy(status=message)}})
+    private val discovery=Discovery(app,{hosts->mutable.update{snapshot->snapshot.copy(hosts=hosts)}},{message->mutable.update{it.copy(discoveryStatus=message)}})
     private fun status(message:String){mutable.update{snapshot->snapshot.copy(status=message,trusted=currentHost)}}
     private suspend fun keys():AndroidIdentity=initGate.withLock {
         identity?:AndroidIdentity(app).also{identity=it;currentHost=it.load();mutable.update{snapshot->snapshot.copy(trusted=currentHost,clientPin=PeerIdentity.fingerprint(it.certificate))}}

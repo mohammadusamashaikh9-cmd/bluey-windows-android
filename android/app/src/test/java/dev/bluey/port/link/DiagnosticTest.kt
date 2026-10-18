@@ -15,9 +15,7 @@ class DiagnosticTest {
         try {
             val uri="bluey-secure://pair?secret=DO_NOT_LOG_THE_INVITATION"
             link.pair(uri)
-            val method=DeviceLink::class.java.methods.firstOrNull{it.name=="diagnosticText"}
-            assertNotNull("Pairing diagnostics must expose the failing stage",method)
-            val text=method!!.invoke(link) as String
+            val text=link.diagnosticText()
             assertTrue(text.contains("INVITATION_INVALID"))
             assertFalse(text.contains(uri));assertFalse(text.contains("DO_NOT_LOG_THE_INVITATION"))
         } finally {link.close()}

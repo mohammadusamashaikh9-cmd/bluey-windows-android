@@ -140,3 +140,18 @@ the permission flow. F3 declares/request Nearby only when needed on API 33+;
 no location, microphone, storage or camera permission. Physical permission/NSD,
 Keystore/mTLS interoperability, firewall, pairing, latency and Wi-Fi loss still
 require the produced artifacts on real devices. No F4/F5 endpoint exists.
+
+### D009 F3-R1 implementation note / 2026-10-19 (Asia/Karachi)
+
+The first reported physical pairing failure has no confirmed network/TLS root
+cause. Preserve D009 without algorithm/certificate/bootstrap changes. Add only
+bounded developer-facing fixed-stage diagnostics and testable extraction of the
+existing EC client-alias policy. No trust-all callback, TLS downgrade, insecure
+enrollment, automatic certificate replacement or firewall changes are justified.
+Both apps retain at most 96 in-memory events; safe-copy includes local attempt ID,
+UTC and client source port for correlation, never payload/URI/secret, exception
+message, certificate subject or key material. Signing certificates of independently
+built debug APKs are public metadata and may differ; verify/report their SHA-256,
+and explicitly uninstall/re-enroll when necessary instead of persisting/exporting
+CI signing keys. Hardware Keystore/SChannel and physical connectivity still need
+one paired-device retest with the produced artifacts.

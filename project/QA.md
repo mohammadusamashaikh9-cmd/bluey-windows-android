@@ -171,3 +171,35 @@ latency distribution and frame/CPU/memory impact without inferring these from CI
 Do not record invitation secrets or private keys in submitted evidence. Existing
 F1/F2 measured-performance acceptance remains separate. F2 functional acceptance
 is user-reported; no new physical observations are claimed by the agent.
+
+### F3-R1 diagnostic evidence and retest
+
+On 2026-10-19 (Asia/Karachi), the developer reported: Windows host launches/listens
+on private IPv4; Wi-Fi is Private; an application-scoped inbound Private TCP allow
+rule exists; Android displays a fresh invitation and Pair is explicitly tapped;
+Android reports generic failure and Windows never shows pending approval. TCP
+reachability was not definitively observed. These are user-reported observations,
+not agent-performed device tests. Different server/client certificate pins are
+expected and are not a defect.
+
+The confirmed implementation defect was loss of failure-stage evidence: Android
+collapsed all pre-approval exceptions into one message and Windows swallowed
+failures without an accessible stage log. The physical network/TLS root cause
+remains unknown. F3-R1 adds fixed-vocabulary bounded in-memory logs, local attempt
+IDs and client source ports. It instruments pin verification, client alias/chain/
+key selection, local handshake, hello/enrollment, approval and session closure.
+No packet, exception message, certificate subject, secret or full URI is logged.
+
+[Windows instructions](../windows/README.md#f3-r1-one-safe-physical-pairing-retest)
+provide the exact single-attempt paired-device retest and safe diagnostic-copy
+procedure, including executable-path firewall continuity and Android debug-signer
+reinstall/re-enrollment. Do not replace this with PowerShell connection-state
+polling or screenshots of the invitation.
+
+Regression coverage uses actual .NET TLS 1.2/1.3 with Android-shaped P-256 leaves
+without KU/EKU, plus actual JDK JSSE handshakes through the production Android
+client key manager with ephemeral **software** keys. Missing identity/pin failures,
+alias selection, opaque-key nonexport, stage categorization, privacy and 96-event
+bounds are checked. These tests cannot demonstrate a real Android hardware key or
+Windows-to-phone interoperability. Existing motion/render/protocol/revocation and
+no-downgrade tests remain required. Actual final run/artifact results are in tracking.

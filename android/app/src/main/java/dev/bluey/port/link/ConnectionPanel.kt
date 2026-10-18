@@ -39,6 +39,7 @@ fun ConnectionPanel(link:DeviceLink,incoming:String?,close:()->Unit) {
             }
             state.clientPin?.let{Text("This phone certificate SHA-256 (compare on Windows): $it")}
             state.trusted?.let{Text("Saved host: ${it.hostId}\nSHA-256: ${it.pin}")}
+            Text(state.discoveryStatus)
             Text("Secure hosts discovered (names are untrusted hints):")
             state.hosts.forEach{host->TextButton(onClick={link.connect(host)}){Text("${host.name} · ${host.address}:${host.port}\nConnect using saved identity")}}
             if(state.hosts.isEmpty())Text("No host discovered. Start Windows secure host; QR/URI works without discovery.")

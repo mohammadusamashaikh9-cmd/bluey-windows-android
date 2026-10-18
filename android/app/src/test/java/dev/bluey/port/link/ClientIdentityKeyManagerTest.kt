@@ -22,7 +22,7 @@ private fun identity():TestIdentity {
         val command=ProcessBuilder(System.getProperty("java.home")+"/bin/keytool","-genkeypair","-alias","test",
             "-keyalg","EC","-groupname","secp256r1","-dname","CN=Bluey test identity","-validity","2",
             "-storetype","PKCS12","-keystore",file.path,"-storepass","test-only-password","-noprompt")
-            .redirectErrorStream(true).redirectOutput(ProcessBuilder.Redirect.DISCARD).start()
+            .redirectErrorStream(true).redirectOutput(folder.resolve("keytool.log")).start()
         if(!command.waitFor(20,TimeUnit.SECONDS)){command.destroyForcibly();error("Test identity generation timeout")}
         check(command.exitValue()==0)
         val store=KeyStore.getInstance("PKCS12").apply{file.inputStream().use{load(it,"test-only-password".toCharArray())}}

@@ -54,7 +54,9 @@ public sealed class LinkServer : IAsyncDisposable
             {
                 var client = await listener!.AcceptTcpClientAsync(lifetime.Token);
                 var attempt=Diagnostics.Begin();
-                var port=(client.Client.RemoteEndPoint as IPEndPoint)?.Port??0;
+                var port=0;
+                try {port=(client.Client.RemoteEndPoint as IPEndPoint)?.Port??0;}
+                catch(Exception e) when(e is SocketException or ObjectDisposedException) { /* Optional diagnostic metadata. */ }
                 Diagnostics.Record(attempt,ConnectionStage.TcpAccepted,port);
                 if (!slots.Wait(0)) { Diagnostics.Record(attempt,ConnectionStage.TcpRejectedBusy,port);client.Dispose(); continue; }
                 var id = Interlocked.Increment(ref taskId);
