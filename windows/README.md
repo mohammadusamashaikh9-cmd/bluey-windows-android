@@ -213,3 +213,46 @@ If Session confirmed/SessionReady appears on both, test mouse gaze, mood and Tal
 output. Otherwise stop at the recorded failure and supply those safe logs. Actual
 phone Keystore/SChannel interoperability, LAN reachability and the physical root
 cause remain unverified until this retest; software-key/loopback CI is separate.
+
+## F3-R2: Keystore signing and mutual-TLS retest
+
+The developer's R1 phone/laptop logs establish TCP acceptance, server-pin validation
+and client EC alias/key/chain selection, then handshake failure before enrollment
+(October 18, 21:57:00 UTC/client port 53148 and 21:59:10/53192). The code omitted
+Android DIGEST_NONE authorization, required by Conscrypt's prehashed EC signing
+path. New keys authorize it; this does not change TLS wire algorithms or trust.
+The actual phone rejection/root cause and successful correction need this retest.
+
+1. Verify both R2 manifests and use the two builds from the same recorded app
+   commit. Replace the stopped Windows application at its existing firewall-allowed
+   path; preserve LocalAppData/Bluey/Link. Keep both apps foreground on the same Wi-Fi.
+   The APK includes its public SIGNING-CERT.txt. A different CI debug signer requires
+   uninstall/install (deletes phone data/old key); never bypass signing checks.
+2. On Android Connection choose **Test protected signing identity**. Copy its safe
+   diagnostics. Expected new-key results: DIGEST_NONE_AUTHORIZED, SIGN_SHA256_PASSED
+   and SIGN_PREHASH_PASSED. A preserved R1 key can report DIGEST_NONE_NOT_AUTHORIZED,
+   pass SHA-256, then fail prehashed signing: this directly tests the suspected
+   mechanism without a connection. Do not delete that evidence before copying it.
+3. Only if the old key is incompatible, choose **Replace phone identity / forget
+   host…**, explicitly confirm, revoke the old phone entry on Windows, then run
+   the signing check again. Replacement stops the session, deletes the phone key
+   and local saved host trust; it never silently replaces an identity or changes
+   Windows trust. A fresh APK installation already generates the corrected key.
+4. Start Windows host and a fresh five-minute invitation. Compare the server pin
+   on Android; tap Pair once. Require Windows ServerCertificateSelected,
+   ClientCertificatePresent, MutualTlsCompleted, EnrollmentValidated and
+   ApprovalPending. Compare the phone pin across the approval displays, approve
+   on Windows, and require SessionReady/SESSION_CONFIRMED. The phone and server
+   pins differ by design. Test live mouse gaze/mood/talk only after that session.
+5. Immediately copy **only Copy safe diagnostics** on both devices, review/redact,
+   and return those texts with OS/model/time/build digests. Match UTC/source ports;
+   local A/W IDs differ. Diagnostics v2 adds fixed signing/provider/alert categories,
+   Windows HRESULT/native code when available and ClientValidationNotReached when
+   TLS fails before its application callback. Unknown provider alerts stay unknown;
+   no raw messages, TLS records, secrets, keys, challenge or signature are logged.
+   Never share the QR/full URI, settings screenshots or unrelated system logs.
+
+CI forces TLS 1.2 and TLS 1.3 independently, including identity rejection and full
+approval/confirmed face delivery. Those are software-key tests, not evidence of
+phone Keystore/SChannel interoperability. Production still enables both TLS
+versions with exact pinning, mandatory mutual authentication and no downgrade.

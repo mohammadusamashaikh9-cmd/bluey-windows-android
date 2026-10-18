@@ -207,3 +207,29 @@ alias selection, opaque-key nonexport, stage categorization, privacy and 96-even
 bounds are checked. These tests cannot demonstrate a real Android hardware key or
 Windows-to-phone interoperability. Existing motion/render/protocol/revocation and
 no-downgrade tests remain required. Actual final run/artifact results are in tracking.
+
+### F3-R2 / 2026-10-19 (Asia/Karachi)
+
+Physical evidence supplied by the developer: two October 18 attempts correlated
+at 21:57:00 UTC/53148 and 21:59:10 UTC/53192. TCP is accepted on Windows; Android
+verifies the server pin and supplies EC key/chain; TLS fails before Windows client
+validation/mutual-TLS completion, hello or enrollment. Firewall/QR/discovery and
+different identities' fingerprints are not demonstrated causes.
+
+Source-confirmed defect: Android generation authorizes SHA digests but not NONE,
+while Conscrypt requests NONEwithECDSA for opaque-key TLS signing. Regression
+ClientKeyPolicyTest failed at the old policy (43 tests, one expected failure in
+Android CI 39171259060). Authorize NONE for new keys without weakening TLS hashes.
+Run the actual existing-key SHA256withECDSA and prehashed NONEwithECDSA sign/verify
+checks on-device. Explicitly replace an incompatible immutable key and forget local
+host trust only after user confirmation; revoke its Windows entry and re-enroll.
+Never export the private key, challenge/signature, URI or provider exception text.
+
+Software tests independently exercise TLS 1.2/1.3, exact certificate presentation,
+proof-of-possession/completion, EnrollmentValidated/ApprovalPending, confirmation,
+face delivery, revocation and missing/untrusted identity rejection. JCA signing
+checks test matching/mismatched keys; Robolectric checks the production key spec,
+not actual KeyMint enforcement. Windows native error/HRESULT and fixed Android
+provider/alert diagnostics are safe categories, not raw traffic or definitive alert
+codes when the provider exposes none. Actual Keystore/Schannel rejection mechanism
+and successful correction stay pending the [R2 physical sequence](../windows/README.md#f3-r2-keystore-signing-and-mutual-tls-retest).

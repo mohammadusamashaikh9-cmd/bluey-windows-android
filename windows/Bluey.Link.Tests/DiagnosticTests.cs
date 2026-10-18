@@ -49,4 +49,15 @@ public sealed class DiagnosticTests
         Assert.DoesNotContain("SECRET",log.Text());Assert.DoesNotContain("PRIVATE_PROVIDER_TEXT",log.Text());
     }
 
+    [Fact] public async Task ClosedPeerBeforeCertificateValidationIsExplicitWithoutAssumingRejectionCause()
+    {
+        using var store=new MemoryStore();await using var server=new LinkServer(store);server.Start(IPAddress.Loopback);
+        using(var tcp=new TcpClient()) {await tcp.ConnectAsync(IPAddress.Loopback,server.Port);}
+        for(var i=0;i<100 && !Text(server).Contains("SessionClosed");i++)await Task.Delay(10);
+        var trace=server.Diagnostics.Snapshot();
+        Assert.Contains(trace,e=>e.Stage==ConnectionStage.ClientValidationNotReached);
+        Assert.DoesNotContain(trace,e=>e.Stage==ConnectionStage.ClientCertificatePresent || e.Stage==ConnectionStage.MutualTlsCompleted);
+        Assert.Empty(store.Peers);Assert.Null(server.Pending);
+    }
+
 }

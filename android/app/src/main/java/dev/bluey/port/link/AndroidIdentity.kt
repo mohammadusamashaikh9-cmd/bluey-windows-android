@@ -66,6 +66,7 @@ class AndroidIdentity(context:Context) {
             val info=KeyFactory.getInstance(privateKey.algorithm,"AndroidKeyStore").getKeySpec(privateKey,KeyInfo::class.java)
             event(if(info.digests.contains(KeyProperties.DIGEST_NONE))LinkStage.DIGEST_NONE_AUTHORIZED else LinkStage.DIGEST_NONE_NOT_AUTHORIZED)
         } catch(_:GeneralSecurityException) {event(LinkStage.DIGEST_AUTHORIZATION_UNKNOWN)}
+        catch(_:ProviderException) {event(LinkStage.DIGEST_AUTHORIZATION_UNKNOWN)}
         try {certificate.verify(certificate.publicKey);event(LinkStage.CLIENT_CERT_SELF_SIGNATURE_VALID)}
         catch(_:GeneralSecurityException){event(LinkStage.CLIENT_CERT_SELF_SIGNATURE_INVALID)}
         val eku=certificate.extendedKeyUsage

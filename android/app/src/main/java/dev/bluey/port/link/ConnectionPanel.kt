@@ -37,7 +37,7 @@ fun ConnectionPanel(link:DeviceLink,incoming:String?,close:()->Unit) {
                 context.getSystemService(ClipboardManager::class.java).setPrimaryClip(ClipData.newPlainText("Bluey safe diagnostics",link.diagnosticText()))
             }){Text("Copy safe diagnostics")}
             if(showLog) {
-                Text("Bounded local debug log; UTC/attempt IDs/client source ports only. Review before sharing. Do not include the QR/URI.")
+                Text("Bounded debug log: fixed signing/connection stages, safe error categories, UTC, local IDs and client source ports. Review before sharing; never include the QR/URI.")
                 Text(remember(log){link.diagnosticText()},style=MaterialTheme.typography.bodySmall)
             }
             state.clientPin?.let{Text("This phone certificate SHA-256 (compare on Windows): $it")}
