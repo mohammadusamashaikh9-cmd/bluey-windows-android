@@ -89,7 +89,10 @@ class DeviceLink(context:Context) {
         invitation=null;desired=true;restart()
     }
     @Synchronized fun disconnect(){desired=false;invitation=null;worker?.cancel();closeSocket();latest.value=null;mutable.update{snapshot->snapshot.copy(connected=false,status="Disconnected — offline demo")}}
-    fun forget(){disconnect();scope.launch{initGate.withLock{identity?.forget();currentHost=null;mutable.update{snapshot->snapshot.copy(trusted=null)}}}}
+    fun forget(){disconnect();scope.launch(NonCancellable){
+        try {initGate.withLock{AndroidIdentity.eraseTrust(app);currentHost=null;mutable.update{snapshot->snapshot.copy(trusted=null)}}}
+        catch(_:Exception){status("Saved trust could not be removed. Check protected storage.")}
+    }}
     fun close(){pause();scope.cancel()}
     private suspend fun loop() {
         try {

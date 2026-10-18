@@ -21,6 +21,9 @@ import javax.security.auth.x500.X500Principal
 
 // Never exports a private key. Android's TLS provider signs through AndroidKeyStore.
 class AndroidIdentity(context:Context) {
+    companion object {
+        fun eraseTrust(context:Context) { AtomicFile(File(context.noBackupFilesDir,"bluey-peer.gcm")).delete() }
+    }
     private val keys=KeyStore.getInstance("AndroidKeyStore").apply{load(null)}
     private val identity="bluey.f3.client";private val protection="bluey.f3.trust"
     private val file=AtomicFile(File(context.noBackupFilesDir,"bluey-peer.gcm"))

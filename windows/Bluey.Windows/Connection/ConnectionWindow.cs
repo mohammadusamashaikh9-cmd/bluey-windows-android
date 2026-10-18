@@ -8,6 +8,7 @@ internal sealed class ConnectionWindow : Window
 {
     private readonly WindowsLinkHost host;
     private readonly TextBlock status=new(){TextWrapping=TextWrapping.Wrap};
+    private readonly TextBlock error=new(){TextWrapping=TextWrapping.Wrap};
     private readonly TextBlock pending=new(){TextWrapping=TextWrapping.Wrap};
     private readonly TextBox invite=new(){IsReadOnly=true,TextWrapping=TextWrapping.Wrap,MinHeight=70};
     private readonly ListBox peers=new(){MinHeight=80};
@@ -25,7 +26,7 @@ internal sealed class ConnectionWindow : Window
         Add(panel,"Refresh local addresses",async()=>{var list=await Task.Run(WindowsLinkHost.Addresses);address.ItemsSource=list;address.SelectedIndex=0;});
         Add(panel,"Start secure host",async()=>{var ip=address.SelectedItem as string??"";await Task.Run(()=>host.Start(ip));});
         Add(panel,"Stop secure host",()=>Task.Run(host.Stop));
-        panel.Children.Add(status);
+        panel.Children.Add(status);panel.Children.Add(error);
         Add(panel,"Start pairing (expires in 5 minutes)",async()=>{uri=await Task.Run(host.StartPairing);invite.Text=uri;qr.Source=Qr(uri);});
         Add(panel,"Stop pairing / clear invitation",async()=>{await Task.Run(()=>host.Server?.StopPairing());ClearInvite();});
         panel.Children.Add(qr);panel.Children.Add(invite);
@@ -54,7 +55,7 @@ internal sealed class ConnectionWindow : Window
     private void Add(Panel panel,string label,Func<Task> action)
     {
         var button=new Button{Content=label,Padding=new(8),Margin=new(0,4,0,4),HorizontalAlignment=HorizontalAlignment.Left};
-        button.Click+=async(_,_)=>{if(busy)return;busy=true;button.IsEnabled=false;try{await action();status.Text=host.Status;}catch(Exception e) when(e is System.IO.IOException or System.Security.Cryptography.CryptographicException or InvalidOperationException or System.Net.Sockets.SocketException){status.Text="Connection operation failed: "+e.GetType().Name+". Check the selected address and protected storage.";}finally{busy=false;button.IsEnabled=true;}};
+        button.Click+=async(_,_)=>{if(busy)return;busy=true;button.IsEnabled=false;error.Text="";try{await action();status.Text=host.Status;}catch(Exception e) when(e is System.IO.IOException or System.Security.Cryptography.CryptographicException or InvalidOperationException or System.Net.Sockets.SocketException){error.Text="Connection operation failed: "+e.GetType().Name+". Check the selected address and protected storage.";}finally{busy=false;button.IsEnabled=true;}};
         panel.Children.Add(button);
     }
     private static ImageSource Qr(string value)

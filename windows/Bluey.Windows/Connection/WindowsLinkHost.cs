@@ -7,7 +7,7 @@ internal sealed class WindowsLinkHost
 {
     private ProtectedTrust? store; private LinkServer? server; private Advertisement? advertisement; private IPAddress? address;
     internal LinkServer? Server => Volatile.Read(ref server);
-    internal string Status => Server is {} s ? $"TLS host {address}:{s.Port} · {s.Connections} authenticated connection(s)\n{advertisement?.Status}" : "Secure host stopped";
+    internal string Status => Server is {} s ? $"TLS host {address}:{s.Port} · {s.Connections} authenticated connection(s)\n{advertisement?.Status}\nHost identity: {s.HostId}\nServer SHA-256: {s.Pin}" : "Secure host stopped";
     internal static bool Private(IPAddress ip) { var b=ip.GetAddressBytes(); return b.Length==4 && (b[0]==10 || b[0]==172 && b[1]>=16 && b[1]<=31 || b[0]==192 && b[1]==168); }
     internal static string[] Addresses() => NetworkInterface.GetAllNetworkInterfaces().Where(n=>n.OperationalStatus==OperationalStatus.Up && n.NetworkInterfaceType!=NetworkInterfaceType.Loopback)
         .SelectMany(n=>n.GetIPProperties().UnicastAddresses).Select(a=>a.Address).Where(Private).Select(a=>a.ToString()).Distinct().ToArray();
