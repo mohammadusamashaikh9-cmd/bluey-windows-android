@@ -53,6 +53,11 @@ jobs:
             $relative = [IO.Path]::GetRelativePath($root, $_.FullName).Replace('\', '/')
             '{0}  {1}' -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant(), $relative
           } | Set-Content -Encoding utf8NoBOM artifacts/bluey-win-x64/SHA256SUMS.txt
+      - name: Primary binary and manifest SHA-256 summary
+        run: |
+          foreach ($name in @('Bluey.Windows.exe', 'Bluey.Windows.dll', 'SHA256SUMS.txt')) {
+            '{0}  {1}' -f (Get-FileHash "artifacts/bluey-win-x64/$name" -Algorithm SHA256).Hash.ToLowerInvariant(), $name
+          }
       - uses: actions/upload-artifact@v6
         if: success()
         with:

@@ -179,7 +179,7 @@ The phone and server certificate fingerprints are supposed to differ.
    folder, manually check that the existing application rule names that new EXE.
    Bluey does not create or change firewall policy.
 2. Check Android APK signing continuity before updating (the artifact includes
-   `SIGNING-CERT.txt`). Independent CI runners may use different debug signers.
+   `SIGNING-CERT.txt`; APK signing identity is separate from both TLS identities). Independent CI runners may use different debug signers.
    If Android rejects the update because its signer differs, uninstall the old
    Bluey app and install the new APK using the phone's package installer. This
    deletes its old app data/Keystore identity. Revoke any old phone entry in the

@@ -39,11 +39,27 @@ jobs:
           cache-read-only: ${{ github.event_name == 'pull_request' }}
       - name: Unit tests, native bitmap renders, lint and debug APK
         run: gradle --no-daemon --console=plain :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+      - name: Unit and lint result summary
+        run: |
+          python3 - <<'PYTHON'
+          import glob, xml.etree.ElementTree as ET
+          reports=glob.glob('app/build/test-results/testDebugUnitTest/TEST-*.xml')
+          assert reports, 'JUnit reports missing'
+          totals={k:0 for k in ('tests','failures','errors','skipped')}
+          for file in reports:
+              row=ET.parse(file).getroot()
+              for key in totals: totals[key]+=int(row.get(key,0))
+          print('JUnit totals:',totals)
+          lint=ET.parse('app/build/reports/lint-results-debug.xml').getroot()
+          counts={}
+          for issue in lint.findall('issue'): counts[issue.get('severity')]=counts.get(issue.get('severity'),0)+1
+          print('Lint severities:',counts)
+          PYTHON
       - name: APK signature verification and digest
         run: |
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --print-certs app/build/outputs/apk/debug/app-debug.apk > app/build/outputs/apk/debug/SIGNING-CERT.txt
           cat app/build/outputs/apk/debug/SIGNING-CERT.txt
-          sha256sum app/build/outputs/apk/debug/app-debug.apk > app/build/outputs/apk/debug/SHA256SUMS.txt
+          sha256sum app/build/outputs/apk/debug/app-debug.apk | tee app/build/outputs/apk/debug/SHA256SUMS.txt
       - uses: actions/upload-artifact@v6
         if: success()
         with:
