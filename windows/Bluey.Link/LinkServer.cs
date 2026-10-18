@@ -7,10 +7,11 @@ using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 namespace Bluey.Link;
 
-public sealed record Enrollment(string DeviceId, string Name, string Pin, string RequestId, TaskCompletionSource<bool> Decision);
+public sealed record Enrollment(string DeviceId, string Name, string Pin, string RequestId, TaskCompletionSource<bool> Decision, CancellationTokenSource Stop);
 public sealed class LinkServer : IAsyncDisposable
 {
     private readonly ITrustStore store;
+    private readonly object trustGate = new();
     private readonly Stopwatch clock = Stopwatch.StartNew();
     private readonly CancellationTokenSource lifetime = new();
     private readonly SemaphoreSlim slots = new(4);
@@ -34,7 +35,10 @@ public sealed class LinkServer : IAsyncDisposable
     public string StartPairing() { StopPairing(); return Invitation.Start(); }
     public void StopPairing() { Invitation.Stop(); Pending?.Decision.TrySetResult(false); }
     public void Decide(string pin, bool approved) { var p = Pending; if (p?.Pin == pin) p.Decision.TrySetResult(approved); }
-    public void Revoke(string pin) { store.Remove(pin); if (sessions.TryGetValue(pin, out var session)) session.Cancel(); }
+    public void Revoke(string pin) { lock(trustGate) {
+        store.Remove(pin); if(Pending is {} p && p.Pin==pin) p.Stop.Cancel();
+        if (sessions.TryGetValue(pin, out var session)) { try { session.Cancel(); } catch(ObjectDisposedException) { } }
+    } }
     // O(1), no serialization, crypto, storage, socket work or waiting on the animation thread.
     public void Publish(double x, double y, string mood, double talk)
     {
@@ -87,13 +91,14 @@ public sealed class LinkServer : IAsyncDisposable
                 {
                     var generation = Invitation.Generation;
                     if (store.Peers.Count >= 8 || !Invitation.Check(Wire.Text(first.Payload, "secret"))) throw new AuthenticationException();
-                    request = new(Wire.Text(first.Payload,"deviceId"), Wire.Text(first.Payload,"name"), pin, first.Id, new(TaskCreationOptions.RunContinuationsAsynchronously));
+                    request = new(Wire.Text(first.Payload,"deviceId"), Wire.Text(first.Payload,"name"), pin, first.Id, new(TaskCreationOptions.RunContinuationsAsynchronously), stop);
                     if (Interlocked.CompareExchange(ref pending, request, null) != null) throw new AuthenticationException();
                     if (!await request.Decision.Task.WaitAsync(TimeSpan.FromSeconds(90), stop.Token)) throw new AuthenticationException();
                     await wire.Send("approve", new { requestId = first.Id, clientPin = pin }, stop.Token);
                     var confirm = await wire.Read(stop.Token);
                     if (confirm.Type != "confirm" || Wire.Text(confirm.Payload,"requestId") != first.Id || !Invitation.Consume(generation)) throw new AuthenticationException();
-                    peer = new(request.DeviceId, request.Name, pin); store.Add(peer);
+                    peer = new(request.DeviceId, request.Name, pin);
+                    lock(trustGate) { stop.Token.ThrowIfCancellationRequested(); store.Add(peer); }
                     Interlocked.CompareExchange(ref pending, null, request); request = null;
                 }
                 else if (first.Type != "connect" || peer == null || Wire.Text(first.Payload,"hostId") != HostId || Wire.Text(first.Payload,"deviceId") != peer.DeviceId)

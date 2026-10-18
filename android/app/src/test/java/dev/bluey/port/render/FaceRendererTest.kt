@@ -101,12 +101,13 @@ class FaceRendererTest {
             if (i in listOf(1, 5, 9, 18, 36, 60)) save(render(renderer, f), "happy-transition-$i")
         }
     }
-    @Test fun manifestHasNoRequestedPermissionsAndFontsKeepTheirNotices() {
+    @Test fun manifestHasOnlyF3LanPermissionsAndFontsKeepTheirNotices() {
         val app = RuntimeEnvironment.getApplication()
         val info = app.packageManager.getPackageInfo(app.packageName, android.content.pm.PackageManager.GET_PERMISSIONS)
         // AndroidX may add its app-scoped signature receiver permission, but the
-        // demo must not request system permissions for network, audio or storage.
-        assertTrue(info.requestedPermissions.orEmpty().none { it.startsWith("android.permission.") })
+        // F3 adds only LAN and optional Android 16 opt-in Nearby permission.
+        assertEquals(setOf("android.permission.INTERNET", "android.permission.NEARBY_WIFI_DEVICES"),
+            info.requestedPermissions.orEmpty().filter { it.startsWith("android.permission.") }.toSet())
         for (name in listOf("OFL-Fredoka.txt", "OFL-IBMPlex.txt")) {
             assertTrue(app.assets.open(name).bufferedReader().use { it.readText() }.contains("SIL OPEN FONT LICENSE"))
         }

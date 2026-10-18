@@ -46,7 +46,7 @@ internal sealed class ConnectionWindow : Window
         if(!busy)status.Text=host.Status;
         var s=host.Server;
         if(s?.Invitation.Active!=true && uri!=null)ClearInvite();
-        pending.Text=s?.Pending is {} p?$"REQUEST: {p.Name}\nClient certificate SHA-256: {p.Pin}\nApprove only the phone you are enrolling.":"No enrollment awaiting approval.";
+        pending.Text=s?.Pending is {} p?$"REQUEST: {p.Name}\nClient certificate SHA-256: {p.Pin}\nCompare this fingerprint with Connection on the phone before approving.":"No enrollment awaiting approval.";
         var selected=(peers.SelectedItem as DeviceRow)?.Pin;
         var rows=s?.Peers.Select(p=>new DeviceRow(p.Pin,$"{p.Name} · {p.DeviceId}\n{p.Pin}")).ToArray()??[];
         if(!rows.SequenceEqual(peers.Items.Cast<DeviceRow>())) {peers.ItemsSource=rows;peers.SelectedItem=rows.FirstOrDefault(p=>p.Pin==selected);}

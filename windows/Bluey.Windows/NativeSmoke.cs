@@ -18,6 +18,21 @@ internal static class NativeSmoke
         void Check(bool ok, string name) { if (!ok) throw new InvalidOperationException(name); checks.Add(name); }
         try
         {
+            var trustDirectory=Path.Combine(Path.GetTempPath(),"bluey-link-check-"+Guid.NewGuid());
+            try {
+                var first=new Connection.ProtectedTrust(trustDirectory);
+                var peer=new Bluey.Link.Peer(Guid.NewGuid().ToString(),"CI synthetic device",new string('a',64));
+                first.Add(peer);var second=new Connection.ProtectedTrust(trustDirectory);
+                Check(first.HostId==second.HostId && Bluey.Link.Identity.Fingerprint(first.Certificate)==Bluey.Link.Identity.Fingerprint(second.Certificate) && second.Certificate.HasPrivateKey && second.Peers.Single()==peer,
+                    "Actual CurrentUser DPAPI identity/trust roundtrip retains key and peer");
+                second.Remove(peer.Pin);var third=new Connection.ProtectedTrust(trustDirectory);
+                Check(third.Peers.Count==0,"DPAPI revocation persists across store reload");
+                var protectedBytes=File.ReadAllBytes(Path.Combine(trustDirectory,"trust.dpapi"));protectedBytes[0]^=255;
+                File.WriteAllBytes(Path.Combine(trustDirectory,"trust.dpapi"),protectedBytes);
+                var rejected=false;try{_ = new Connection.ProtectedTrust(trustDirectory);}catch(System.Security.Cryptography.CryptographicException){rejected=true;}
+                Check(rejected,"Corrupted protected trust fails closed without identity replacement");
+                first.Certificate.Dispose();second.Certificate.Dispose();third.Certificate.Dispose();
+            } finally { if(Directory.Exists(trustDirectory))Directory.Delete(trustDirectory,true); }
             var e = new CursorEngine(new(), () => 0, () => .5); var v = new VisualState(e, () => .5);
             window = new(e, v); var before = Native.GetForegroundWindow(); window.Show();
             window.Dispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);

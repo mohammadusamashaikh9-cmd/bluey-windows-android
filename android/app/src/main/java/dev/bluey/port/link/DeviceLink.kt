@@ -47,7 +47,7 @@ class SocketWire(private val socket:SSLSocket,val session:String,hello:Message) 
     }
 }
 data class RemoteFace(val face:LinkFace,val receivedMs:Long,val id:String)
-data class LinkUi(val status:String="Disconnected — offline demo",val hosts:List<DiscoveredHost> = emptyList(),val trusted:TrustedHost?=null,val connected:Boolean=false)
+data class LinkUi(val status:String="Disconnected — offline demo",val hosts:List<DiscoveredHost> = emptyList(),val trusted:TrustedHost?=null,val connected:Boolean=false,val clientPin:String?=null)
 
 // Foreground-only lifetime, one read task and one heartbeat task. Latest face is a conflated single slot.
 class DeviceLink(context:Context) {
@@ -65,7 +65,7 @@ class DeviceLink(context:Context) {
     private val discovery=Discovery(app,{hosts->mutable.value=mutable.value.copy(hosts=hosts)},{message->if(!mutable.value.connected)status(message)})
     private fun status(message:String){mutable.value=mutable.value.copy(status=message,trusted=currentHost)}
     private suspend fun keys():AndroidIdentity=initGate.withLock {
-        identity?:AndroidIdentity(app).also{identity=it;currentHost=it.load();mutable.value=mutable.value.copy(trusted=currentHost)}
+        identity?:AndroidIdentity(app).also{identity=it;currentHost=it.load();mutable.value=mutable.value.copy(trusted=currentHost,clientPin=PeerIdentity.fingerprint(it.certificate))}
     }
     @Synchronized fun resume(){foreground=true;discovery.start();restart()}
     @Synchronized fun pause(){foreground=false;worker?.cancel();socket?.close();socket=null;latest.value=null;mutable.value=mutable.value.copy(connected=false,status="Paused — connection closed");discovery.stop()}

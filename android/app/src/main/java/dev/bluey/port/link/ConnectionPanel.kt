@@ -21,6 +21,7 @@ fun ConnectionPanel(link:DeviceLink,incoming:String?,close:()->Unit) {
     AlertDialog(onDismissRequest=close,title={Text("Secure Windows connection")},
         text={Column(Modifier.verticalScroll(rememberScrollState())) {
             Text(state.status)
+            state.clientPin?.let{Text("This phone certificate SHA-256 (compare on Windows): $it")}
             state.trusted?.let{Text("Saved host: ${it.hostId}\nSHA-256: ${it.pin}")}
             Text("Secure hosts discovered (names are untrusted hints):")
             state.hosts.forEach{host->TextButton(onClick={link.connect(host)}){Text("${host.name} · ${host.address}:${host.port}\nConnect using saved identity")}}

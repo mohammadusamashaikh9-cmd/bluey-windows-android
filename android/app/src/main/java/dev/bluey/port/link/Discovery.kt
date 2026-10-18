@@ -34,7 +34,7 @@ class Discovery(context:Context,private val changed:(List<DiscoveredHost>)->Unit
                     if(ip!=null && Bootstrap.privateAddress(ip) && info.port in 1..65535){hosts[info.serviceName]=DiscoveredHost(info.serviceName,ip,info.port);changed(hosts.values.toList())}}
                 resolving=false;resolveNext(run)
             }}
-        )}catch(e:RuntimeException){resolving=false;status("Discovery resolution unavailable")}
+        })}catch(e:RuntimeException){resolving=false;status("Discovery resolution unavailable")}
     }
     @Synchronized fun stop(){generation++;listener?.let{try{manager.stopServiceDiscovery(it)}catch(_:RuntimeException){}};listener=null;hosts.clear();queue.clear();changed(emptyList())}
 }
