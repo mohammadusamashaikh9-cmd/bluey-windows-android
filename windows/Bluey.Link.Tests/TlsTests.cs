@@ -114,4 +114,39 @@ public sealed class TlsTests
         await c.Wire.Send("ready",new{hostId=s.HostId,deviceId},default);
         await Denied(async()=>{while(true)await c.Wire.Read(default);});
     }
+    [Fact] public async Task PhoneDisconnectReleasesPendingEnrollmentWithoutWaitingForApprovalTimeout()
+    {
+        using var store=new MemoryStore();await using var s=new LinkServer(store);s.Start(IPAddress.Loopback);using var cert=Identity.Create("phone",false);
+        var secret=s.StartPairing();using(var c=await Connect(s,cert)) {
+            await c.Wire.Send("enroll",new{deviceId=Guid.NewGuid().ToString(),name="background",secret},default);
+            for(var n=0;n<100 && s.Pending==null;n++)await Task.Delay(10);Assert.NotNull(s.Pending);
+        }
+        for(var n=0;n<100 && s.Pending!=null;n++)await Task.Delay(10);
+        Assert.Null(s.Pending);Assert.Empty(store.Peers);Assert.True(s.Invitation.Active);
+    }
+    [Fact] public async Task RealTlsBackpressureCancelsWriterInsteadOfGrowingAnApplicationQueue()
+    {
+        using var serverCert=Identity.Create("slow-reader",true);using var clientCert=Identity.Create("writer",false);
+        using var listener=new TcpListener(IPAddress.Loopback,0);listener.Start();
+        using var tcp=new TcpClient{SendBufferSize=1024};await tcp.ConnectAsync((IPEndPoint)listener.LocalEndpoint);
+        using var peer=await listener.AcceptTcpClientAsync();peer.ReceiveBufferSize=1024;
+        using var serverTls=new SslStream(peer.GetStream(),false,(_,c,_,_)=>c is X509Certificate2 x && Identity.Fingerprint(x)==Identity.Fingerprint(clientCert));
+        using var clientTls=new SslStream(tcp.GetStream(),false,(_,c,_,_)=>c is X509Certificate2 x && Identity.Fingerprint(x)==Identity.Fingerprint(serverCert));
+        using var deadline=new CancellationTokenSource(5000);
+        await Task.WhenAll(serverTls.AuthenticateAsServerAsync(new SslServerAuthenticationOptions{
+            ServerCertificate=serverCert,ClientCertificateRequired=true,EnabledSslProtocols=SslProtocols.Tls12|SslProtocols.Tls13,
+            CertificateRevocationCheckMode=X509RevocationMode.NoCheck},deadline.Token),
+            clientTls.AuthenticateAsClientAsync(new SslClientAuthenticationOptions{
+                TargetHost="slow-reader",ClientCertificates=new X509CertificateCollection{clientCert},EnabledSslProtocols=SslProtocols.Tls12|SslProtocols.Tls13,
+                CertificateRevocationCheckMode=X509RevocationMode.NoCheck},deadline.Token));
+        Assert.True(serverTls.IsMutuallyAuthenticated);
+        var wire=new WireConnection(clientTls,Guid.NewGuid().ToString());
+        // The authenticated peer deliberately never reads application bytes; actual TCP/TLS buffers fill.
+        var clock=System.Diagnostics.Stopwatch.StartNew();var sent=0;
+        var failure=await Record.ExceptionAsync(async()=>{
+            for(;sent<100000;sent++)await wire.Send("ping",new{},default);
+        });
+        Assert.True(failure is OperationCanceledException or IOException,$"Expected bounded write cancellation, got {failure?.GetType().Name}");
+        Assert.InRange(sent,1,99999);Assert.True(clock.Elapsed<TimeSpan.FromSeconds(8));
+    }
 }

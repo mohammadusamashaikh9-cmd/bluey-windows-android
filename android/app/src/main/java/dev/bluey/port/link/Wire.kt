@@ -53,6 +53,7 @@ object Wire {
             if (bytes.isEmpty() || bytes.size > MAX_FRAME) throw ProtocolException("size")
             val text = Charsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
                 .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes)).toString()
+            if(text.startsWith("\uFEFF"))throw ProtocolException("json BOM")
             val r = JsonReader(StringReader(text)); r.setStrictness(Strictness.STRICT)
             fun value(depth: Int): JsonElement {
                 if (depth > 4) throw ProtocolException("depth")

@@ -9,7 +9,7 @@ data class RemoteFace(val face:LinkFace,val receivedMs:Long,val id:String)
 class FaceDelivery {
     private var delivered:String?=null
     fun apply(animator:FaceAnimator,packet:RemoteFace?,elapsedMs:Long,animationSeconds:Double):Boolean {
-        if(packet==null || elapsedMs-packet.receivedMs !in 0 until 2500)return false
+        if(packet==null || elapsedMs-packet.receivedMs !in 0L until 2500L)return false
         if(delivered!=packet.id) {
             val f=packet.face
             animator.receive(FaceState(f.gazeX,f.gazeY,Mood.valueOf(f.mood),f.talk),animationSeconds)

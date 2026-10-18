@@ -148,7 +148,7 @@ separate evidence is recorded. No screenshot/capture feature is implemented.
 
 ## F3 automated and physical acceptance
 
-Both language suites execute all 35 shared `protocol/v1-cases.jsonl` cases.
+Both language suites execute all 40 shared `protocol/v1-cases.jsonl` cases.
 Run `dotnet test windows/Bluey.Link.Tests -c Release` for real loopback mTLS
 (enrollment approval/confirm, reconnect/revoke, wrong pin/secret, missing/unknown
 certificate, plaintext rejection, role rejection, slot cleanup and fast latest-slot

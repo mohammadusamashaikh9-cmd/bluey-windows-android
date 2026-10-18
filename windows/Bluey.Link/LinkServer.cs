@@ -93,10 +93,23 @@ public sealed class LinkServer : IAsyncDisposable
                     if (store.Peers.Count >= 8 || !Invitation.Check(Wire.Text(first.Payload, "secret"))) throw new AuthenticationException();
                     request = new(Wire.Text(first.Payload,"deviceId"), Wire.Text(first.Payload,"name"), pin, first.Id, new(TaskCreationOptions.RunContinuationsAsynchronously), stop);
                     if (Interlocked.CompareExchange(ref pending, request, null) != null) throw new AuthenticationException();
-                    if (!await request.Decision.Task.WaitAsync(TimeSpan.FromSeconds(90), stop.Token)) throw new AuthenticationException();
-                    await wire.Send("approve", new { requestId = first.Id, clientPin = pin }, stop.Token);
-                    var confirm = await wire.Read(stop.Token);
-                    if (confirm.Type != "confirm" || Wire.Text(confirm.Payload,"requestId") != first.Id || !Invitation.Consume(generation)) throw new AuthenticationException();
+                    // Keep one TLS read outstanding during approval: disconnect/background releases
+                    // the pending slot immediately. The same read receives confirm after approval.
+                    using(var approvalStop=CancellationTokenSource.CreateLinkedTokenSource(stop.Token)) {
+                        var confirmation=wire.Read(approvalStop.Token,90000);
+                        try {
+                            var decision=request.Decision.Task.WaitAsync(TimeSpan.FromSeconds(90),stop.Token);
+                            if(await Task.WhenAny(decision,confirmation)==confirmation) { await confirmation; throw new AuthenticationException(); }
+                            if(!await decision) throw new AuthenticationException();
+                            await wire.Send("approve",new {requestId=first.Id,clientPin=pin},stop.Token);
+                            approvalStop.CancelAfter(5000);
+                            var confirm=await confirmation;
+                            if(confirm.Type!="confirm" || Wire.Text(confirm.Payload,"requestId")!=first.Id || !Invitation.Consume(generation))throw new AuthenticationException();
+                        } finally {
+                            approvalStop.Cancel();request.Decision.TrySetResult(false);
+                            try {await confirmation;} catch(Exception e) when(e is IOException or OperationCanceledException) { }
+                        }
+                    }
                     peer = new(request.DeviceId, request.Name, pin);
                     lock(trustGate) { stop.Token.ThrowIfCancellationRequested(); store.Add(peer); }
                     Interlocked.CompareExchange(ref pending, null, request); request = null;

@@ -6,14 +6,22 @@ public sealed class ProtocolTests
 {
     [Fact] public void SharedFixturesDecodeWithDeclaredOutcomes()
     {
-        var cases=File.ReadAllLines(Path.Combine(AppContext.BaseDirectory,"v1-cases.jsonl")); Assert.True(cases.Length>=30);
+        var cases=File.ReadAllLines(Path.Combine(AppContext.BaseDirectory,"v1-cases.jsonl")); Assert.Equal(40,cases.Length);
         foreach(var line in cases)
         {
-            using var doc=JsonDocument.Parse(line);var root=doc.RootElement;var framer=new Frames();var count=0;
+            using var doc=JsonDocument.Parse(line);var root=doc.RootElement;var framer=new Frames();var count=0;var decoded=new List<Message>();
             Exception? error=null;
-            try { foreach(var c in root.GetProperty("chunks").EnumerateArray())foreach(var bytes in framer.Feed(Convert.FromBase64String(c.GetString()!))){Wire.Decode(bytes);count++;} framer.End(); }
+            try { foreach(var c in root.GetProperty("chunks").EnumerateArray())foreach(var bytes in framer.Feed(Convert.FromBase64String(c.GetString()!))){decoded.Add(Wire.Decode(bytes));count++;} framer.End(); }
             catch(ProtocolException e){error=e;}
             Assert.True(root.GetProperty("valid").GetBoolean() ? error==null && count>0 : error!=null,root.GetProperty("name").GetString());
+            if(error==null) {
+                var expected=root.GetProperty("expected").EnumerateArray().ToArray();Assert.Equal(expected.Length,decoded.Count);
+                for(var i=0;i<expected.Length;i++) {var e=expected[i];var m=decoded[i];
+                    Assert.Equal(e.GetProperty("type").GetString(),m.Type);Assert.Equal(e.GetProperty("id").GetString(),m.Id);
+                    Assert.Equal(e.GetProperty("session").GetString(),m.Session);Assert.Equal(e.GetProperty("seq").GetInt64(),m.Seq);
+                    Assert.True(JsonElement.DeepEquals(e.GetProperty("payload"),m.Payload));
+                }
+            }
         }
     }
     [Fact] public void SequenceSessionDuplicatesAndStalenessAreRejected()

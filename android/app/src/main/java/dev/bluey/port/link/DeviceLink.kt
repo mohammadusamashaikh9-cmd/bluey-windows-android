@@ -63,14 +63,23 @@ class DeviceLink(context:Context) {
     @Volatile private var invitation:Bootstrap?=null
     @Volatile private var currentHost:TrustedHost?=null
     private var worker:Job?=null
+    // Closing TLS may emit a close-notify; never do that from Compose/lifecycle callbacks.
+    @Synchronized private fun closeSocket() {
+        val old=socket;socket=null
+        if(old!=null)scope.launch(NonCancellable){runCatching{old.close()}}
+    }
+    @Synchronized private fun installSocket(next:Socket) {
+        if(!foreground||!desired){scope.launch(NonCancellable){runCatching{next.close()}};throw CancellationException()}
+        socket=next
+    }
     private val discovery=Discovery(app,{hosts->mutable.update{snapshot->snapshot.copy(hosts=hosts)}},{message->mutable.update{if(it.connected)it else it.copy(status=message)}})
     private fun status(message:String){mutable.update{snapshot->snapshot.copy(status=message,trusted=currentHost)}}
     private suspend fun keys():AndroidIdentity=initGate.withLock {
         identity?:AndroidIdentity(app).also{identity=it;currentHost=it.load();mutable.update{snapshot->snapshot.copy(trusted=currentHost,clientPin=PeerIdentity.fingerprint(it.certificate))}}
     }
     @Synchronized fun resume(){foreground=true;discovery.start();restart()}
-    @Synchronized fun pause(){foreground=false;worker?.cancel();socket?.close();socket=null;latest.value=null;mutable.update{snapshot->snapshot.copy(connected=false,status="Paused — connection closed")};discovery.stop()}
-    @Synchronized private fun restart(){worker?.cancel();socket?.close();latest.value=null;mutable.update{it.copy(connected=false)};if(foreground && desired)worker=scope.launch{sessionGate.withLock{loop()}}}
+    @Synchronized fun pause(){foreground=false;worker?.cancel();closeSocket();latest.value=null;mutable.update{snapshot->snapshot.copy(connected=false,status="Paused — connection closed")};discovery.stop()}
+    @Synchronized private fun restart(){worker?.cancel();closeSocket();latest.value=null;mutable.update{it.copy(connected=false)};if(foreground && desired)worker=scope.launch{sessionGate.withLock{loop()}}}
     fun pair(text:String) {
         try {invitation=Bootstrap.parse(text,System.currentTimeMillis()/1000);desired=true;restart()}
         catch(_:Exception){status("Invalid or expired invitation. Copy the complete fresh Windows URI.")}
@@ -79,7 +88,7 @@ class DeviceLink(context:Context) {
         if(selected!=null && currentHost!=null)currentHost=currentHost!!.copy(address=selected.address,port=selected.port)
         invitation=null;desired=true;restart()
     }
-    @Synchronized fun disconnect(){desired=false;invitation=null;worker?.cancel();socket?.close();latest.value=null;mutable.update{snapshot->snapshot.copy(connected=false,status="Disconnected — offline demo")}}
+    @Synchronized fun disconnect(){desired=false;invitation=null;worker?.cancel();closeSocket();latest.value=null;mutable.update{snapshot->snapshot.copy(connected=false,status="Disconnected — offline demo")}}
     fun forget(){disconnect();scope.launch{initGate.withLock{identity?.forget();currentHost=null;mutable.update{snapshot->snapshot.copy(trusted=null)}}}}
     fun close(){pause();scope.cancel()}
     private suspend fun loop() {
@@ -104,7 +113,7 @@ class DeviceLink(context:Context) {
                     }
                     status("Connection lost — offline demo; retrying securely")
                     delay(retry.nextMs())
-                } finally {socket?.close();socket=null}
+                } finally {closeSocket()}
             }
         } catch(e:CancellationException){throw e}
         catch(_:Exception){status("Protected identity/storage unavailable. No connection opened.")}
@@ -112,9 +121,9 @@ class DeviceLink(context:Context) {
     }
     private suspend fun session(keys:AndroidIdentity,host:TrustedHost,enroll:Bootstrap?)=coroutineScope {
         if(enroll!=null && System.currentTimeMillis()/1000>=enroll.expires)throw ProtocolException("expired")
-        val tcp=Socket();socket=tcp;tcp.tcpNoDelay=true;tcp.connect(InetSocketAddress(host.address,host.port),5000)
+        val tcp=Socket();installSocket(tcp);tcp.tcpNoDelay=true;tcp.connect(InetSocketAddress(host.address,host.port),5000)
         val tls=keys.context(host.pin).socketFactory.createSocket(tcp,host.address,host.port,true) as SSLSocket
-        socket=tls;tls.useClientMode=true;tls.enabledProtocols=tls.supportedProtocols.filter{it=="TLSv1.2"||it=="TLSv1.3"}.toTypedArray();tls.soTimeout=5000
+        installSocket(tls);tls.useClientMode=true;tls.enabledProtocols=tls.supportedProtocols.filter{it=="TLSv1.2"||it=="TLSv1.3"}.toTypedArray();tls.soTimeout=5000
         // Socket.close from lifecycle/disconnect also interrupts a blocked handshake/read/write.
         val handshakeGuard=launch {delay(5000);tls.close()}
         try{tls.startHandshake()}finally{handshakeGuard.cancel()}
