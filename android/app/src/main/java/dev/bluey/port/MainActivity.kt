@@ -14,7 +14,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -181,9 +180,13 @@ private fun FaceDemo(incoming: String?) {
             val insets=rootView.rootWindowInsets
             val positions=if(Build.VERSION.SDK_INT>=31)listOf(RoundedCorner.POSITION_TOP_LEFT,RoundedCorner.POSITION_TOP_RIGHT,RoundedCorner.POSITION_BOTTOM_RIGHT,RoundedCorner.POSITION_BOTTOM_LEFT)else emptyList()
             val radii=if(Build.VERSION.SDK_INT>=31)positions.map{insets?.getRoundedCorner(it)?.radius?.toFloat()?:cornerFallback*densityPx}else List(4){cornerFallback*densityPx}
-            val cutout=if(Build.VERSION.SDK_INT>=28)insets?.displayCutout else null
-            val shape=ScreenShape(size.width,size.height,radii,cutout?.safeInsetLeft?.toFloat()?:0f,cutout?.safeInsetTop?.toFloat()?:0f)
-            drawIntoCanvas{borderRenderer.draw(it.nativeCanvas,shape,indicatorFrame,densityPx,cutout?.boundingRects.orEmpty())}
+            // Keep every DisplayCutout access inside the API28 guard (minSdk26).
+            var safeLeft=0f;var safeTop=0f;var cutouts=emptyList<android.graphics.Rect>()
+            if(Build.VERSION.SDK_INT>=28) {
+                insets?.displayCutout?.let{safeLeft=it.safeInsetLeft.toFloat();safeTop=it.safeInsetTop.toFloat();cutouts=it.boundingRects}
+            }
+            val shape=ScreenShape(size.width,size.height,radii,safeLeft,safeTop)
+            drawIntoCanvas{borderRenderer.draw(it.nativeCanvas,shape,indicatorFrame,densityPx,cutouts)}
         }
         TextButton(onClick = { voicePanel=true },modifier=Modifier.align(Alignment.BottomEnd).safeDrawingPadding()) {Text("Offline simulation · ${voiceState.mode}")}
         if(voicePanel)VoicePreview(voiceState,cornerFallback,{cornerFallback=it},{voice.toggle(SystemClock.elapsedRealtime());flushVoice()},{voice.sleep(SystemClock.elapsedRealtime());flushVoice()}){voicePanel=false}

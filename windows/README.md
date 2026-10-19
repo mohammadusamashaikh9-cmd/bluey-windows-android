@@ -321,6 +321,6 @@ no host, API key or permission. Microphone/cloud/screen consents are separately
 planned and OFF; no live capture is possible. For the cross-device demo, explicitly
 start the secure host and connect the updated Android app using saved F3 trust.
 On Android use Offline simulation instructions, double tap wake, hold300ms, release.
-Mock captions appear on Windows; sleep/pause/disconnect clears the remote bubble.
+Matching F4-A APK and Windows commits are required. Mock captions appear on Windows; sleep/pause/disconnect clears the remote bubble.
 The old Show speech / Clear speech controls remain available for F2 comparison.
 Use the [physical QA sequence](../project/QA.md#f4-a-physical-offline-demonstration-pending).
