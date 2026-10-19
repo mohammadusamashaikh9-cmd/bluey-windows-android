@@ -323,5 +323,6 @@ start the secure host and connect the updated Android app using saved F3 trust.
 On Android use Offline simulation instructions, double tap wake, hold300ms, release.
 Matching F4-A APK and Windows commits are required. Mock captions appear on Windows; sleep/pause/disconnect clears the remote bubble.
 The old Show speech / Clear speech controls remain available for F2 comparison.
-CI evidence includes a Windows voice-preview frame and Android border/face composites.
+CI evidence includes a Windows voice-preview frame and Android border/face composites,
+with regression tests for restoring the original remote face after local interaction.
 Use the [physical QA sequence](../project/QA.md#f4-a-physical-offline-demonstration-pending).

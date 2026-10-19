@@ -62,7 +62,8 @@ class VoiceController(private val provider:MockProvider=OfflineProvider(),privat
             }
             "done"->if(mode==VoiceMode.speaking){emit("done");if(mode!=VoiceMode.speaking)return
                 transition(VoiceMode.listening);if(mode!=VoiceMode.listening)return
-                val words=caption.split{it.isWhitespace()}.count{it.isNotEmpty()}
+                var words=0;var previousSpace=true
+                for(c in caption){val space=c.isWhitespace();if(!space&&previousSpace)words++;previousSpace=space}
                 scheduled.add(MockEvent(now+((1.2+words*.32).coerceIn(2.8,12.0)+3).times(1000).toLong(),generation,turn,"clear"));scheduled.sortBy{it.due}
             }
             "clear"->if(mode==VoiceMode.listening){caption="";emit("clear")}

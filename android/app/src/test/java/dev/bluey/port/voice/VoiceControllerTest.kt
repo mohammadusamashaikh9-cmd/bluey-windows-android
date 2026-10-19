@@ -2,6 +2,7 @@ package dev.bluey.port.voice
 import org.junit.Assert.*
 import org.junit.Test
 import dev.bluey.port.animation.*
+import dev.bluey.port.link.*
 class VoiceControllerTest {
     private fun awake()=VoiceController().apply{toggle(0);tick(600);drain()}
     @Test fun sixStatesHoldThresholdAndStreaming() {
@@ -61,6 +62,21 @@ class VoiceControllerTest {
         val c=awake();c.down(700);c.up(1000);val active=c.snapshot
         repeat(80){c.accept(MockEvent(1001,active.generation,active.turnId,"delta","x"),1001)}
         assertEquals(VoiceMode.asleep,c.snapshot.mode);assertEquals("",c.snapshot.caption);assertTrue(c.drain().size<=32)
+    }
+    @Test fun authenticatedRemoteSurvivesLocalVoiceAndTouchOverrides() {
+        val animator=FaceAnimator(AnimationClock{0.0},RandomSource{.5});val delivery=FaceDelivery()
+        val remote=RemoteFace(LinkFace(.7,-.4,"happy",.8,0),1000,"packet")
+        assertTrue(delivery.apply(animator,remote,1000,0.0))
+        val local=VoiceFace.select(null,VoiceMode.speaking,remote,true,0.0)!!
+        assertEquals(.7,local.gazeX,0.0);assertEquals(Mood.talking,local.mood)
+        animator.overrideFace=local;animator.step(0.0)
+        animator.overrideFace=VoiceFace.select(Gaze(-.5,.2),VoiceMode.thinking,remote,true,.1)
+        assertEquals(Mood.listening,animator.step(.1).mood)
+        animator.overrideFace=VoiceFace.select(null,VoiceMode.asleep,remote,true,.2)
+        assertEquals(Mood.happy,animator.step(.2).mood) // receive target was never replaced by voice
+        assertFalse(delivery.apply(animator,remote,3500,.3))
+        assertEquals(Mood.listening,animator.step(2.5).mood) // original remote stale behavior
+        assertEquals(0.0,VoiceFace.select(null,VoiceMode.listening,remote,false,3.0)!!.gazeX,0.0)
     }
     @Test fun exactSourceIndicatorParametersPulseAndTransitions() {
         val colors=listOf(0xB9B2CC,0xFFD66B,0x4F8BFF,0x4F8BFF,0xC79BFF,0xFF9AD0)
