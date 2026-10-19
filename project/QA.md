@@ -2,7 +2,8 @@
 
 F0 is static foundation validation. F1 execution is recorded in tracking;
 F2 pure/build/native CI evidence is recorded in tracking; physical F1/F2 and
-wider F3–F6 acceptance remains unverified.
+F3 functional acceptance is developer-reported (including restart/reconnect).
+Measured performance, F4-A physical QA and future live F4–F6 acceptance remain unverified.
 See [CHECKPOINTS](../tracking/CHECKPOINTS.md) for gate ownership/evidence.
 
 ## Evidence rules

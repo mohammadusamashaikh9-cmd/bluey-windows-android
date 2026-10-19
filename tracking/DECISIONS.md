@@ -232,7 +232,7 @@ No claimed physical Windows DNS-SD cause or universal multicast reachability.
 
 ## D010 / 2026-10-20 (Asia/Karachi) — F4-A offline voice presentation
 
-F3 PR#4 is squash-merged at32a38c045e6de87e9d79d44d1114a4f0c76d2b8d. Developer
+F3 PR #4 is squash-merged at `32a38c045e6de87e9d79d44d1114a4f0c76d2b8d`. Developer
 reports all specified functional pairing/gaze/mood/touch/Wi-Fi/revocation/full-app-
 restart reconnection passes. Accept functional F3; keep measured latency/FPS/resources,
 multi-device/OS compatibility and advanced QA open. Do not reopen F3 implementation.
