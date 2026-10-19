@@ -62,3 +62,20 @@ upload -> optional cloud transcription -> local session merge/export. Upstream
 uses 300 s AAC chunks, per-chunk speaker letters, notes sync and retries. The port
 must make retry/retention/deletion visible and not claim speaker identity across
 chunks. Deleting Android records must state whether desktop copies still exist.
+
+## F3 implemented connection flow
+
+Open Windows Secure device connection, select its private IPv4, Start host, then
+Start pairing. Android Connection accepts the OS-scanned or privately pasted full
+invitation and displays the host UUID/fingerprint. Pair explicitly approves it;
+TLS verifies that exact certificate before the enrollment secret is sent. Compare
+the phone certificate fingerprint displayed on both screens and Approve on Windows.
+Only the confirmed `ready` session supplies live face updates.
+
+Discovery selection reconnects using an already saved identity; it never trusts a
+new name. Stop pairing/expiration cancels enrollment. Revocation removes host trust
+and closes the affected socket. Android Disconnect retains trust, Forget removes
+it, and backgrounding closes sockets/discovery until foreground resume. Secure
+retry backs off from one to fifteen seconds; authentication/protocol failures stop
+retry until explicit user action. Disconnected animation retains its offline demo.
+No F4/F5 event handler is enabled by pairing.

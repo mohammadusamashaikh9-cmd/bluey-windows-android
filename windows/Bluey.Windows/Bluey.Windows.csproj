@@ -11,6 +11,8 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../Bluey.Core/Bluey.Core.csproj" />
+    <ProjectReference Include="../Bluey.Link/Bluey.Link.csproj" />
+    <PackageReference Include="QRCoder" Version="1.7.0" />
     <Resource Include="../../Shared/Fonts/*.ttf" Link="Fonts/%(Filename)%(Extension)" />
     <Content Include="../../Shared/Fonts/OFL-*.txt" Link="Fonts/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../../LICENSE" Link="LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />

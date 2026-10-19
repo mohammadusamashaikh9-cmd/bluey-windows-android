@@ -1,0 +1,71 @@
+package dev.bluey.port.link
+
+import android.Manifest
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun ConnectionPanel(link:DeviceLink,incoming:String?,close:()->Unit) {
+    val state by link.ui.collectAsState()
+    val log by link.diagnostics.collectAsState()
+    val context=LocalContext.current
+    var replaceIdentity by remember {mutableStateOf(false)}
+    var showLog by remember {mutableStateOf(false)}
+    var endpointAddress by remember {mutableStateOf("")}
+    var endpointPort by remember {mutableStateOf(ReconnectEndpoints.DEFAULT_PORT.toString())}
+    var invitation by remember(incoming){mutableStateOf(incoming?:"")}
+    val displayedInvitation=invitation
+    val parsed=remember(displayedInvitation){runCatching{Bootstrap.parse(displayedInvitation,System.currentTimeMillis()/1000)}.getOrNull()}
+    val nearby=rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()){granted->if(granted){link.pause();link.resume()}}
+    AlertDialog(onDismissRequest=close,title={Text("Secure Windows connection")},
+        text={Column(Modifier.verticalScroll(rememberScrollState())) {
+            Text(state.status)
+            TextButton(onClick=link::testIdentity){Text("Test protected signing identity")}
+            TextButton(onClick={replaceIdentity=true}){Text("Replace phone identity / forget host…")}
+            TextButton(onClick={showLog=!showLog}){Text(if(showLog)"Hide safe diagnostics" else "Show safe diagnostics")}
+            TextButton(onClick={
+                context.getSystemService(ClipboardManager::class.java).setPrimaryClip(ClipData.newPlainText("Bluey safe diagnostics",link.diagnosticText()))
+            }){Text("Copy safe diagnostics")}
+            if(showLog) {
+                Text("Bounded debug log: fixed signing/connection stages, safe error categories, UTC, local IDs and client source ports. Review before sharing; never include the QR/URI.")
+                Text(remember(log){link.diagnosticText()},style=MaterialTheme.typography.bodySmall)
+            }
+            state.clientPin?.let{Text("This phone certificate SHA-256 (compare on Windows): $it")}
+            state.trusted?.let{Text("Saved host: ${it.hostId}\nSHA-256: ${it.pin}")}
+            Text(state.discoveryStatus)
+            TextButton(onClick=link::refreshDiscovery){Text("Refresh discovery")}
+            Text("Saved identity reconnects without a new QR. Default Windows TCP port: ${ReconnectEndpoints.DEFAULT_PORT}. Start the Windows host explicitly after reopening it.")
+            OutlinedTextField(value=endpointAddress,onValueChange={if(it.length<=15)endpointAddress=it},label={Text("Current Windows private IPv4 (routing hint)")},modifier=Modifier.fillMaxWidth())
+            OutlinedTextField(value=endpointPort,onValueChange={if(it.length<=5)endpointPort=it},label={Text("Windows TCP port")})
+            TextButton(onClick={link.connectEndpoint(endpointAddress,endpointPort)},enabled=state.trusted!=null){Text("Use endpoint with saved identity")}
+            Text("If the laptop IP changed and discovery is unavailable, enter its displayed endpoint. The saved certificate pin is still required; no trust or key is replaced.")
+            Text("Secure hosts discovered (names are untrusted hints):")
+            state.hosts.forEach{host->TextButton(onClick={link.connect(host)}){Text("${host.name} · ${host.address}:${host.port}\nConnect using saved identity")}}
+            if(state.hosts.isEmpty())Text("No host discovered. Saved endpoint still works; start Windows secure host or update its LAN endpoint. A new QR is only for enrollment.")
+            OutlinedTextField(value=invitation,onValueChange={if(it.length<=2048)invitation=it},label={Text("Complete Windows pairing URI")},modifier=Modifier.fillMaxWidth(),maxLines=4)
+            parsed?.let{Text("Invitation host: ${it.host.hostId}\n${it.host.address}:${it.host.port}\nServer SHA-256: ${it.host.pin}\nCompare this fingerprint with the Windows invitation. Pair explicitly approves this identity; Windows will also ask for approval.")}
+            Button(onClick={link.pair(displayedInvitation);invitation=""},enabled=parsed!=null){Text("Pair with this Windows identity")}
+            TextButton(onClick={link.connect()}){Text("Reconnect saved host")}
+            TextButton(onClick={link.disconnect()}){Text("Disconnect / use offline demo")}
+            TextButton(onClick={link.forget()}){Text("Forget saved Windows trust")}
+            if(Build.VERSION.SDK_INT>=33)TextButton(onClick={nearby.launch(Manifest.permission.NEARBY_WIFI_DEVICES)}){Text("Allow Nearby devices if Android 16 local-network opt-in requires it")}
+            Text("No camera permission: use your system QR scanner or paste privately. Backgrounding closes the link. No plaintext fallback. Forgetting here does not revoke this phone on Windows; revoke it there too.")
+        }},confirmButton={TextButton(onClick=close){Text("Done")}})
+    if(replaceIdentity)AlertDialog(onDismissRequest={replaceIdentity=false},
+        title={Text("Replace this phone identity?")},
+        text={Text("This stops the session, deletes this phone's signing key and saved Windows trust. Revoke the old phone entry on Windows, then use a fresh invitation and approve both devices again. Nothing is replaced automatically.")},
+        confirmButton={TextButton(onClick={replaceIdentity=false;link.replaceIdentity()}){Text("Replace identity and forget host")}},
+        dismissButton={TextButton(onClick={replaceIdentity=false}){Text("Cancel")}})
+}

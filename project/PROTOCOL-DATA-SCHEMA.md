@@ -128,3 +128,12 @@ reviewed OS store after API selection; do not copy upstream plaintext `keys.json
 Ephemeral tokens remain memory-only; API request/response content is not a local
 database. OpenAI Realtime schema/capabilities/model and price require live checks
 at F4; source string constants are historical implementation, not availability.
+
+## Implemented Windows–Android v1 (F3)
+
+[protocol/README.md](../protocol/README.md) defines the exact protected-channel
+schema, enrollment state machine, UUID/sequence/size/deadline limits and freshness
+rules. [v1-cases.jsonl](../protocol/v1-cases.jsonl) is executed by both native-language
+suites. The legacy Apple framing above remains source reference only. The port's
+service identity is `_bluey-sec._tcp`; it intentionally rejects insecure legacy
+clients and accepts no tool/voice/capture/action command.

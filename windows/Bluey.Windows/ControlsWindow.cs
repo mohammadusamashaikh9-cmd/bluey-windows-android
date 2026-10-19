@@ -18,7 +18,7 @@ internal sealed class ControlsWindow : Window
     private readonly Dictionary<int, Action> hotkeys = [];
     private nint hwnd;
     private double lastStatus;
-    internal ControlsWindow(CursorEngine engine, OverlayWindow overlay, VisualState visuals)
+    internal ControlsWindow(CursorEngine engine, OverlayWindow overlay, VisualState visuals, Action? openConnection = null)
     {
         this.engine = engine; this.overlay = overlay; this.visuals = visuals;
         Title = "Bluey — offline Windows demo"; Width = 430; Height = 700; MinWidth = 350; MinHeight = 420;
@@ -55,6 +55,7 @@ internal sealed class ControlsWindow : Window
         Button(demos, "Temporary label", () => overlay.Art.Label("Hello there!"));
         Button(demos, "Visual burst", visuals.DemoBurst);
         Button(demos, "Talk output (Ctrl+Alt+T)", () => engine.TalkUntil = engine.Now + 3);
+        if (openConnection != null) Button(demos, "Secure device connection", openConnection);
         Button(demos, "Exit", Close);
         panel.Children.Add(status); panel.Children.Add(warning);
         if (SettingsStore.Warning is { } w) warning.Text = w;
@@ -104,6 +105,6 @@ internal sealed class ControlsWindow : Window
     {
         if (engine.Now - lastStatus < .2) return; lastStatus = engine.Now;
         var face = engine.Face(engine.Now);
-        status.Text = $"{engine.Mode} · {overlay.ActualWidth:0} × {overlay.ActualHeight:0} DIPs · {overlay.Coordinates.DpiX:0} DPI\nPhone data only: {face.Mood}, gaze ({face.GazeX:0.00}, {face.GazeY:0.00}), talk {face.Talk:0.00}\nMinimize this control window while comparing animation. Restore it from the taskbar to recover a hidden overlay or exit.";
+        status.Text = $"{engine.Mode} · {overlay.ActualWidth:0} × {overlay.ActualHeight:0} DIPs · {overlay.Coordinates.DpiX:0} DPI\nPhone output: {face.Mood}, gaze ({face.GazeX:0.00}, {face.GazeY:0.00}), talk {face.Talk:0.00}\nMinimize this control window while comparing animation. Restore it from the taskbar to recover a hidden overlay or exit.";
     }
 }

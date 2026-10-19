@@ -67,3 +67,44 @@ require scoped confirmation for irreversible effects and keep a local emergency
 stop reachable without model/network cooperation. Stop remains latched until the
 user resumes; the source's short cool-down is not sufficient. Approval is tied to
 one operation/target and expires on state changes. No unattended privileged agent.
+
+## F3 implemented security profile (D009, 2026-10-18)
+
+The port uses platform TLS 1.2/1.3 with mutual certificate proof and exact SHA-256
+DER pinning, never legacy `_googly._tcp` plaintext. See the executable
+[wire contract](../protocol/README.md) and [D009](../tracking/DECISIONS.md).
+Windows supplies a five-minute 256-bit invitation and its certificate fingerprint
+through an out-of-band QR/full URI. Android must explicitly approve that identity;
+Windows must explicitly approve the phone's certificate. DNS-SD names provide no
+authentication. An unknown certificate is admitted to an enrollment-only TLS
+session only during an active invitation; it receives no face state until the
+secret, both approvals and confirmation succeed. The TLS signature proves private
+key possession; checking only a JSON pin would not authenticate a peer.
+
+Windows identity PFX and trust ledger use CurrentUser DPAPI and atomic replacement
+under LocalAppData/Bluey/Link. Android's P-256 signing key is nonexportable through
+Android Keystore; saved host identity/endpoint are AES-GCM encrypted using another
+Keystore key in noBackupFilesDir. Backups and cleartext HTTP are disabled. The
+invitation is never persisted or logged. Trust storage errors fail closed; the app
+does not silently regenerate an unreadable identity. Revoke on Windows closes
+active sessions and rejects reconnection. Android Forget removes saved server trust;
+it does not remotely revoke the phone. After interrupted enrollment, explicitly
+revoke/forget before trying again.
+
+Possession of the complete QR/URI plus erroneous host approval can enroll a hostile
+device. OS compromise, malicious QR scanner/clipboard tools and physical access to
+an unlocked approving device are outside this bootstrap's protection. Use a trusted
+system scanner/private transfer and compare the full displayed host fingerprint.
+The custom URI scheme can be registered by other apps; manual paste into Bluey is
+the fallback. Local endpoint/connection metadata remains visible to the LAN. No
+F4+ or privileged commands are accepted. Physical Keystore, SChannel, NSD, firewall,
+Wi-Fi loss and latency acceptance are pending actual device tests.
+
+Android remains targetSdk 36. Official [local network permission guidance](https://developer.android.com/privacy-and-security/local-network-permission)
+requires ACCESS_LOCAL_NETWORK for target 37+ on Android 17; it is not requested by
+this target-36 build. Android 16 local-network restrictions are opt-in and use
+NEARBY_WIFI_DEVICES; the connection panel offers an explicit request if that opt-in
+is enabled. Normal NSD/LAN use requires INTERNET; no location/camera/microphone
+permission is requested. [NSD](https://developer.android.com/develop/connectivity/wifi/use-nsd)
+and [Keystore](https://developer.android.com/privacy-and-security/keystore)
+use platform APIs. Revisit permission behavior when raising targetSdk.

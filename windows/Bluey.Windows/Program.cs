@@ -21,7 +21,14 @@ internal static class Program
         var engine = new CursorEngine(settings, () => timer.Elapsed.TotalSeconds, random.NextDouble);
         var visuals = new VisualState(engine, random.NextDouble);
         var overlay = new OverlayWindow(engine, visuals);
-        var controls = new ControlsWindow(engine, overlay, visuals);
+        var host = new Connection.WindowsLinkHost();
+        Connection.ConnectionWindow? connection = null;
+        var controls = new ControlsWindow(engine, overlay, visuals, () => {
+            if (connection == null) { connection = new(host); connection.Closed += (_,_) => connection = null; connection.Show(); }
+            else connection.Activate();
+        });
+        overlay.Frame += () => host.Publish(engine.Face(engine.Now));
+        app.Exit += (_,_) => { connection?.Close(); Task.Run(host.Stop).GetAwaiter().GetResult(); };
         app.MainWindow = controls;
         engine.GoHome(); overlay.Show(); controls.Show();
         return app.Run();

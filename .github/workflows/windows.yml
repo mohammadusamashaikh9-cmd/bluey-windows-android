@@ -1,11 +1,11 @@
 name: Windows overlay
 on:
   push:
-    branches: [main, port/windows-overlay]
-    paths: ['windows/**', 'Shared/Fonts/**', '.github/workflows/windows.yml']
+    branches: [main, port/windows-overlay, port/secure-device-link]
+    paths: ['windows/**', 'Shared/Fonts/**', 'protocol/**', '.github/workflows/windows.yml']
   pull_request:
     branches: [main]
-    paths: ['windows/**', 'Shared/Fonts/**', '.github/workflows/windows.yml']
+    paths: ['windows/**', 'Shared/Fonts/**', 'protocol/**', '.github/workflows/windows.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -29,6 +29,8 @@ jobs:
           global-json-file: windows/global.json
       - name: Pure deterministic tests
         run: dotnet test Bluey.Core.Tests -c Release --logger 'trx;LogFileName=core.trx' --results-directory TestResults
+      - name: Strict protocol and actual TLS loopback tests
+        run: dotnet test Bluey.Link.Tests -c Release --logger 'trx;LogFileName=link.trx' --results-directory TestResults
       - name: Build native WPF application
         run: dotnet build Bluey.Windows -c Release
       - name: Publish self-contained development folder
@@ -51,6 +53,11 @@ jobs:
             $relative = [IO.Path]::GetRelativePath($root, $_.FullName).Replace('\', '/')
             '{0}  {1}' -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant(), $relative
           } | Set-Content -Encoding utf8NoBOM artifacts/bluey-win-x64/SHA256SUMS.txt
+      - name: Primary binary and manifest SHA-256 summary
+        run: |
+          foreach ($name in @('Bluey.Windows.exe', 'Bluey.Windows.dll', 'SHA256SUMS.txt')) {
+            '{0}  {1}' -f (Get-FileHash "artifacts/bluey-win-x64/$name" -Algorithm SHA256).Hash.ToLowerInvariant(), $name
+          }
       - uses: actions/upload-artifact@v6
         if: success()
         with:

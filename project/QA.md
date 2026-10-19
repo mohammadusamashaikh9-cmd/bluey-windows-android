@@ -112,7 +112,7 @@ background-clock suspension and invalid time. Robolectric native graphics on
 SDK 35 uses the actual Android Canvas renderer to produce seven fixed mood PNGs,
 blink, scaling/crop cases and happy transition keyframes under
 `android/app/build/renders/`. It also checks vector bounds, font notices and
-absence of system permissions. These are offscreen tests, not physical GPU tests.
+the minimal F3 LAN permission allowlist. These are offscreen tests, not physical GPU tests.
 
 Success uploads `bluey-android-debug-<commit>` with `app-debug.apk` and
 `SHA256SUMS.txt`; `android-test-evidence-<commit>` contains reports/XML/renders.
@@ -144,3 +144,124 @@ not a user click-routing test. No physical Windows click-through/focus/Alt+Tab,
 100/150/200% DPI, capture interaction, visual fidelity, frame pacing, CPU or
 8 GB laptop performance result may be inferred. F2 stays active until that
 separate evidence is recorded. No screenshot/capture feature is implemented.
+
+
+## F3 automated and physical acceptance
+
+Both language suites execute all 40 shared `protocol/v1-cases.jsonl` cases.
+Run `dotnet test windows/Bluey.Link.Tests -c Release` for real loopback mTLS
+(enrollment approval/confirm, reconnect/revoke, wrong pin/secret, missing/unknown
+certificate, plaintext rejection, role rejection, slot cleanup and fast latest-slot
+publishing) plus deterministic codec/invitation/rate/sequence/freshness tests.
+Windows CI additionally runs real CurrentUser DPAPI identity/trust reload,
+persistent revocation and corruption rejection, alongside F2 regression checks.
+Android CI tests the same codec corpus, bootstrap limits, pin matching, bounded
+retry schedule, and once-only fresh delivery into the unchanged animator.
+
+Physical acceptance remains pending. Install the exact checksum-verified Windows
+folder and debug APK from the same tested commit. Record laptop/phone model, OS,
+Wi-Fi/router topology, private IPv4, permissions and artifact digests. Start host,
+pair with the full QR/URI, compare both full fingerprints, explicitly approve on
+both devices; confirm authenticated status and gaze following mouse movement.
+Exercise all seven Windows-generated moods and Talk output; verify touch override,
+2.5-second stale behavior, disconnect/offline demo, background/resume, host restart,
+Wi-Fi disable/re-enable and device revocation. Try wrong/expired invitation and
+changed server identity; no face must reach an untrusted session. Record actual
+latency distribution and frame/CPU/memory impact without inferring these from CI.
+Do not record invitation secrets or private keys in submitted evidence. Existing
+F1/F2 measured-performance acceptance remains separate. F2 functional acceptance
+is user-reported; no new physical observations are claimed by the agent.
+
+### F3-R1 diagnostic evidence and retest
+
+On 2026-10-19 (Asia/Karachi), the developer reported: Windows host launches/listens
+on private IPv4; Wi-Fi is Private; an application-scoped inbound Private TCP allow
+rule exists; Android displays a fresh invitation and Pair is explicitly tapped;
+Android reports generic failure and Windows never shows pending approval. TCP
+reachability was not definitively observed. These are user-reported observations,
+not agent-performed device tests. Different server/client certificate pins are
+expected and are not a defect.
+
+The confirmed implementation defect was loss of failure-stage evidence: Android
+collapsed all pre-approval exceptions into one message and Windows swallowed
+failures without an accessible stage log. The physical network/TLS root cause
+remains unknown. F3-R1 adds fixed-vocabulary bounded in-memory logs, local attempt
+IDs and client source ports. It instruments pin verification, client alias/chain/
+key selection, local handshake, hello/enrollment, approval and session closure.
+No packet, exception message, certificate subject, secret or full URI is logged.
+A source-level cancellation defect is also repaired: a cancelled blocking socket
+read could raise IOException, allowing the active-error handler to clear a newer
+pairing intent. A real loopback read/coroutine regression failed before the active
+context guard. This mechanism is distinct from any unproven physical root cause.
+
+[Windows instructions](../windows/README.md#f3-r1-one-safe-physical-pairing-retest)
+provide the exact single-attempt paired-device retest and safe diagnostic-copy
+procedure, including executable-path firewall continuity and Android debug-signer
+reinstall/re-enrollment. Do not replace this with PowerShell connection-state
+polling or screenshots of the invitation.
+
+Regression coverage uses actual .NET TLS 1.2/1.3 with Android-shaped P-256 leaves
+without KU/EKU, plus actual JDK JSSE handshakes through the production Android
+client key manager with ephemeral **software** keys. Missing identity/pin failures,
+alias selection, opaque-key nonexport, stage categorization, privacy and 96-event
+bounds are checked. These tests cannot demonstrate a real Android hardware key or
+Windows-to-phone interoperability. Existing motion/render/protocol/revocation and
+no-downgrade tests remain required. Actual final run/artifact results are in tracking.
+
+### F3-R2 / 2026-10-19 (Asia/Karachi)
+
+Physical evidence supplied by the developer: two October 18 attempts correlated
+at 21:57:00 UTC/53148 and 21:59:10 UTC/53192. TCP is accepted on Windows; Android
+verifies the server pin and supplies EC key/chain; TLS fails before Windows client
+validation/mutual-TLS completion, hello or enrollment. Firewall/QR/discovery and
+different identities' fingerprints are not demonstrated causes.
+
+Source-confirmed defect: Android generation authorizes SHA digests but not NONE,
+while Conscrypt requests NONEwithECDSA for opaque-key TLS signing. Regression
+ClientKeyPolicyTest failed at the old policy (43 tests, one expected failure in
+Android CI 39171259060). Authorize NONE for new keys without weakening TLS hashes.
+Run the actual existing-key SHA256withECDSA and prehashed NONEwithECDSA sign/verify
+checks on-device. Explicitly replace an incompatible immutable key and forget local
+host trust only after user confirmation; revoke its Windows entry and re-enroll.
+Never export the private key, challenge/signature, URI or provider exception text.
+
+Software tests independently exercise TLS 1.2/1.3, exact certificate presentation,
+proof-of-possession/completion, EnrollmentValidated/ApprovalPending, confirmation,
+face delivery, revocation and missing/untrusted identity rejection. JCA signing
+checks test matching/mismatched keys; Robolectric checks the production key spec,
+not actual KeyMint enforcement. Windows native error/HRESULT and fixed Android
+provider/alert diagnostics are safe categories, not raw traffic or definitive alert
+codes when the provider exposes none. Actual Keystore/Schannel rejection mechanism
+and successful correction stay pending the [R2 physical sequence](../windows/README.md#f3-r2-keystore-signing-and-mutual-tls-retest).
+
+### F3-R3 / 2026-10-19 UTC
+
+User-reported R2 physical passes: authenticated mTLS pairing, live gaze and mood,
+Android touch precedence, Wi-Fi reconnection and revocation rejection. The restart
+video reports repeated TCP timeouts/no host discovery over 3–5 minutes; it does
+not independently prove Windows listened at each attempt. Physical old/new IP/port
+and the exact DNS-SD failure remain uncaptured.
+
+Source-confirmed defects: default port-0 binding makes saved endpoints unstable;
+Android has no fixed-port/manual fallback when NSD is absent. NSD start failure
+keeps a non-null listener; pause while resolving keeps its busy latch, preventing
+new generation resolution. Red tests reproduce the port conflict being ignored
+via ephemeral bind and both discovery lifecycle failures. R3 binds TCP47654 with
+explicit conflict/no fallback, preserves host-start consent, rotates bounded
+pinned-identity endpoint hints, and keeps ordinary transport failures retryable.
+New endpoint persistence occurs only after authenticated hello/ready checks.
+
+Focused tests must cover a host exiting with a live authenticated client and
+restarting at the default port with existing trust and no invitation; stale port,
+changed loopback IP/port and wrong-pin rejection; host not listening; conflicting
+port/retry; revoked identity rejection followed by explicit same-key enrollment.
+Kotlin tests cover missing/late/untrusted hints, fixed-port migration, manual LAN
+address validation, immutable saved UUID/pin, retry classification and stale NSD
+callback generations. NSD callback simulation is not real multicast evidence.
+Retain all existing animation, protected-store and protocol tests.
+
+Retest using [the one R3 sequence](../windows/README.md#f3-r3-restart-and-saved-identity-reconnection).
+Record Windows actual running/stopped endpoint alongside Android's selected route,
+unchanged TLS identities, confirmed session after restart, conflict handling,
+IP-change recovery and intentional revocation/re-enrollment. No new physical R3
+pass or measured latency is inferred from builds/loopback/software-key tests.

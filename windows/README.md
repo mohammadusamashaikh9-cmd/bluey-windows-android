@@ -136,3 +136,179 @@ defines NOACTIVATE and TOOLWINDOW.
 and [RegisterHotKey](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey)
 guide DPI/refit and conflict/no-repeat behavior. These were read during F2;
 the API contracts are not evidence that a particular laptop behaved correctly.
+
+## F3 secure phone demonstration
+
+Open **Secure device connection** in the existing control window. Refresh local
+addresses, select the laptop's private IPv4 Wi-Fi/LAN address, and Start secure
+host. If Windows Firewall asks, allow the application on your private home network
+only. Bluey does not modify firewall rules or request administrator privileges.
+Start pairing; on Android open Connection, scan the Windows QR with a trusted
+system scanner (or privately paste the entire displayed URI), compare the host
+fingerprint and choose Pair. Back on Windows, approve the requesting phone/cert.
+The Android status must say authenticated TLS before testing live gaze/mood/talk.
+Use Windows Follow, phone position, mood and Talk output to exercise synchronization.
+
+Stop pairing invalidates the invitation; Stop host closes sessions. Trusted-device
+Revoke closes that device's session and rejects reconnect. Android Forget clears
+its server trust. If enrollment was interrupted at final confirmation, revoke and
+forget on both sides before a fresh invitation. Leave Android foreground; background
+closes its network connection. On resume it reconnects with the saved pin, without
+plaintext fallback. Windows restart changes the port; DNS-SD supplies its new
+endpoint, authenticated with the stored full identity. Full URI paste works when
+discovery is unavailable. Initial scope is private IPv4 on the same LAN.
+
+Development artifacts remain self-contained, unsigned Windows x64 folders; no
+laptop SDK, IDE, WSL, Docker or extra desktop runtime is required. The Android APK
+is a debug development build. Verify supplied SHA256SUMS before use. Physical
+pairing, Wi-Fi loss/reconnect, OS-protected key behavior, latency and existing
+performance measurements remain pending until recorded on the actual devices.
+
+## F3-R1: one safe physical pairing retest
+
+The initial phone attempt failed before Windows showed approval. TCP reachability
+and the failing TLS/enrollment stage were not captured, so the physical root cause
+is **not established**. These builds also prevent a cancelled socket read from being treated as an active
+pairing failure that could clear a newer attempt. A real loopback/coroutine
+regression tests that mechanism; it does not establish the physical failure cause.
+These builds add bounded in-app stage diagnostics on both
+platforms, without changing D009, TLS versions, certificates or enrollment rules.
+The phone and server certificate fingerprints are supposed to differ.
+
+1. Verify both new artifact checksum files. Stop the old Windows process and
+   replace its development folder at the **same executable path already allowed
+   by your existing Private-profile application rule**. Keep LocalAppData/Bluey/Link
+   intact; do not delete the Windows identity. If you deliberately choose a new
+   folder, manually check that the existing application rule names that new EXE.
+   Bluey does not create or change firewall policy.
+2. Check Android APK signing continuity before updating (the artifact includes
+   `SIGNING-CERT.txt`; APK signing identity is separate from both TLS identities). Independent CI runners may use different debug signers.
+   If Android rejects the update because its signer differs, uninstall the old
+   Bluey app and install the new APK using the phone's package installer. This
+   deletes its old app data/Keystore identity. Revoke any old phone entry in the
+   Windows trusted-device list, if one exists, and enroll anew; never bypass the
+   signature check or restore/export private keys. No local Android SDK is needed.
+3. Keep both apps foreground on the same private Wi-Fi. Start Windows secure host
+   on its current Wi-Fi IPv4, then Start pairing. Scan/paste that fresh invitation;
+   compare the **server** fingerprint with Android's invitation display and tap
+   Pair once. Compare the **phone** fingerprint across the two approval displays
+   only if Windows reaches ApprovalPending, then explicitly approve on Windows.
+4. After either success or failure, immediately choose **Copy safe diagnostics**
+   in each app's Connection window/panel. Share only these two text logs, plus
+   Windows/Android OS and phone model, approximate attempt time, and artifact
+   digests. Logs keep only the latest 96 events, in memory. They contain UTC,
+   local attempt IDs, client TCP source port, fixed stages/categories and (on
+   Windows) numeric native TLS error/negotiated protocol. Review/redact them before
+   sharing. **Do not share the QR, full URI, clipboard invitation, a full settings
+   screenshot, private keys, credentials or unrelated Logcat/event logs.**
+5. Match Android `TCP_CONNECTED port=N` to Windows `TcpAccepted port=N` near the
+   same UTC time (NAT can translate ports). IDs starting A/W are local IDs, not a
+   shared credential. No Windows TcpAccepted means this listener did not observe
+   the attempt in the retained log; it does not prove which router/firewall/path
+   blocked it. `TLS_COMPLETED` on Android means local handshake completion; TLS
+   1.3 may still be rejected by Windows before hello. Windows MutualTlsCompleted,
+   EnrollmentValidated and ApprovalPending locate progression precisely.
+
+If Session confirmed/SessionReady appears on both, test mouse gaze, mood and Talk
+output. Otherwise stop at the recorded failure and supply those safe logs. Actual
+phone Keystore/SChannel interoperability, LAN reachability and the physical root
+cause remain unverified until this retest; software-key/loopback CI is separate.
+
+## F3-R2: Keystore signing and mutual-TLS retest
+
+The developer's R1 phone/laptop logs establish TCP acceptance, server-pin validation
+and client EC alias/key/chain selection, then handshake failure before enrollment
+(October 18, 21:57:00 UTC/client port 53148 and 21:59:10/53192). The code omitted
+Android DIGEST_NONE authorization, required by Conscrypt's prehashed EC signing
+path. New keys authorize it; this does not change TLS wire algorithms or trust.
+The actual phone rejection/root cause and successful correction need this retest.
+
+1. Verify both R2 manifests and use the two builds from the same recorded app
+   commit. Replace the stopped Windows application at its existing firewall-allowed
+   path; preserve LocalAppData/Bluey/Link. Keep both apps foreground on the same Wi-Fi.
+   The APK includes its public SIGNING-CERT.txt. A different CI debug signer requires
+   uninstall/install (deletes phone data/old key); never bypass signing checks.
+2. On Android Connection choose **Test protected signing identity**. Copy its safe
+   diagnostics. Expected new-key results: DIGEST_NONE_AUTHORIZED, SIGN_SHA256_PASSED
+   and SIGN_PREHASH_PASSED. A preserved R1 key can report DIGEST_NONE_NOT_AUTHORIZED,
+   pass SHA-256, then fail prehashed signing: this directly tests the suspected
+   mechanism without a connection. Do not delete that evidence before copying it.
+3. Only if the old key is incompatible, choose **Replace phone identity / forget
+   host…**, explicitly confirm, revoke the old phone entry on Windows, then run
+   the signing check again. Replacement stops the session, deletes the phone key
+   and local saved host trust; it never silently replaces an identity or changes
+   Windows trust. A fresh APK installation already generates the corrected key.
+4. Start Windows host and a fresh five-minute invitation. Compare the server pin
+   on Android; tap Pair once. Require Windows ServerCertificateSelected,
+   ClientCertificatePresent, MutualTlsCompleted, EnrollmentValidated and
+   ApprovalPending. Compare the phone pin across the approval displays, approve
+   on Windows, and require SessionReady/SESSION_CONFIRMED. The phone and server
+   pins differ by design. Test live mouse gaze/mood/talk only after that session.
+5. Immediately copy **only Copy safe diagnostics** on both devices, review/redact,
+   and return those texts with OS/model/time/build digests. Match UTC/source ports;
+   local A/W IDs differ. Diagnostics v2 adds fixed signing/provider/alert categories,
+   Windows HRESULT/native code when available and ClientValidationNotReached when
+   TLS fails before its application callback. Unknown provider alerts stay unknown;
+   no raw messages, TLS records, secrets, keys, challenge or signature are logged.
+   Never share the QR/full URI, settings screenshots or unrelated system logs.
+
+CI forces TLS 1.2 and TLS 1.3 independently, including identity rejection and full
+approval/confirmed face delivery. Those are software-key tests, not evidence of
+phone Keystore/SChannel interoperability. Production still enables both TLS
+versions with exact pinning, mandatory mutual authentication and no downgrade.
+
+## F3-R3: restart and saved-identity reconnection
+
+Windows now listens on **TCP 47654** at the private IPv4 you explicitly select.
+Start secure host is still required after application launch; opening the app does
+not start a listener. Status/safe diagnostics say `listening=IP:47654` only after
+bind succeeds. An occupied/unavailable port leaves the host stopped and reports
+that conflict; close the old/conflicting listener or check the reservation, then
+retry. There is no silent dynamic-port fallback or automatic firewall change.
+47654 is a project development default, not an IANA reservation claim.
+
+Android retains the saved host UUID/pin and its existing phone key. It tries the
+saved endpoint, that IP at 47654 (for R2's old dynamic ports), then bounded rotating
+matching DNS-SD hints. A candidate still must pass exact pinned mutual TLS and
+hello/ready identity checks before a changed endpoint is saved. Ordinary TCP
+refusal/timeouts while the host is stopped remain retryable; neither those nor a
+rejected hint erase trust or authorize a different server. Explicit Disconnect
+stops retrying. Explicit Pair still requires a fresh invitation and both approvals;
+a revoked phone can re-enroll with the same key after the user authorizes it.
+
+Use **Refresh discovery** without forgetting trust. If DHCP changed the laptop's
+IP and multicast discovery is unavailable, enter its displayed private IPv4 and
+port in Android and choose **Use endpoint with saved identity**. This is an
+untrusted route, not re-enrollment; there is no LAN scan or pin replacement.
+Stable port handles unchanged-IP restarts without discovery. Automatic discovery
+success is not guaranteed on networks that block multicast; typed routing is the
+fallback for IP changes. Safe logs now include the selected private endpoint and
+Windows running/stopped state; review/redact LAN metadata before sharing.
+
+One physical restart/reconnect test:
+
+1. Verify the matching R3 artifacts/manifests and keep Windows DPAPI data intact.
+   Check APK SIGNING-CERT.txt: independently signed CI debug builds may require a
+   one-time uninstall/install and initial enrollment, which loses the old phone
+   app data/key. This packaging limitation is separate from the restart test;
+   never bypass signature checks or replace identity during restart recovery.
+2. Establish an authenticated R3 session once, record both pins/host UUID and
+   endpoint, and confirm gaze/mood. Exit Windows fully while Android stays foreground.
+   Check Android retries/offline demo without forgetting its saved identity.
+3. Reopen Windows. Confirm status says stopped before clicking Start secure host.
+   Select the same Wi-Fi IPv4, start host, and confirm `listening=IP:47654`.
+   Tap Android Reconnect saved host if needed. Do not start pairing, scan a QR,
+   Forget, Replace identity or approve enrollment. Require SessionReady and
+   SESSION_CONFIRMED and unchanged pins/UUID with resumed live gaze/mood.
+4. If IP changed, use discovery refresh or type the displayed new private endpoint;
+   require the same pin/UUID and confirmed session without QR. If bind failed,
+   resolve its reported conflict and explicitly retry Start host; do not attribute
+   Android timeouts to TLS while Windows says stopped.
+5. Revoke the phone on Windows: reconnect must fail. For the separate authorized
+   re-enrollment check, start a fresh invitation and approve both sides using the
+   same phone key; no identity replacement is needed. Copy only both safe logs
+   after the tests, with times/OS/model/build hashes; no QR/URI/keys/raw traffic.
+
+Developer reports R2 real mTLS, gaze/mood, touch precedence, Wi-Fi reconnect and
+revocation rejection passed. This R3 restart correction, DNS-SD/network behavior
+and latency still require the above real-device retest. CI is separate evidence.
