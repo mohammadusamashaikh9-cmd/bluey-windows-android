@@ -96,9 +96,10 @@ device. OS compromise, malicious QR scanner/clipboard tools and physical access 
 an unlocked approving device are outside this bootstrap's protection. Use a trusted
 system scanner/private transfer and compare the full displayed host fingerprint.
 The custom URI scheme can be registered by other apps; manual paste into Bluey is
-the fallback. Local endpoint/connection metadata remains visible to the LAN. No
-F4+ or privileged commands are accepted. Physical Keystore, SChannel, NSD, firewall,
-Wi-Fi loss and latency acceptance are pending actual device tests.
+the fallback. Local endpoint/connection metadata remains visible to the LAN. No privileged commands are accepted. F4-A only adds the bounded presentation
+allowlist below. F3 functional Keystore/SChannel pairing, Wi-Fi recovery and saved
+restart reconnect are now developer-reported accepted; measured latency and
+advanced device compatibility remain unverified.
 
 Android remains targetSdk 36. Official [local network permission guidance](https://developer.android.com/privacy-and-security/local-network-permission)
 requires ACCESS_LOCAL_NETWORK for target 37+ on Android 17; it is not requested by

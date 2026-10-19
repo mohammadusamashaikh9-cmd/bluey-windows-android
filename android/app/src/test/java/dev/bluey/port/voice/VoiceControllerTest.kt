@@ -50,6 +50,18 @@ class VoiceControllerTest {
         assertEquals(6,VoiceController.legal.size)
         assertFalse(VoiceMode.speaking in VoiceController.legal.getValue(VoiceMode.asleep))
     }
+    @Test fun captionsExpireAndNewTurnCannotReceiveOldProviderWork() {
+        val c=awake();c.down(700);c.up(1000);c.tick(2600);val old=c.snapshot
+        c.tick(15000);assertEquals("",c.snapshot.caption)
+        c.down(15100);c.up(15400);c.accept(MockEvent(15401,old.generation,old.turnId,"delta","old"),15401)
+        assertEquals(VoiceMode.thinking,c.snapshot.mode);assertEquals("",c.snapshot.caption)
+        c.sleep(15402);assertEquals(listOf("cancel"),c.drain().map{it.event})
+    }
+    @Test fun mockFloodRemainsBoundedAndSleepsWithoutLateCaption() {
+        val c=awake();c.down(700);c.up(1000);val active=c.snapshot
+        repeat(80){c.accept(MockEvent(1001,active.generation,active.turnId,"delta","x"),1001)}
+        assertEquals(VoiceMode.asleep,c.snapshot.mode);assertEquals("",c.snapshot.caption);assertTrue(c.drain().size<=32)
+    }
     @Test fun exactSourceIndicatorParametersPulseAndTransitions() {
         val colors=listOf(0xB9B2CC,0xFFD66B,0x4F8BFF,0x4F8BFF,0xC79BFF,0xFF9AD0)
         val widths=listOf(0.0,6.0,10.0,16.0,8.0,8.0);val rates=listOf(0.0,1.6,0.0,1.2,1.1,0.0)

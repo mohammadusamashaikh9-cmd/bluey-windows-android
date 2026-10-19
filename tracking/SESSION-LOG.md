@@ -683,3 +683,16 @@ Original Apple/Shared/previews and target render/animation code unchanged. F1/F2
 measured QA remains separate. No new authentication protocol, F4, network scanning,
 relay/backend, automation, firewall changes or merge. Physical R3 success remains
 pending HANDOFF's one restart/reconnect/revocation sequence and actual endpoint logs.
+
+## 2026-10-20 Asia/Karachi — F4-A implementation
+
+Verified origin/main and PR4 merged at32a38c0; created port/ai-voice-foundation.
+Recorded developer-reported F3 functional acceptance including full Windows restart,
+explicit host start and saved authenticated reconnect. Performance/matrix QA stays
+unverified. Applied all four project skills and cloud setup/runtime guidance;
+existing cloud SDK/Git auth sufficed, no local Android/Windows SDK installation.
+D010 precedes new code. Original Apple/previews unchanged. Deterministic Kotlin
+controller, public-corner native border and authenticated bounded caption events
+implemented. Local .NET core27/27 and link35/35 passed, zero skipped/failed.
+Initial red presentation test failed with command rejection before implementation.
+CI and artifact/physical evidence will be recorded separately when observed.

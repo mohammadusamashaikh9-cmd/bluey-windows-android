@@ -52,3 +52,7 @@ Upstream automatic discovery/connection is not authenticated pairing.
 
 Release acceptance requires all selected gate evidence in [QA](QA.md), unresolved
 limitations in release documentation and no unsupported claim of complete parity.
+
+F4-A is an explicitly labeled offline simulation of the original voice UX: it uses
+mock captions and local animation only. It does not authorize microphone collection,
+cloud sessions or desktop capture; separate future permissions default OFF.

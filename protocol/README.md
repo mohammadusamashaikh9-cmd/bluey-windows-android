@@ -61,3 +61,12 @@ Discovery `_bluey-sec._tcp` is an endpoint hint only. Bootstrap URI format:
 The complete URI must move out of band via the displayed QR or private manual
 paste. No secret is advertised in DNS-SD or stored on Android. Private IPv4 is the
 initial supported scope; no IPv6, routed-public or multi-interface claim.
+
+## F4-A presentation only
+
+After authenticated ready, updated Android may send `presentation` with exact
+`turnId,state,event,text` fields. [Canonical bounds/lifecycle](../project/PROTOCOL-DATA-SCHEMA.md#f4-a-presentation-extension-d010)
+and27 shared `f4a-cases.jsonl` fixtures supplement the unchanged40 original fixtures.
+No token/audio/tool/capture command is enabled. Both apps must be updated; old
+F3 hosts reject the extension. The queue is32/session, total caption2048 UTF-16
+units, each delta256, with existing4096-byte framing and sequence/rate checks.

@@ -38,6 +38,6 @@ class IndicatorAnimation {
     }
 }
 data class ScreenShape(val width:Float,val height:Float,val radii:List<Float>,val insetLeft:Float=0f,val insetTop:Float=0f) {
-    init{require(width>0&&height>0&&radii.size==4&&radii.all{it>=0&&it.isFinite()})}
+    init{require(width.isFinite()&&height.isFinite()&&width>0&&height>0&&insetLeft.isFinite()&&insetTop.isFinite()&&insetLeft>=0&&insetTop>=0&&radii.size==4&&radii.all{it>=0&&it.isFinite()})}
     fun centerRadii(stroke:Float)=radii.map{(min(it,min(width,height)/2)-stroke/2).coerceAtLeast(0f)}
 }
