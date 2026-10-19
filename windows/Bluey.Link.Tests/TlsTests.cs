@@ -37,6 +37,29 @@ public sealed class TlsTests
     {
         var e=await Record.ExceptionAsync(operation);Assert.True(e is AuthenticationException or IOException,$"Expected TLS/authentication denial, got {e?.GetType().Name??"success"}");
     }
+    [Fact] public async Task PresentationRequiresReadyAndIsClearedWhenAuthenticatedSessionEnds()
+    {
+        using var store=new MemoryStore();await using var server=new LinkServer(store);server.Start(IPAddress.Loopback,0);
+        using var cert=Identity.Create("phone",false);var id=Guid.NewGuid().ToString();
+        server.StartPairing();
+        using(var unauth=await Connect(server,cert)) {
+            await unauth.Wire.Send("presentation",new{turnId=Guid.NewGuid().ToString(),state="waking",@event="state",text=""},default);
+            await Denied(async()=>await unauth.Wire.Read(default));Assert.Equal("asleep",server.Presentation.State);Assert.Empty(store.Peers);
+        }
+        server.StopPairing();store.Add(new Peer(id,"phone",Identity.Fingerprint(cert)));
+        using(var c=await Connect(server,cert)) {
+            await c.Wire.Send("connect",new{hostId=server.HostId,deviceId=id},default);Assert.Equal("ready",(await c.Wire.Read(default)).Type);
+            var turn=Guid.NewGuid().ToString();
+            foreach(var mode in new[]{"waking","thinking","speaking"})await c.Wire.Send("presentation",new{turnId=turn,state=mode,@event="state",text=""},default);
+            await c.Wire.Send("presentation",new{turnId=turn,state="speaking",@event="delta",text="Offline preview"},default);
+            for(int n=0;n<100&&server.Presentation.Caption==null;n++)await Task.Delay(10);
+            Assert.Equal("Offline preview",server.Presentation.Caption);server.Publish(.2,.3,"happy",0);
+            Assert.Equal("face",(await c.Wire.Read(default)).Type);
+            server.Revoke(Identity.Fingerprint(cert));
+        }
+        for(int n=0;n<100&&server.Presentation.Caption!=null;n++)await Task.Delay(10);
+        Assert.Null(server.Presentation.Caption);await Denied(async()=>{using var c=await Connect(server,cert);});
+    }
     [Fact] public async Task RealMutualTlsEnrollmentRequiresBothApprovalsThenStreamsAndReconnects()
     {
         using var store=new MemoryStore();await using var server=new LinkServer(store);server.Start(IPAddress.Loopback,0);

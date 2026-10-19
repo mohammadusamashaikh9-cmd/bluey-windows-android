@@ -4,6 +4,8 @@ import android.content.Context
 import android.os.Build
 import android.os.SystemClock
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import dev.bluey.port.voice.PresentationEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -65,6 +67,11 @@ class DeviceLink(context:Context) {
     private val mutable=MutableStateFlow(LinkUi());val ui:StateFlow<LinkUi> = mutable
     private val latest=MutableStateFlow<RemoteFace?>(null);val face:StateFlow<RemoteFace?> = latest
     @Volatile private var socket:Socket?=null
+    @Volatile private var presentationSink:Channel<PresentationEvent>?=null
+    fun present(event:PresentationEvent) {
+        val sink=presentationSink?:return // Offline events never queue for reconnection.
+        if(sink.trySend(event).isFailure)sink.close(java.io.IOException("presentation backpressure"))
+    }
     @Volatile private var foreground=false
     @Volatile private var desired=true
     @Volatile private var replacingIdentity=false
@@ -229,6 +236,11 @@ class DeviceLink(context:Context) {
         keys.save(host);currentHost=host;invitation=null;enrollmentAttempt=null;endpointHint=null
         attempt.phase(LinkStage.SESSION_CONFIRMED)
         mutable.update{snapshot->snapshot.copy(connected=true,trusted=host,status="${attempt.id}: Session confirmed — authenticated Windows face connected")}
+        val presentations=Channel<PresentationEvent>(32);presentationSink=presentations
+        val sender=launch(Dispatchers.IO) {
+            try {for(event in presentations)wire.send("presentation",PresentationCodec.payload(event))}
+            finally {tls.close()} // A failed/full bounded queue closes this session; never replay it.
+        }
         // Timeout closes the socket even if the platform's blocking write is backpressured.
         val heartbeat=launch(Dispatchers.IO) {
             while(isActive){delay(1000);val guard=launch{delay(2000);tls.close()};try{wire.send("ping",Wire.payload())}finally{guard.cancel()}}
@@ -242,6 +254,6 @@ class DeviceLink(context:Context) {
                     else->throw ProtocolException("session command")
                 }
             }
-        } finally {heartbeat.cancel();tls.close()}
+        } finally {presentationSink=null;presentations.cancel();sender.cancel();heartbeat.cancel();tls.close()}
     }
 }

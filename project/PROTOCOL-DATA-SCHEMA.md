@@ -137,3 +137,21 @@ rules. [v1-cases.jsonl](../protocol/v1-cases.jsonl) is executed by both native-l
 suites. The legacy Apple framing above remains source reference only. The port's
 service identity is `_bluey-sec._tcp`; it intentionally rejects insecure legacy
 clients and accepts no tool/voice/capture/action command.
+
+## F4-A presentation extension (D010)
+
+Version 1 adds only `presentation` after authenticated `ready`. Payload has exactly
+`turnId` (canonical UUID), `state` (asleep/waking/listening/asking/thinking/speaking),
+`event` (state/delta/done/clear/cancel), `text` (0–256 UTF-16 units, valid Unicode,
+no control characters). Only nonempty speaking deltas carry text; done requires
+speaking; cancel requires asleep. Captions total at most2048 units. Existing4096-byte
+frames, sequence/session/replay checks,120 messages/sec and I/O deadlines remain.
+Shared `protocol/f4a-cases.jsonl` supplements the unchanged40 F3 fixtures.
+
+Android sends through a32-slot session-only queue on IO; disconnect destroys it.
+No offline replay. Windows grants one presentation owner per authenticated session;
+its reducer validates legal state/turn ordering and retires recent64 turns. An old
+session cannot clear a replacement owner. Disconnect/revocation clears captions.
+Interrupted streams expire15s after the last delta; complete captions use the source
+`clamp(1.2 + words*0.32, 2.8, 12) + 3` seconds. No privileged message is enabled.
+An older F3 host fails closed on the new type; update both apps before this demo.

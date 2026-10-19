@@ -229,3 +229,40 @@ R3 API semantics were checked against Microsoft Learn
 [ExclusiveAddressUse](https://learn.microsoft.com/en-us/dotnet/api/system.net.sockets.tcplistener.exclusiveaddressuse?view=net-10.0)
 (set before starting), plus Android's [NSD lifecycle guidance](https://developer.android.com/develop/connectivity/wifi/use-nsd).
 No claimed physical Windows DNS-SD cause or universal multicast reachability.
+
+## D010 / 2026-10-20 (Asia/Karachi) — F4-A offline voice presentation
+
+F3 PR#4 is squash-merged at32a38c045e6de87e9d79d44d1114a4f0c76d2b8d. Developer
+reports all specified functional pairing/gaze/mood/touch/Wi-Fi/revocation/full-app-
+restart reconnection passes. Accept functional F3; keep measured latency/FPS/resources,
+multi-device/OS compatibility and advanced QA open. Do not reopen F3 implementation.
+
+F4-A is a pure monotonic Kotlin six-state offline controller, deterministic injected
+mock reply events and generation-bound cancellation. Compose adapters own gestures,
+public WindowInsets rounded-corner/cutout queries and Canvas. Preserve ModeIndicator
+colors/borders/pulse/250ms ease-in-out; use dp for pt-equivalent units, public per-
+corner radii on API31+, adjustable55dp fallback otherwise, clip cutout bounds and
+keep labels inside safe insets. No private corner API. Touch > explicit local voice
+> fresh authenticated remote > demo fallback; add only a data override to the existing
+animator, preserving springs/vector math and remote receive/stale pipeline.
+
+Keep protocol v1 envelope/framing/sequences/4096-byte limit. Add only phone-to-host
+`presentation` after authenticated ready: UUID turnId, six-state enum, event
+state/delta/done/clear/cancel, bounded text. Delta chunks <=256 UTF-16 units, total
+caption <=2048; state/done/clear/cancel text empty. Only speaking carries deltas/done.
+Generation/turn/session checks cancel stale work. One active presentation owner,
+bounded32-message per-session client queue, no offline replay, host cleanup on
+sleep/disconnect/revoke and source read time clamp(1.2+words*.32,2.8,12)+3 seconds.
+This is a nonprivileged presentation allowlist, not tools/voice-token/media dispatch.
+Old F3 binaries reject the extension; matching F4-A apps are required for simulation.
+
+Microphone/cloud/screen permissions are separate planned states, all off and not
+grantable here. Explain future continuous awake audio, but no AudioRecord/media/
+capture/API client is created, no permission added, no audio/chirp output recorded.
+Original chirps are represented by synthetic talk animation only. No key UI/store
+is needed for offline testing; defer optional protected master-key setup to F4-B.
+Future GA Realtime client-secret boundary must require an authenticated active F3
+session plus explicit current mic/cloud authorization, request/expiry/rate bounds
+and cancellation/revocation; screen consent independent. No token endpoint or fake
+credential exists in F4-A. Follow current official GA client_secrets documentation
+in F4-B, not upstream beta token shapes/model constants. No live/billable request.

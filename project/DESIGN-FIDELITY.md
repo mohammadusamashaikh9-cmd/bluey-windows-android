@@ -154,3 +154,29 @@ visibly narrower/sharper than the upstream PNG reference; reference input/DPI is
 unknown, so the radius is not guessed to force a screenshot match. Physical/source
 recording calibration remains a material open fidelity item. Embedded original
 TTFs are verified byte-for-byte; notice text is retained with CI checkout CRLF.
+
+## F4-A source comparison
+
+`GooglyApp.swift` ModeIndicator maps asleep/waking/listening/asking/thinking/speaking
+in order to border widths0/6/10/16/8/8 dp-equivalent, colors none/FFD66B/4F8BFF/4F8BFF/
+C79BFF/FF9AD0, rates0/1.6/0/1.2/1.1/0. Source250ms ease-in-out uses explicit cubic
+x-inversion in the port. Border opacity is exactly
+`0.65 + 0.35*(0.5 + 0.5*sin(2*pi*frequency*t))`; labels remain solid.
+Fredoka16, icon14, gap7, capsule34, horizontal padding14, top14+border and left24+border
+follow source intent. Icons are native vector equivalents, not Apple SF Symbols.
+
+Public Android31+ WindowInsets rounded corners, per corner, take precedence;55dp
+adjustable fallback replaces upstream private iOS corner lookup. Cutout bounds clip
+decoration and safe top/left offsets protect labels in landscape. Android circular
+physical-corner paths replace Apple's continuous-corner primitive; platform pixel
+parity and real glass geometry remain device-unverified.12 offscreen state/layout
+frames are generated with the actual Android vector renderer; physical animations
+must still be compared with source previews.
+
+Existing FaceAnimator math is unchanged; a data-only override selects touch, local
+voice, fresh authenticated remote, then offline demo in that order. Voice waking maps
+happy, asking/listening maps listening, thinking maps thinking, speaking maps talking
+with synthetic motion only. LiveVoice chirps/audio and network provider timing are
+intentionally excluded; deterministic600ms wake and700/1000/1300ms caption deltas plus
+1600ms completion are labeled mock timing. Mac RealtimeHost reading/cleanup formula
+is preserved in Windows. Original source files and preview assets are unchanged.

@@ -62,6 +62,7 @@ class FaceAnimator(
     private var nextJitter = 0.0
     private var nextHop = 6.0
 
+    var overrideFace: FaceState? = null
     var touchGaze: Gaze? = null
     var localMood: Mood? = null
     var localTalk: () -> Double = { 0.0 }
@@ -84,8 +85,9 @@ class FaceAnimator(
         require(now.isFinite() && now >= (lastTime ?: now)) { "Animation time must be finite and monotonic" }
         val dt = min(now - (lastTime ?: now), 1.0 / 20)
         lastTime = now
-        val live = now - lastPacket < 2.5
-        val wantedMood = localMood ?: if (live) target.mood else Mood.listening
+        val activeTarget = overrideFace ?: target
+        val live = overrideFace != null || now - lastPacket < 2.5
+        val wantedMood = localMood ?: if (live) activeTarget.mood else Mood.listening
         if (wantedMood != mood) {
             mood = wantedMood
             blinkStart = now
@@ -94,7 +96,7 @@ class FaceAnimator(
                 pupil.velocity += 3
             }
         }
-        var want = touchGaze ?: if (live) Gaze(target.gazeX, target.gazeY) else {
+        var want = touchGaze ?: if (live) Gaze(activeTarget.gazeX, activeTarget.gazeY) else {
             if (now > nextSaccade) {
                 wanderTarget = Gaze(between(-0.9, 0.9), between(-0.9, 0.4))
                 nextSaccade = now + between(0.6, 2.2)
@@ -113,7 +115,7 @@ class FaceAnimator(
         }
         gazeX.step(want.x + jitter.x, dt)
         gazeY.step(want.y + jitter.y, dt)
-        var wantTalk = if (live) target.talk else if (localMood == Mood.talking)
+        var wantTalk = if (live) activeTarget.talk else if (localMood == Mood.talking)
             0.5 + 0.5 * sin(now * 19) * sin(now * 7.3) else 0.0
         wantTalk = max(wantTalk, localTalk())
         talk += (wantTalk - talk) * min(1.0, dt * 25)

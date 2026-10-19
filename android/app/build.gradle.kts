@@ -11,8 +11,8 @@ android {
         applicationId = "dev.bluey.port"
         minSdk = 26
         targetSdk = 36
-        versionCode = 6
-        versionName = "0.3.3-f3-r3"
+        versionCode = 7
+        versionName = "0.4.0-f4a"
     }
     buildFeatures { compose = true }
     compileOptions {

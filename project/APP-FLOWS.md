@@ -79,3 +79,12 @@ it, and backgrounding closes sockets/discovery until foreground resume. Secure
 retry backs off from one to fifteen seconds; authentication/protocol failures stop
 retry until explicit user action. Disconnected animation retains its offline demo.
 No F4/F5 event handler is enabled by pairing.
+
+## F4-A offline preview
+
+Android Offline simulation explains planned permissions, double-tap wake/sleep and
+300ms hold/release. Mock captions run locally disconnected or present over an already
+approved F3 connection. Connection transitions/pause/sleep cancel the current mock
+turn; future connection never replays offline events. Windows existing controls offer
+an Offline voice caption preview without starting a listener. Sleep does not revoke
+trusted peers. Live continuous awake audio is a future separately consented flow.

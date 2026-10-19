@@ -265,3 +265,23 @@ Record Windows actual running/stopped endpoint alongside Android's selected rout
 unchanged TLS identities, confirmed session after restart, conflict handling,
 IP-change recovery and intentional revocation/re-enrollment. No new physical R3
 pass or measured latency is inferred from builds/loopback/software-key tests.
+
+## F4-A physical offline demonstration (pending)
+
+Install matching-commit apps and verify SHA256SUMS first. Compare APK signer to the
+installed APK: CI debug signers are ephemeral. If update is rejected for a differing
+signer, uninstall/install loses Android data/Keystore identity and requires explicit
+new enrollment; revoke the old peer. Never reset trust silently. Preserve Windows
+DPAPI app data. This packaging step is separate from the F3 reconnect regression.
+
+Start Windows host explicitly; establish saved authenticated connection. On Android,
+open Offline simulation for disclosure and optional corner fallback, then close it.
+Double tap the face: yellow waking → solid blue listening. Hold >=300ms: thick pulsing
+blue asking. Release: purple thinking → streamed mock reply/pink speaking and Windows
+bubble → blue listening → source-timed caption cleanup. Short taps must not ask.
+Double tap sleep during response, pause activity and disconnect Wi-Fi separately:
+no late callback may wake the session; Windows captions must clear on disconnect.
+Repeat disconnected to demonstrate local states. Drag/touch wins over voice; sleep
+restores fresh remote gaze/mood. Compare cutouts, corners and landscape to visible
+screen and source previews; measure FPS/resources/latency separately. No mic/privacy
+indicator, external provider traffic or capture permission should appear.
