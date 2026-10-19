@@ -222,3 +222,10 @@ revocation still denies a trusted connect. A fresh authorized invitation plus bo
 approvals may enroll the same phone key again. Reset Android discovery failure and
 stale resolver state on generation changes; offer refresh independent of trust.
 No Windows DNS-SD failure cause is assumed without physical/native evidence.
+
+R3 API semantics were checked against Microsoft Learn
+[TcpListener construction](https://learn.microsoft.com/en-us/dotnet/api/system.net.sockets.tcplistener.-ctor?view=net-10.0)
+(port0 requests an assigned port) and
+[ExclusiveAddressUse](https://learn.microsoft.com/en-us/dotnet/api/system.net.sockets.tcplistener.exclusiveaddressuse?view=net-10.0)
+(set before starting), plus Android's [NSD lifecycle guidance](https://developer.android.com/develop/connectivity/wifi/use-nsd).
+No claimed physical Windows DNS-SD cause or universal multicast reachability.

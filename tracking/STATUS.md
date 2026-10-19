@@ -1,110 +1,111 @@
 # Current verified state
 
-2026-10-19 (Asia/Karachi): F3-R2 corrects Android Keystore TLS digest authorization
-and adds actual on-device signing checks. **Physical ApprovalPending/authenticated
-session with this correction remains UNVERIFIED.** Existing PR #4 is open/unmerged
-on port/secure-device-link; R2 started clean at 1bb55768bd15b617a4e3586ffacd6b0134e759c3.
-No branch reset/rebase or duplicate PR. F1 PR #2 and F2 PR #3 remain merged; F2
-functional smoke is user-reported accepted, detailed measured QA stays open.
+2026-10-19 UTC: F3-R3 repairs saved-identity endpoint recovery after host restart.
+Existing branch `port/secure-device-link` / [PR #4](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/4) remains open and
+unmerged. R3 started clean at `78d4a6133f4ae9a7c3ec71061123e25cd2dbff45`; no reset/rebase/new PR/merge.
+Both supplied apps use **`d0a7a9b4a5882b5bbbd4da415244d9d2d4115a6c`**; subsequent closeout is tracking only.
 
-## Physical evidence and source-confirmed correction
+## Physical evidence and confirmed code defects
 
-The developer supplied two October 18 phone/laptop attempts correlated by UTC/client
-port: 21:57:00/53148 and 21:59:10/53192. Both reach Windows TCP, validate the server
-pin and select/provide Android EC key/chain, then fail in TLS. Windows reports
-TcpAccepted/TlsStarted/PeerClosed before its certificate callback, mutual TLS,
-hello or enrollment. This proves TCP reachability for these attempts and supersedes
-R1's uncertainty there. QR/firewall/discovery and differing client/server pins are
-not the demonstrated failure. These are user-reported physical observations.
+The developer now reports R2 real Windows/Android authenticated mTLS pairing,
+live mouse gaze, mood synchronization, Android touch precedence, Wi-Fi recovery
+and intentional revocation rejection passed. These are user-reported physical QA,
+not agent-operated tests. No device/OS matrix or measured latency was supplied.
+This supersedes R2's pending functional pairing status. F3 still needs restart QA;
+F1/F2 detailed visual/performance acceptance remains separate. F1 PR #2 and F2 PR #3
+stay merged; F2 functional smoke remains user-reported accepted.
 
-Source-confirmed incompatibility: the Android key was generated with SHA256/384/512
-but no DIGEST_NONE. Android's official setDigests contract requires that authorization
-for common TLS prehashed signing; Conscrypt CryptoUpcalls requests NONEwithECDSA for
-opaque EC keys. KeyMint uses the separately authorized NONE operation. The old
-production-spec regression failed in Android CI 39171259060 (43 tests, one expected
-failure), then passes with NONE authorized for newly generated P-256 keys.
+Restart reproduction: after Windows exits/reopens and the user starts the secure
+host, Android reports repeated TCP_CONNECTING/TCP_TIMEOUT/no discovered host over
+3–5 minutes. The supplied video description does not independently establish what
+Windows was listening on at each attempt; physical old/new IP/port and the precise
+DNS-SD failure were not captured. No firewall/TLS/identity failure is inferred.
 
-This is a concrete key-capability defect and evidence-supported correction, not a
-claim that the actual phone's provider rejection has been captured or pairing fixed.
-No EKU, certificate format, pin, TLS versions, enrollment or storage profile change
-was justified. Production still uses pinned mutual TLS 1.2/1.3, the strong five-minute
-invitation, both request-bound approvals, protected keys/trust and revocation. No
-plaintext fallback, weak TLS hash, trust-all validator or firewall automation.
+Confirmed source failure mechanism: Windows binds port0, which requests an OS-assigned
+port; Android persists that port and has no endpoint fallback without discovery.
+A restart can therefore leave it retrying a stale endpoint indefinitely. Red/green
+regressions also reproduce Android retaining a failed discovery listener and its
+busy resolver across stop/start, blocking recovery of the next discovery generation.
+These defects are confirmed in code/tests; the precise physical route is not claimed.
 
-The off-UI signing check signs a fresh random challenge with SHA256withECDSA and
-its SHA-256 digest with NONEwithECDSA, then verifies both with the existing public
-certificate. It reports NONE authorization, certificate self-signature/KU/EKU flags
-and fixed outcomes, never challenge/signature/private bytes. It runs manually and
-before networking. Existing immutable keys are never silently replaced: an explicit
-confirmation stops sessions, deletes the phone identity/host trust, then requires
-revoking its old Windows trust and fresh enrollment. Fresh installation makes a
-corrected key automatically. DPAPI identity is preserved.
+## Implemented behavior and security boundary
 
-Safe diagnostics v2 retain 96 in-memory events with UTC/local IDs/source port,
-fixed JCA/provider/recognized TLS alert categories and available Windows native
-code/HRESULT. ServerCertificateSelected confirms .NET selection of the same stored
-server identity; ClientValidationNotReached distinguishes failures before the app's
-client validator. Unknown alerts are not guessed or logged as raw messages. TLS
-1.2/1.3 software tests independently reach EnrollmentValidated/ApprovalPending,
-confirmation and face delivery; physical Keystore/Schannel remains separate.
+- Production listens on **TCP47654**, bound exclusively to the explicitly selected
+  private IPv4. Conflict/unavailable-port errors leave host stopped with clear UI;
+  there is no silent dynamic fallback. Host startup still requires Start secure host
+  after launch. No new auto-start preference/listener or firewall mutation.
+- Android tries saved endpoint, saved IP:47654 (legacy R2 dynamic-port migration),
+  then bounded rotating discovery hints; an explicit manual private endpoint is
+  also available. Every route retains saved host UUID/pin and the existing phone key.
+  Persist a changed endpoint only after pinned mTLS and authenticated hello/ready.
+- TCP refusal/timeouts and rejected untrusted hints remain retryable with existing
+  bounded backoff/foreground lifecycle. Storage/key faults stop; ordinary failures
+  never erase trust, start enrollment or replace identity. Disconnect stops retries.
+- Discovery generation cleanup repairs failed-start/stale-resolver latches. Refresh
+  discovery does not forget trust. If DHCP changes IP while multicast is unavailable,
+  type the displayed private endpoint using the saved identity; no scan/new QR needed.
+- D009 mutual TLS, exact pin, strong five-minute invitation, explicit request-bound
+  approvals, protected stores, revocation and all protocol bounds remain. Revoke
+  blocks connect; fresh authorized enrollment can reuse the same phone key.
+- Safe Android diagnostics v3 include only validated private route address/port in
+  addition to bounded fixed stages/categories. Windows safe-copy includes actual
+  host stopped/listening state and endpoint. Review/redact LAN metadata before sharing.
 
-## Actual tests, artifacts and checksum evidence
+## Actual final validation and artifacts
 
-Both retest applications below are from **3f6ca5afb49ec404a2ad0533af28ab890242cdb7**. Later closeout is tracking only.
-
-| Target | Actual outcome | Artifacts |
+| Target | Observed outcome at the matching app commit | Downloads |
 | --- | --- | --- |
-| [Windows CI 39171721298](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39171721298) | Windows-2025/.NET 10.0.402: 27 motion + 26 link tests, no failures/skips; WPF zero warnings/errors; self-contained publish; 12 native checks and 12 offscreen renders | [Windows x64 + SHA256SUMS](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39171721298/artifacts/12152781645), [TRX/native/render evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39171721298/artifacts/12152926030) |
-| [Android CI 39171721076](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39171721076) | JDK17/Gradle8.13/SDK36: 48 tests, no failures/errors/skips; lint zero errors/15 warnings; apksigner verification/debug APK; 17 renders | [APK + SHA256SUMS + SIGNING-CERT](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39171721076/artifacts/12152857235), [JUnit/lint/render evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39171721076/artifacts/12153061376) |
+| [Windows CI 39308264542](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308264542) | Windows-2025/.NET10.0.402; 27 core + 30 link tests passed, zero skipped/failed; WPF zero warnings/errors; self-contained publish; 12 native checks/12 offscreen renders | [Windows x64 + SHA256SUMS](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308264542/artifacts/12215465316), [TRX/native/render evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308264542/artifacts/12215011329) |
+| [Android CI 39308263802](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308263802) | JDK17/Gradle8.13/SDK36; 55 tests passed, zero failures/errors/skips; lint zero errors/15 warnings; apksigner verification/debug APK; 17 renders | [APK + SHA256SUMS + SIGNING-CERT](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308263802/artifacts/12215091175), [JUnit/lint/render evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308263802/artifacts/12215106118) |
 
-PR merge-tree [Windows 39171723385](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39171723385) and
-[Android 39171723392](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39171723392) also pass. Local final
-`dotnet test Bluey.Link.Tests -c Release` passes all 26 tests; result
-`windows/TestResults/r2-final.trx` is ignored/generated, not committed. Both codecs
-retain the unchanged 40-case fixture corpus. New tests cover the actual production
-key specification, JCA SHA/prehash matching and mismatched public key, unavailable
-opaque key without export, fixed error privacy, pre-validation socket closure,
-independent TLS versions through confirmation/face delivery, and rejection/revocation.
-No mock TLS or software key is called hardware Keystore/Schannel proof.
+PR merge-tree [Windows39308271399](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308271399) and
+[Android39308271303](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308271303) also pass. Local final
+`dotnet test windows/Bluey.Link.Tests -c Release` passes30/30; generated TRX is
+`windows/TestResults/r3-final.trx` (ignored, not committed). Unchanged shared corpus
+still has40 fixtures. Existing animation/TLS/pinning/revocation/cleanup tests retained.
 
-Downloaded Android app/evidence: APK checksum matches; parsed APK-v2 public signer
-matches CI apksigner report; 48-test JUnit/lint XML and 17 renders inspected; all six
-original font/OFL assets match source bytes. Windows app/evidence downloads were
-blocked by this cloud proxy at `productionresultssa7.blob.core.windows.net`.
-Windows build/tests/checksums/upload are observed in actual CI logs and API metadata;
-**no local Windows archive/per-file re-verification is claimed for R2**.
-A draft adds only that host, preserving existing domains; saved, requires publish,
-not applied. No bypass/relay/rehosting or disabled verification was used.
+Actual TLS tests cover server exit while its client is authenticated, immediate
+stable-port restart with saved trust/no invitation, ready/face delivery, port
+conflict and retry, host not listening, stale port and changed loopback IP/port,
+wrong-pin rejection, revoked connect and explicit same-key re-enrollment. Kotlin
+covers absent/delayed/multiple/malformed hints, legacy-port migration, manual LAN
+routing, unchanged UUID/pin, retry classification and old NSD callback generations.
+NSD callbacks are simulated; these are not physical multicast/Android Keystore tests.
 
-Windows folder is self-contained, untrimmed, unsigned win-x64 (no extra desktop
-runtime/SDK). Android is debug 0.3.2-f3-r2/versionCode5. Artifact retention: 14 days.
-Use these linked matching-commit builds, not a later independent debug rebuild.
+Downloaded APK/evidence: checksum verified, APK-v2 public signer matches CI report,
+55-test JUnit/lint XML and17 renders inspected, all6 font/OFL assets match source.
+Windows app/evidence local downloads were blocked by this cloud proxy at
+`productionresultssa1.blob.core.windows.net`. Actual Windows CI logs show tests,
+native checks, hashes and uploaded artifacts; **no local R3 Windows archive/per-file
+verification is claimed**. No proxy bypass, rehosting or verification disabling.
+Artifacts retain14 days. Windows is self-contained/untrimmed/unsigned win-x64,
+requiring no extra laptop runtime/SDK; Android is debug0.3.3-f3-r3/versionCode6.
 
-SHA-256 (Windows values from actual CI; Android independently checked locally):
+SHA-256 (Windows: observed CI; APK: also checked after download):
 
-- `Bluey.Windows.exe`: `8fc454681c871f14b658479de3a9538262aea06807f4404f5535da9d5fa09af9`
-- `Bluey.Windows.dll`: `b8eb51f668cadb274af26e6d6e40405dc48ad09a604eed599a671a50f2a8622a`
-- Windows `SHA256SUMS.txt`: `f21fb5ad82961b1a881f8b100272e45b90ee74492ae195c541f5e0120e156563`
-- `app-debug.apk`: `51b0e4f6478bf457f840594b210677636ff3212ccf09e3aab5f535e43e6b7da6`
+- `Bluey.Windows.exe`: `7c4f029ad98862efec5daac3bc44f8a580194120475f1eb8568c143faad52c4f`
+- `Bluey.Windows.dll`: `7cb4e4dc3e14c22821a405e2f6e3a67ba219897a49fd9431ce6a8b253cbfd937`
+- Windows `SHA256SUMS.txt`: `26e3b78cd9d756d005f63c03e7d8d4c0198f75d21ca7da5f3302b41348cfe899`
+- `app-debug.apk`: `86306a39eb8a21d280b327da464a4f8f2b6c37d2fd27c9a1c6343a915c93cc85`
 
-Debug signer differs from delivered R1: old `1ee1aef4c6f8eb8c7b0b2ceddf289ebdaf7d3eac2755f9c4a6aa7369020a7bff`,
-new `de4459d57c8d3441698a3aba9a37dc4a7ffeef67a87925aaf235d7c47e540134`. Updating that baseline needs uninstall/install and new
-phone identity/enrollment. This deletes phone data and its old key; preserve Windows
-DPAPI identity and revoke any old phone entry. No signing private key was exported,
-committed or uploaded. APK signer is separate from both TLS identities.
+Debug signer changed versus delivered R2: old `de4459d57c8d3441698a3aba9a37dc4a7ffeef67a87925aaf235d7c47e540134`,
+new `2e78aada585a01b285af3dc4baed41a0764da841ab7c468a0d7e8ca74dbd52c1`. Updating that baseline requires uninstall/install and
+initial R3 enrollment, deleting its old phone app data/key. This is a development
+packaging limitation, not reconnection behavior. The restart test then must reuse
+that R3 identity without a QR or key replacement. Preserve Windows DPAPI identity
+and revoke any obsolete phone entry. APK signer differs from TLS identities; no
+signing private key was exported, committed or published.
 
-## Exact R2 changed files (relative to R1 closeout)
+## Exact R3 changed files (relative to R2 closeout)
 
 - `android/app/build.gradle.kts`
-- `android/app/src/main/java/dev/bluey/port/link/AndroidIdentity.kt`
 - `android/app/src/main/java/dev/bluey/port/link/ConnectionDiagnostics.kt`
 - `android/app/src/main/java/dev/bluey/port/link/ConnectionPanel.kt`
 - `android/app/src/main/java/dev/bluey/port/link/DeviceLink.kt`
-- `android/app/src/main/java/dev/bluey/port/link/IdentitySigning.kt`
-- `android/app/src/test/java/dev/bluey/port/link/ClientIdentityKeyManagerTest.kt`
-- `android/app/src/test/java/dev/bluey/port/link/ClientKeyPolicyTest.kt`
-- `android/app/src/test/java/dev/bluey/port/link/FailureCategoryTest.kt`
-- `android/app/src/test/java/dev/bluey/port/link/IdentitySigningTest.kt`
+- `android/app/src/main/java/dev/bluey/port/link/Discovery.kt`
+- `android/app/src/main/java/dev/bluey/port/link/ReconnectEndpoints.kt`
+- `android/app/src/test/java/dev/bluey/port/link/DiscoveryLifecycleTest.kt`
+- `android/app/src/test/java/dev/bluey/port/link/ReconnectEndpointsTest.kt`
 - `project/QA.md`
 - `tracking/CHECKPOINTS.md`
 - `tracking/DECISIONS.md`
@@ -113,12 +114,12 @@ committed or uploaded. APK signer is separate from both TLS identities.
 - `tracking/STATUS.md`
 - `windows/Bluey.Link.Tests/DiagnosticTests.cs`
 - `windows/Bluey.Link.Tests/TlsTests.cs`
-- `windows/Bluey.Link/ConnectionDiagnostics.cs`
 - `windows/Bluey.Link/LinkServer.cs`
+- `windows/Bluey.Windows/Connection/ConnectionWindow.cs`
+- `windows/Bluey.Windows/Connection/WindowsLinkHost.cs`
 - `windows/README.md`
 
-Original Mac/iOS/Shared, previews and existing Windows/Android motion/render source
-are unchanged. No F4+, networking rewrite, hosted relay, firewall automation, new
-PR or merge. Phone signing/handshake, ApprovalPending/session, live synchronization,
-Wi-Fi recovery and physical latency remain unverified for R2. Follow the single
-retest in [HANDOFF](HANDOFF.md).
+Original Mac/iOS/Shared/previews and target animation/render math remain unchanged.
+No F4, input/capture automation, relay/backend, architecture rewrite or merge.
+R3 physical restart, route recovery under actual NSD/DHCP conditions, conflict UI
+and same-key re-enrollment still need the single [HANDOFF](HANDOFF.md) retest.

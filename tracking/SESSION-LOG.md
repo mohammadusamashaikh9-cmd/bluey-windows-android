@@ -614,3 +614,72 @@ Original Apple/Shared/previews and target motion/render source unchanged. Physic
 Keystore/Schannel mechanism and repaired ApprovalPending/authenticated sync remain
 UNVERIFIED. F1/F2 QA stays separate; F2 smoke remains user-reported accepted. Next:
 run HANDOFF's exact signing-first physical sequence with these matching artifacts.
+
+## 2026-10-19 UTC — F3-R3 saved-identity restart recovery
+
+Continued clean `78d4a6133f4ae9a7c3ec71061123e25cd2dbff45` on the existing branch/PR#4 without reset, rebase,
+duplicate PR, merge or delegation. Read authority, current tracking, D009, schema,
+security, host/start/settings, protected stores, Android discovery/retry and tests.
+User now reports R2 physical mTLS/gaze/mood/touch precedence/Wi-Fi reconnect/revocation
+passes. Restart video description reports TCP timeouts/no discovery after full
+Windows exit/reopen; actual listening state and old/new endpoints were not captured.
+These are user-supplied physical observations, not agent-operated phone QA.
+
+Source-confirmed: port0 requests dynamic bind, saved Android port can go stale;
+no DNS-independent port migration or manual route existed. Android failed-start
+listener and resolving latch also block discovery recovery. D009 records stable
+TCP47654 with exclusive bind/no silent fallback/explicit Start consent, and pinned
+route recovery without trust/key reset. Official Microsoft Learn/Android NSD docs
+checked. Do not infer a particular physical DNS-SD/firewall failure.
+
+Red evidence: local focused DefaultPortConflict test failed (no exception, old
+implementation chose ephemeral port) in `windows/TestResults/r3-red.trx`.
+At `e4742dd`, [Android39307089177](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39307089177) ran50 tests,
+exactly2 expected lifecycle failures (failed start retained listener; pending old
+resolve blocked a new generation); Windows39307089320 also failed the port
+regression. Tests compiled/executed. Implemented stable exclusive listener, clear
+conflict/host state UI, deterministic bounded route rotation/manual fallback,
+authenticated-only persistence, retry classification and NSD generation cleanup.
+Retained cryptographic identity/approval/storage/bounds and animation source.
+
+Candidate `e668d00`: Windows actual restart with a live authenticated client passed;
+Android lint caught one SuspiciousIndentation error in changed callback (15 existing
+warnings). Corrected indentation, did not suppress lint. Final app `d0a7a9b4a5882b5bbbd4da415244d9d2d4115a6c`:
+
+- Local `/workspace/bluey-tools/dotnet-run test windows/Bluey.Link.Tests -c Release`
+  passed30/30 with zero skips/failures (`windows/TestResults/r3-final.trx`). Two
+  transient exec-server transport disconnects occurred before process creation;
+  no code ran in those calls, later healthy command execution continued.
+- [Windows39308264542](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308264542) passed27 core+30 link, WPF0 warnings/errors,
+  self-contained publish,12 native checks and12 renders. Actual TLS covers host
+  stop while client remains authenticated, same-port restart/no invitation/ready/
+  face, conflict cleanup/retry, stopped host, stale port/changed loopback IP+port,
+  wrong pin, revoked connect and explicit same-key re-enrollment. Memory/software
+  identities plus retained DPAPI native checks are not physical phone proof.
+- [Android39308263802](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308263802) passed55 tests, zero failures/errors/skips;
+  lint0 errors/15 warnings, apksigner verified APK/17 renders. Includes both NSD
+  lifecycle red/green regressions and5 route/retry tests. Callback simulation is
+  not real multicast/permissions evidence. All40 unchanged fixtures and existing
+  animation/identity/cancellation/TLS tests retained.
+- PR merge-tree Windows39308271399/Android39308271303 also passed.
+
+Matching-commit downloads: [Windows](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308264542/artifacts/12215465316), [Windows evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308264542/artifacts/12215011329),
+[Android APK/manifest/signer](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308263802/artifacts/12215091175), [Android evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308263802/artifacts/12215106118), retention14days.
+Observed CI Windows SHA-256: EXE `7c4f029ad98862efec5daac3bc44f8a580194120475f1eb8568c143faad52c4f`,
+DLL `7cb4e4dc3e14c22821a405e2f6e3a67ba219897a49fd9431ce6a8b253cbfd937`,
+manifest `26e3b78cd9d756d005f63c03e7d8d4c0198f75d21ca7da5f3302b41348cfe899`.
+Windows app/evidence download was proxy CONNECT-blocked at exact host
+productionresultssa1.blob.core.windows.net; CI results/hash/upload are observed,
+local R3 Windows archive verification is NOT claimed. No bypass/rehosting or
+verification disabling. Downloaded APK `86306a39eb8a21d280b327da464a4f8f2b6c37d2fd27c9a1c6343a915c93cc85` matches manifest;
+APK-v2 public signer matches apksigner report, inspected55-test XML/lint/17 renders,
+and all6 original font/OFL bytes match. Signer changed from delivered R2
+`de4459d57c8d3441698a3aba9a37dc4a7ffeef67a87925aaf235d7c47e540134` to `2e78aada585a01b285af3dc4baed41a0764da841ab7c468a0d7e8ca74dbd52c1`; that upgrade needs initial
+uninstall/install/enrollment, then restart testing must retain the R3 identity.
+No signing private key was exported, committed or uploaded. This packaging issue
+is distinct from reconnection; no automatic key/trust erasure was added.
+
+Original Apple/Shared/previews and target render/animation code unchanged. F1/F2
+measured QA remains separate. No new authentication protocol, F4, network scanning,
+relay/backend, automation, firewall changes or merge. Physical R3 success remains
+pending HANDOFF's one restart/reconnect/revocation sequence and actual endpoint logs.
