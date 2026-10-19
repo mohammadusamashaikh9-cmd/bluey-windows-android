@@ -39,7 +39,7 @@ public sealed class TlsTests
     }
     [Fact] public async Task RealMutualTlsEnrollmentRequiresBothApprovalsThenStreamsAndReconnects()
     {
-        using var store=new MemoryStore();await using var server=new LinkServer(store);server.Start(IPAddress.Loopback);
+        using var store=new MemoryStore();await using var server=new LinkServer(store);server.Start(IPAddress.Loopback,0);
         using var cert=Identity.Create("phone",false);var id=Guid.NewGuid().ToString();var secret=server.StartPairing();
         using(var c=await Connect(server,cert))
         {
@@ -70,7 +70,7 @@ public sealed class TlsTests
     [InlineData(SslProtocols.Tls13)]
     public async Task WrongPinMissingCertificateUnknownAndPlaintextPeersFailClosed(SslProtocols protocol)
     {
-        using var store=new MemoryStore();await using var s=new LinkServer(store);s.Start(IPAddress.Loopback);using var cert=Identity.Create("phone",false);
+        using var store=new MemoryStore();await using var s=new LinkServer(store);s.Start(IPAddress.Loopback,0);using var cert=Identity.Create("phone",false);
         s.StartPairing();await Denied(async()=>{using var c=await Connect(s,cert,new string('0',64),protocol);});
         await Denied(async()=>{using var c=await Connect(s,null,protocols:protocol);});s.StopPairing();
         await Denied(async()=>{using var c=await Connect(s,cert,protocols:protocol);});
@@ -81,7 +81,7 @@ public sealed class TlsTests
     }
     [Fact] public async Task WrongSecretAndRejectedEnrollmentNeverPersistTrust()
     {
-        using var store=new MemoryStore();await using var s=new LinkServer(store);s.Start(IPAddress.Loopback);using var cert=Identity.Create("phone",false);s.StartPairing();
+        using var store=new MemoryStore();await using var s=new LinkServer(store);s.Start(IPAddress.Loopback,0);using var cert=Identity.Create("phone",false);s.StartPairing();
         using(var c=await Connect(s,cert))
         {
             await c.Wire.Send("enroll",new{deviceId=Guid.NewGuid().ToString(),name="wrong",secret=new string('x',43)},default);
@@ -96,7 +96,7 @@ public sealed class TlsTests
     }
     [Fact] public async Task PendingApprovalCancelAndSlotTimeoutCleanup()
     {
-        using var store=new MemoryStore();await using var s=new LinkServer(store);s.Start(IPAddress.Loopback);using var cert=Identity.Create("phone",false);
+        using var store=new MemoryStore();await using var s=new LinkServer(store);s.Start(IPAddress.Loopback,0);using var cert=Identity.Create("phone",false);
         var secret=s.StartPairing();using var c=await Connect(s,cert);
         await c.Wire.Send("enroll",new{deviceId=Guid.NewGuid().ToString(),name="cancel",secret},default);
         for(var i=0;i<100 && s.Pending==null;i++)await Task.Delay(10);
@@ -111,7 +111,7 @@ public sealed class TlsTests
     }
     [Fact] public async Task LatestStateIsBoundedAndMalformedSessionCloses()
     {
-        using var store=new MemoryStore();await using var s=new LinkServer(store);s.Start(IPAddress.Loopback);using var cert=Identity.Create("phone",false);
+        using var store=new MemoryStore();await using var s=new LinkServer(store);s.Start(IPAddress.Loopback,0);using var cert=Identity.Create("phone",false);
         var deviceId=Guid.NewGuid().ToString();store.Add(new(deviceId,"test",Identity.Fingerprint(cert)));
         using var c=await Connect(s,cert);await c.Wire.Send("connect",new{hostId=s.HostId,deviceId},default);Assert.Equal("ready",(await c.Wire.Read(default)).Type);
         var clock=System.Diagnostics.Stopwatch.StartNew();for(var i=0;i<100000;i++)s.Publish(.5,-.2,"happy",0);
@@ -123,7 +123,7 @@ public sealed class TlsTests
     }
     [Fact] public async Task PhoneDisconnectReleasesPendingEnrollmentWithoutWaitingForApprovalTimeout()
     {
-        using var store=new MemoryStore();await using var s=new LinkServer(store);s.Start(IPAddress.Loopback);using var cert=Identity.Create("phone",false);
+        using var store=new MemoryStore();await using var s=new LinkServer(store);s.Start(IPAddress.Loopback,0);using var cert=Identity.Create("phone",false);
         var secret=s.StartPairing();using(var c=await Connect(s,cert)) {
             await c.Wire.Send("enroll",new{deviceId=Guid.NewGuid().ToString(),name="background",secret},default);
             for(var n=0;n<100 && s.Pending==null;n++)await Task.Delay(10);Assert.NotNull(s.Pending);
@@ -158,7 +158,7 @@ public sealed class TlsTests
     }
     [Fact] public async Task AuthenticatedCertificateCannotClaimAnotherDeviceIdentityOnReconnect()
     {
-        using var store=new MemoryStore();await using var s=new LinkServer(store);s.Start(IPAddress.Loopback);using var cert=Identity.Create("phone",false);
+        using var store=new MemoryStore();await using var s=new LinkServer(store);s.Start(IPAddress.Loopback,0);using var cert=Identity.Create("phone",false);
         var device=Guid.NewGuid().ToString();store.Add(new(device,"phone",Identity.Fingerprint(cert)));
         using var c=await Connect(s,cert);await c.Wire.Send("connect",new{hostId=s.HostId,deviceId=Guid.NewGuid().ToString()},default);
         await Denied(async()=>{await c.Wire.Read(default);});Assert.Equal(device,store.Peers.Single().DeviceId);Assert.Equal(0,s.Connections);
@@ -174,7 +174,7 @@ public sealed class TlsTests
         using var leaf=request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1),DateTimeOffset.UtcNow.AddDays(1));
         using var cert=X509CertificateLoader.LoadPkcs12(leaf.Export(X509ContentType.Pkcs12),null);
         Assert.Empty(cert.Extensions.OfType<X509EnhancedKeyUsageExtension>());
-        using var store=new MemoryStore();await using var server=new LinkServer(store);server.Start(IPAddress.Loopback);var secret=server.StartPairing();
+        using var store=new MemoryStore();await using var server=new LinkServer(store);server.Start(IPAddress.Loopback,0);var secret=server.StartPairing();
         using var client=await Connect(server,cert,protocols:protocol);
         await client.Wire.Send("enroll",new{deviceId=Guid.NewGuid().ToString(),name="Android shaped",secret},default);
         for(var i=0;i<100 && server.Pending==null;i++)await Task.Delay(10);
@@ -195,4 +195,13 @@ public sealed class TlsTests
         server.Revoke(pending.Pin);server.StopPairing();
         await Denied(async()=>{using var rejected=await Connect(server,cert,protocols:protocol);});
     }
+    [Fact] public async Task DefaultPortConflictFailsWithoutSilentlySelectingAnEphemeralEndpoint()
+    {
+        using var occupied=new TcpListener(IPAddress.Loopback,LinkServer.DefaultPort);
+        occupied.ExclusiveAddressUse=true;occupied.Start();
+        using var store=new MemoryStore();await using var server=new LinkServer(store);
+        var error=Assert.Throws<SocketException>(()=>server.Start(IPAddress.Loopback));
+        Assert.Contains(error.SocketErrorCode,new[]{SocketError.AddressAlreadyInUse,SocketError.AccessDenied});
+    }
+
 }

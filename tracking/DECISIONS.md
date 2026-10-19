@@ -195,3 +195,30 @@ to select the same stored identity and record a fixed event, without logging SNI
 [Schannel AcceptSecurityContext](https://learn.microsoft.com/en-us/windows/win32/secauthn/acceptsecuritycontext--schannel)
 return categories inform numeric native-error labels; no unavailable TLS alert is
 invented. Unknown/cancelled errors remain distinct and carry no provider text.
+
+### D009 F3-R3 endpoint recovery / 2026-10-19
+
+The developer reports R2 physical mTLS enrollment, live gaze/mood, touch precedence,
+Wi-Fi recovery and revocation rejection passed. Restart/reconnect still fails with
+TCP timeouts/no discovery. The video does not independently prove Windows was
+listening. Source confirms ephemeral bind plus saved endpoint and discovery-only
+refresh; it cannot establish the exact physical restart IP/port or DNS failure.
+
+Use TCP 47654 on the explicitly selected private IPv4 for production host starts.
+This is a project development default, not a reserved/IANA service claim. Bind
+exclusively, report a conflict and leave the host stopped; never silently choose a
+new port. No auto-start/preference change: the existing Start secure host action
+remains necessary. Test listeners may explicitly request port 0 for isolation.
+Android tries the saved endpoint, then that IP's stable port (migrating R2 dynamic
+endpoints), and bounded rotating discovery/manual LAN hints. A LAN endpoint is a
+routing hint only: preserve saved host UUID/server pin and phone key, and persist
+a changed address/port only after the existing pinned mTLS hello/ready checks.
+IP changes with no working discovery need an explicit typed LAN endpoint; no LAN
+scanning, new QR, new identity, certificate downgrade or pairing shortcut.
+
+Retry ordinary transport failures without erasing trust; bound attempts/backoff and
+rotate hints after authentication rejection without accepting them. Explicit
+revocation still denies a trusted connect. A fresh authorized invitation plus both
+approvals may enroll the same phone key again. Reset Android discovery failure and
+stale resolver state on generation changes; offer refresh independent of trust.
+No Windows DNS-SD failure cause is assumed without physical/native evidence.

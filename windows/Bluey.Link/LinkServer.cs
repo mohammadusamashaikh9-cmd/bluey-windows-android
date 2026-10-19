@@ -10,6 +10,7 @@ namespace Bluey.Link;
 public sealed record Enrollment(string DeviceId, string Name, string Pin, string RequestId, TaskCompletionSource<bool> Decision, CancellationTokenSource Stop);
 public sealed class LinkServer : IAsyncDisposable
 {
+    public const int DefaultPort=47654;
     private readonly ITrustStore store;
     private readonly object trustGate = new();
     private readonly Stopwatch clock = Stopwatch.StartNew();
@@ -28,10 +29,10 @@ public sealed class LinkServer : IAsyncDisposable
     public int Connections => sessions.Count;
     public int Port => ((IPEndPoint)listener!.LocalEndpoint).Port;
     public LinkServer(ITrustStore store, ConnectionDiagnostics? diagnostics=null) { this.store = store; Diagnostics=diagnostics??new(); Invitation = new(() => clock.ElapsedMilliseconds); }
-    public void Start(IPAddress address)
+    public void Start(IPAddress address,int port=0)
     {
         if (listener != null) throw new InvalidOperationException("already started");
-        listener = new(address, 0); listener.Start(8); accepting = AcceptLoop();
+        listener = new(address, port); listener.Start(8); accepting = AcceptLoop();
     }
     public string StartPairing() { StopPairing(); return Invitation.Start(); }
     public void StopPairing() { Invitation.Stop(); Pending?.Decision.TrySetResult(false); }

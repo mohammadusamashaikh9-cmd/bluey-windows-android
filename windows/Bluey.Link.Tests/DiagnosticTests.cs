@@ -8,7 +8,7 @@ public sealed class DiagnosticTests
     private static string Text(LinkServer server)=>server.Diagnostics.Text();
     [Fact] public async Task AcceptedSocketIsObservableBeforeAnyTlsOrEnrollmentMessage()
     {
-        using var store=new MemoryStore();await using var server=new LinkServer(store);server.Start(IPAddress.Loopback);
+        using var store=new MemoryStore();await using var server=new LinkServer(store);server.Start(IPAddress.Loopback,0);
         using var tcp=new TcpClient();await tcp.ConnectAsync(IPAddress.Loopback,server.Port);
         var text=Text(server);
         for(var i=0;i<100 && !text.Contains("TlsStarted");i++){await Task.Delay(10);text=Text(server);}
@@ -18,7 +18,7 @@ public sealed class DiagnosticTests
     }
     [Fact] public async Task MalformedPeerIsCategorizedWithoutEchoingBytes()
     {
-        using var store=new MemoryStore();await using var server=new LinkServer(store);server.Start(IPAddress.Loopback);
+        using var store=new MemoryStore();await using var server=new LinkServer(store);server.Start(IPAddress.Loopback,0);
         const string forbidden="bluey-secure://pair?secret=NEVER_LOG_THIS";
         using var tcp=new TcpClient();await tcp.ConnectAsync(IPAddress.Loopback,server.Port);
         await tcp.GetStream().WriteAsync(System.Text.Encoding.UTF8.GetBytes(forbidden));tcp.Client.Shutdown(SocketShutdown.Send);
@@ -51,7 +51,7 @@ public sealed class DiagnosticTests
 
     [Fact] public async Task ClosedPeerBeforeCertificateValidationIsExplicitWithoutAssumingRejectionCause()
     {
-        using var store=new MemoryStore();await using var server=new LinkServer(store);server.Start(IPAddress.Loopback);
+        using var store=new MemoryStore();await using var server=new LinkServer(store);server.Start(IPAddress.Loopback,0);
         using(var tcp=new TcpClient()) {await tcp.ConnectAsync(IPAddress.Loopback,server.Port);}
         for(var i=0;i<100 && !Text(server).Contains("SessionClosed");i++)await Task.Delay(10);
         var trace=server.Diagnostics.Snapshot();
