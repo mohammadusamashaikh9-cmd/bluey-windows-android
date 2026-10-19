@@ -169,7 +169,7 @@ Public Android31+ WindowInsets rounded corners, per corner, take precedence;55dp
 adjustable fallback replaces upstream private iOS corner lookup. Cutout bounds clip
 decoration and safe top/left offsets protect labels in landscape. Android circular
 physical-corner paths replace Apple's continuous-corner primitive; platform pixel
-parity and real glass geometry remain device-unverified.12 offscreen state/layout
+parity and real glass geometry remain device-unverified.24 offscreen border/composite
 frames are generated with the actual Android vector renderer; physical animations
 must still be compared with source previews.
 
