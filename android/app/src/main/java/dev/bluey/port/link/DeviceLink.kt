@@ -70,6 +70,7 @@ class DeviceLink(context:Context) {
     @Volatile private var replacingIdentity=false
     @Volatile private var invitation:Bootstrap?=null
     @Volatile private var currentHost:TrustedHost?=null
+    @Volatile private var endpointHint:LanEndpoint?=null
     private var worker:Job?=null
     // Closing TLS may emit a close-notify; never do that from Compose/lifecycle callbacks.
     @Synchronized private fun closeSocket() {
@@ -92,7 +93,7 @@ class DeviceLink(context:Context) {
         if(replacingIdentity){status("Identity replacement in progress");return}
         val attempt=safeLog.begin()
         try {
-            invitation=Bootstrap.parse(text,System.currentTimeMillis()/1000);enrollmentAttempt=attempt
+            invitation=Bootstrap.parse(text,System.currentTimeMillis()/1000);enrollmentAttempt=attempt;endpointHint=null
             attempt.phase(LinkStage.INVITATION_VALIDATED);desired=true;restart()
         } catch(_:Exception){
             attempt.phase(LinkStage.INVITATION_INVALID);attempt.failed(ConnectionProblem(LinkFailure.INVITATION_INVALID))
@@ -101,8 +102,14 @@ class DeviceLink(context:Context) {
     }
     @Synchronized fun connect(selected:DiscoveredHost?=null) {
         if(replacingIdentity){status("Identity replacement in progress");return}
-        if(selected!=null && currentHost!=null)currentHost=currentHost!!.copy(address=selected.address,port=selected.port)
+        endpointHint=selected?.let{runCatching{LanEndpoint(it.address,it.port)}.getOrNull()}
         invitation=null;enrollmentAttempt=null;desired=true;restart()
+    }
+    fun refreshDiscovery(){if(foreground)discovery.refresh()}
+    fun connectEndpoint(address:String,port:String) {
+        val endpoint=runCatching{LanEndpoint(address.trim(),port.toInt())}.getOrNull()
+        if(endpoint==null){status("Enter a private IPv4 address and port 1–65535. Saved identity unchanged.");return}
+        connect(DiscoveredHost("manual endpoint hint",endpoint.address,endpoint.port))
     }
     @Synchronized fun disconnect(){desired=false;invitation=null;worker?.cancel();closeSocket();latest.value=null;mutable.update{snapshot->snapshot.copy(connected=false,status="Disconnected — offline demo")}}
     fun forget(){disconnect();scope.launch(NonCancellable){
@@ -142,7 +149,7 @@ class DeviceLink(context:Context) {
     }
     fun close(){pause();scope.cancel()}
     private suspend fun loop() {
-        val retry=RetrySchedule()
+        val retry=RetrySchedule();val endpoints=ReconnectEndpoints()
         try {
             while(currentCoroutineContext().isActive && foreground && desired) {
                 val enroll=invitation
@@ -150,23 +157,25 @@ class DeviceLink(context:Context) {
                 try {
                     progress(attempt,LinkStage.IDENTITY_LOADING,"Loading protected client identity")
                     val keys=keys();keys.signingSelfTest(attempt::event);attempt.phase(LinkStage.IDENTITY_READY);currentCoroutineContext().ensureActive()
-                    var host=enroll?.host?:currentHost
-                    if(host==null){status("No trusted host. Scan/paste a Windows invitation, then Pair.");return}
-                    if(enroll==null)mutable.value.hosts.firstOrNull{it.name.startsWith("Bluey-"+host!!.hostId.take(8))}
-                        ?.let{host=host!!.copy(address=it.address,port=it.port)}
-                    session(keys,host!!,enroll,attempt)
+                    val saved=enroll?.host?:currentHost
+                    if(saved==null){status("No trusted host. Scan/paste a Windows invitation, then Pair.");return}
+                    discovery.start() // A platform start failure may now be retried; no trust mutation.
+                    val target=if(enroll!=null)ReconnectTarget(saved,EndpointSource.SAVED)
+                        else endpoints.next(saved,mutable.value.hosts,endpointHint)
+                    session(keys,target.host,enroll,attempt)
                     throw EOFException()
                 } catch(e:CancellationException){attempt.cancelled();throw e}
                 catch(e:Exception) {
                     val code=attempt.failureIfActive(e)
                     latest.value=null;mutable.update{it.copy(connected=false)}
                     val failure="${attempt.id}: ${attempt.current} / $code. "+failureHint(code)
-                    if(enroll!=null || attempt.current==LinkStage.IDENTITY_LOADING || e is javax.net.ssl.SSLException ||
-                        e is ProtocolException || e is java.security.GeneralSecurityException || (e is ConnectionProblem && code!=LinkFailure.WRITE_TIMEOUT)) {
+                    if(enroll!=null || !retryTrusted(e,attempt.current)) {
                         if(enroll!=null){invitation=null;enrollmentAttempt=null}
                         desired=false;status(failure);return
                     }
-                    status(failure+" Retrying securely; offline demo available.");delay(retry.nextMs())
+                    if(attempt.current==LinkStage.SESSION_CONFIRMED){retry.reset();endpoints.reset()}
+                    status(failure+" Saved identity retained. Retrying routes securely; start Windows host or update its LAN endpoint.")
+                    delay(retry.nextMs())
                 } finally {closeSocket();attempt.event(LinkStage.SESSION_CLOSED)}
             }
         } finally{latest.value=null;mutable.update{it.copy(connected=false)}}
@@ -184,7 +193,8 @@ class DeviceLink(context:Context) {
     }
     private suspend fun session(keys:AndroidIdentity,host:TrustedHost,enroll:Bootstrap?,attempt:LinkAttempt)=coroutineScope {
         if(enroll!=null && System.currentTimeMillis()/1000>=enroll.expires)throw ConnectionProblem(LinkFailure.ENROLLMENT_REJECTED_OR_EXPIRED)
-        progress(attempt,LinkStage.TCP_CONNECTING,"Connecting TCP to the invitation/saved endpoint")
+        attempt.target=LanEndpoint(host.address,host.port)
+        progress(attempt,LinkStage.TCP_CONNECTING,"Connecting TCP to ${host.address}:${host.port} with the saved/presented identity")
         val tcp=Socket();installSocket(tcp);tcp.tcpNoDelay=true
         try {tcp.connect(InetSocketAddress(host.address,host.port),5000)}finally{attempt.port=tcp.localPort.coerceAtLeast(0)}
         attempt.phase(LinkStage.TCP_CONNECTED)
@@ -216,7 +226,7 @@ class DeviceLink(context:Context) {
         if(ready.type!="ready"||Wire.text(ready.payload,"hostId")!=host.hostId||Wire.text(ready.payload,"deviceId")!=keys.deviceId)throw ProtocolException("ready")
         ensureActive();if(!foreground||!desired)throw CancellationException()
         attempt.phase(LinkStage.TRUST_PERSISTING)
-        keys.save(host);currentHost=host;invitation=null;enrollmentAttempt=null
+        keys.save(host);currentHost=host;invitation=null;enrollmentAttempt=null;endpointHint=null
         attempt.phase(LinkStage.SESSION_CONFIRMED)
         mutable.update{snapshot->snapshot.copy(connected=true,trusted=host,status="${attempt.id}: Session confirmed — authenticated Windows face connected")}
         // Timeout closes the socket even if the platform's blocking write is backpressured.

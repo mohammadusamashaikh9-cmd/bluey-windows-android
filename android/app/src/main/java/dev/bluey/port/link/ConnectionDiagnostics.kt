@@ -79,23 +79,24 @@ fun tlsDetail(error:Throwable):TlsDetail {
     }
     return fallback
 }
-data class LinkDiagnostic(val at:Long,val attempt:String,val stage:LinkStage,val failure:LinkFailure,val port:Int,val detail:TlsDetail)
-// Deliberately no free-form message/exception/URI/payload parameter. The only strings are local IDs.
+data class LinkDiagnostic(val at:Long,val attempt:String,val stage:LinkStage,val failure:LinkFailure,val port:Int,val detail:TlsDetail,val target:LanEndpoint?)
+// Deliberately no free-form message/exception/URI/payload parameter. Strings are local IDs or validated private IPv4 endpoints.
 class SafeDiagnostics {
     companion object {const val CAPACITY=96}
     private val next=AtomicInteger()
     private val entries=MutableStateFlow<List<LinkDiagnostic>>(emptyList())
     val events:StateFlow<List<LinkDiagnostic>> = entries
     fun begin()=LinkAttempt("A%08x".format(next.incrementAndGet()),this)
-    @Synchronized internal fun record(id:String,stage:LinkStage,failure:LinkFailure,port:Int,detail:TlsDetail=TlsDetail.NONE) {
-        entries.value=(entries.value+LinkDiagnostic(System.currentTimeMillis(),id,stage,failure,port,detail)).takeLast(CAPACITY)
+    @Synchronized internal fun record(id:String,stage:LinkStage,failure:LinkFailure,port:Int,detail:TlsDetail=TlsDetail.NONE,target:LanEndpoint?=null) {
+        entries.value=(entries.value+LinkDiagnostic(System.currentTimeMillis(),id,stage,failure,port,detail,target)).takeLast(CAPACITY)
     }
-    fun text()="Bluey safe connection diagnostics v2 (UTC; ids local; port=client TCP source port)\n"+
-        entries.value.joinToString("\n"){"${Instant.ofEpochMilli(it.at)} ${it.attempt} port=${it.port} ${it.stage} ${it.failure} detail=${it.detail}"}
+    fun text()="Bluey safe connection diagnostics v3 (UTC; ids local; port=client source; endpoint=untrusted route)\n"+
+        entries.value.joinToString("\n"){"${Instant.ofEpochMilli(it.at)} ${it.attempt} port=${it.port} ${it.stage} ${it.failure} detail=${it.detail}"+(it.target?.let{endpoint->" endpoint=${endpoint.address}:${endpoint.port}"}?:"")}
 }
 class LinkAttempt(val id:String,private val log:SafeDiagnostics) {
     @Volatile var current=LinkStage.IDENTITY_LOADING;private set
     @Volatile var port=0
+    @Volatile var target:LanEndpoint?=null
     @Volatile var aliasRequested=false;private set
     @Volatile var aliasSelected=false;private set
     @Volatile var handshakeTimedOut=false
@@ -103,13 +104,13 @@ class LinkAttempt(val id:String,private val log:SafeDiagnostics) {
     fun event(stage:LinkStage) {
         if(stage==LinkStage.CLIENT_ALIAS_REQUESTED)aliasRequested=true
         if(stage==LinkStage.CLIENT_ALIAS_SELECTED||stage==LinkStage.CLIENT_KEY_PROVIDED)aliasSelected=true
-        log.record(id,stage,LinkFailure.NONE,port)
+        log.record(id,stage,LinkFailure.NONE,port,target=target)
     }
     fun failed(error:Throwable):LinkFailure {
         val code=classify(error)
-        log.record(id,current,code,port,tlsDetail(error));return code
+        log.record(id,current,code,port,tlsDetail(error),target);return code
     }
-    fun cancelled(){log.record(id,LinkStage.LIFECYCLE_CANCELLED,LinkFailure.CANCELLED,port)}
+    fun cancelled(){log.record(id,LinkStage.LIFECYCLE_CANCELLED,LinkFailure.CANCELLED,port,target=target)}
     private fun classify(error:Throwable):LinkFailure {
         var cause:Throwable?=error
         repeat(8) {

@@ -18,9 +18,9 @@ public sealed class TlsTests
 {
     private sealed class Client(TcpClient socket,SslStream tls,WireConnection wire,Message hello) : IDisposable
     { public WireConnection Wire=>wire;public Message Hello=>hello;public void Dispose(){tls.Dispose();socket.Dispose();} }
-    private static async Task<Client> Connect(LinkServer server,X509Certificate2? cert,string? pin=null,SslProtocols protocols=SslProtocols.Tls12|SslProtocols.Tls13)
+    private static async Task<Client> Connect(LinkServer server,X509Certificate2? cert,string? pin=null,SslProtocols protocols=SslProtocols.Tls12|SslProtocols.Tls13,IPAddress? address=null)
     {
-        var tcp=new TcpClient();await tcp.ConnectAsync(IPAddress.Loopback,server.Port);
+        var tcp=new TcpClient();await tcp.ConnectAsync(address??IPAddress.Loopback,server.Port);
         var ssl=new SslStream(tcp.GetStream(),false,(_,c,_,_)=>c is X509Certificate2 x && Identity.Fingerprint(x)==(pin??server.Pin));
         try
         {
@@ -202,6 +202,58 @@ public sealed class TlsTests
         using var store=new MemoryStore();await using var server=new LinkServer(store);
         var error=Assert.Throws<SocketException>(()=>server.Start(IPAddress.Loopback));
         Assert.Contains(error.SocketErrorCode,new[]{SocketError.AddressAlreadyInUse,SocketError.AccessDenied});
+        Assert.Throws<InvalidOperationException>(()=>server.Port);
+        occupied.Stop();server.Start(IPAddress.Loopback);Assert.Equal(LinkServer.DefaultPort,server.Port);
+    }
+
+    [Fact] public async Task RestartRetainsDefaultEndpointAndAuthenticatedTrustWithoutAnInvitation()
+    {
+        using var store=new MemoryStore();using var cert=Identity.Create("saved Android shaped identity",false);
+        var device=Guid.NewGuid().ToString();store.Add(new(device,"phone",Identity.Fingerprint(cert)));
+        var pin=Identity.Fingerprint(store.Certificate);
+        var first=new LinkServer(store);Client? active=null;
+        try {
+            first.Start(IPAddress.Loopback);Assert.Equal(LinkServer.DefaultPort,first.Port);
+            active=await Connect(first,cert);await active.Wire.Send("connect",new{hostId=store.HostId,deviceId=device},default);
+            Assert.Equal("ready",(await active.Wire.Read(default)).Type);
+        } finally {
+            // The host exits while its authenticated phone is still connected.
+            await first.DisposeAsync();active?.Dispose();
+        }
+        await using var second=new LinkServer(store);second.Start(IPAddress.Loopback);
+        Assert.Equal(LinkServer.DefaultPort,second.Port);Assert.Equal(pin,second.Pin);Assert.False(second.Invitation.Active);
+        using var resumed=await Connect(second,cert);await resumed.Wire.Send("connect",new{hostId=store.HostId,deviceId=device},default);
+        Assert.Equal("ready",(await resumed.Wire.Read(default)).Type);Assert.Null(second.Pending);Assert.Single(store.Peers);
+        second.Publish(.3,-.4,"happy",.2);Assert.Equal("happy",Wire.Face(await resumed.Wire.Read(default)).Mood);
+    }
+    [Fact] public async Task StalePortAndChangedAddressRequireOnlyRoutingRefreshWithTheSamePinnedIdentity()
+    {
+        using var store=new MemoryStore();using var cert=Identity.Create("same phone",false);
+        var device=Guid.NewGuid().ToString();store.Add(new(device,"phone",Identity.Fingerprint(cert)));int oldPort;
+        await using(var old=new LinkServer(store)){old.Start(IPAddress.Loopback,0);oldPort=old.Port;}
+        // Nothing listens at the saved address while the user has not started the host.
+        using(var stale=new TcpClient())await Assert.ThrowsAnyAsync<SocketException>(()=>stale.ConnectAsync(IPAddress.Loopback,oldPort).WaitAsync(TimeSpan.FromSeconds(3)));
+        var changed=IPAddress.Parse("127.0.0.2");
+        using var blockOldPort=new TcpListener(changed,oldPort);blockOldPort.ExclusiveAddressUse=true;blockOldPort.Start();
+        await using var next=new LinkServer(store);next.Start(changed,0);Assert.NotEqual(oldPort,next.Port);
+        await Denied(async()=>{using var wrong=await Connect(next,cert,new string('0',64),address:changed);});
+        using var client=await Connect(next,cert,address:changed);
+        await client.Wire.Send("connect",new{hostId=store.HostId,deviceId=device},default);
+        Assert.Equal("ready",(await client.Wire.Read(default)).Type);Assert.Null(next.Pending);Assert.Single(store.Peers);
+    }
+    [Fact] public async Task RevokedIdentityCannotReconnectButMayBeExplicitlyEnrolledAgainWithoutAReplacementKey()
+    {
+        using var store=new MemoryStore();using var cert=Identity.Create("unchanged phone key",false);
+        var device=Guid.NewGuid().ToString();var pin=Identity.Fingerprint(cert);store.Add(new(device,"phone",pin));
+        await using var server=new LinkServer(store);server.Start(IPAddress.Loopback,0);server.Revoke(pin);
+        await Denied(async()=>{using var blocked=await Connect(server,cert);});Assert.Empty(store.Peers);
+        var secret=server.StartPairing();using var client=await Connect(server,cert);
+        var request=await client.Wire.Send("enroll",new{deviceId=device,name="same phone",secret},default);
+        for(var i=0;i<100&&server.Pending==null;i++)await Task.Delay(10);
+        Assert.NotNull(server.Pending);Assert.Equal(pin,server.Pending.Pin);Assert.Empty(store.Peers);
+        server.Decide(pin,true,request);Assert.Equal("approve",(await client.Wire.Read(default)).Type);
+        await client.Wire.Send("confirm",new{requestId=request},default);Assert.Equal("ready",(await client.Wire.Read(default)).Type);
+        Assert.Equal(pin,Assert.Single(store.Peers).Pin);
     }
 
 }

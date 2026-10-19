@@ -233,3 +233,35 @@ not actual KeyMint enforcement. Windows native error/HRESULT and fixed Android
 provider/alert diagnostics are safe categories, not raw traffic or definitive alert
 codes when the provider exposes none. Actual Keystore/Schannel rejection mechanism
 and successful correction stay pending the [R2 physical sequence](../windows/README.md#f3-r2-keystore-signing-and-mutual-tls-retest).
+
+### F3-R3 / 2026-10-19 UTC
+
+User-reported R2 physical passes: authenticated mTLS pairing, live gaze and mood,
+Android touch precedence, Wi-Fi reconnection and revocation rejection. The restart
+video reports repeated TCP timeouts/no host discovery over 3–5 minutes; it does
+not independently prove Windows listened at each attempt. Physical old/new IP/port
+and the exact DNS-SD failure remain uncaptured.
+
+Source-confirmed defects: default port-0 binding makes saved endpoints unstable;
+Android has no fixed-port/manual fallback when NSD is absent. NSD start failure
+keeps a non-null listener; pause while resolving keeps its busy latch, preventing
+new generation resolution. Red tests reproduce the port conflict being ignored
+via ephemeral bind and both discovery lifecycle failures. R3 binds TCP47654 with
+explicit conflict/no fallback, preserves host-start consent, rotates bounded
+pinned-identity endpoint hints, and keeps ordinary transport failures retryable.
+New endpoint persistence occurs only after authenticated hello/ready checks.
+
+Focused tests must cover a host exiting with a live authenticated client and
+restarting at the default port with existing trust and no invitation; stale port,
+changed loopback IP/port and wrong-pin rejection; host not listening; conflicting
+port/retry; revoked identity rejection followed by explicit same-key enrollment.
+Kotlin tests cover missing/late/untrusted hints, fixed-port migration, manual LAN
+address validation, immutable saved UUID/pin, retry classification and stale NSD
+callback generations. NSD callback simulation is not real multicast evidence.
+Retain all existing animation, protected-store and protocol tests.
+
+Retest using [the one R3 sequence](../windows/README.md#f3-r3-restart-and-saved-identity-reconnection).
+Record Windows actual running/stopped endpoint alongside Android's selected route,
+unchanged TLS identities, confirmed session after restart, conflict handling,
+IP-change recovery and intentional revocation/re-enrollment. No new physical R3
+pass or measured latency is inferred from builds/loopback/software-key tests.

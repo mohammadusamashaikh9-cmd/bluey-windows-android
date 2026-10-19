@@ -12,13 +12,16 @@ internal sealed class WindowsLinkHost
     internal static bool Private(IPAddress ip) { var b=ip.GetAddressBytes(); return b.Length==4 && (b[0]==10 || b[0]==172 && b[1]>=16 && b[1]<=31 || b[0]==192 && b[1]==168); }
     internal static string[] Addresses() => NetworkInterface.GetAllNetworkInterfaces().Where(n=>n.OperationalStatus==OperationalStatus.Up && n.NetworkInterfaceType!=NetworkInterfaceType.Loopback)
         .SelectMany(n=>n.GetIPProperties().UnicastAddresses).Select(a=>a.Address).Where(Private).Select(a=>a.ToString()).Distinct().ToArray();
-    internal void Start(string selected)
+    internal async Task Start(string selected)
     {
         if(Server!=null) return;
         if(!IPAddress.TryParse(selected,out var ip)||!Private(ip)||!Addresses().Contains(selected)) throw new InvalidOperationException("Select this laptop's private IPv4 Wi-Fi/LAN address.");
-        store ??= new ProtectedTrust(); var next=new LinkServer(store,Diagnostics); next.Start(ip); address=ip;
+        store ??= new ProtectedTrust(); var next=new LinkServer(store,Diagnostics);
+        try {next.Start(ip);} catch {await next.DisposeAsync();throw;}
+        address=ip;
         Volatile.Write(ref server,next); advertisement=new(ip,next.Port,next.HostId);
     }
+    internal string DiagnosticText() => "Bluey host status: "+(Server is {} s?$"listening={address}:{s.Port}":"stopped")+"\n"+Diagnostics.Text();
     internal string StartPairing()
     {
         var s=Server??throw new InvalidOperationException("Start the secure host first."); var secret=s.StartPairing();

@@ -30,7 +30,7 @@ internal sealed class ConnectionWindow : Window
         panel.Children.Add(status);panel.Children.Add(error);
         panel.Children.Add(new TextBlock{Text="Safe connection diagnostics — UTC/local attempt IDs/client source ports. Review before sharing; never share the QR/URI.",TextWrapping=TextWrapping.Wrap});
         panel.Children.Add(diagnostics);
-        Add(panel,"Copy safe diagnostics",()=>{Clipboard.SetText(host.Diagnostics.Text());return Task.CompletedTask;});
+        Add(panel,"Copy safe diagnostics",()=>{Clipboard.SetText(host.DiagnosticText());return Task.CompletedTask;});
         Add(panel,"Start pairing (expires in 5 minutes)",async()=>{uri=await Task.Run(host.StartPairing);invite.Text=uri;qr.Source=Qr(uri);});
         Add(panel,"Stop pairing / clear invitation",async()=>{await Task.Run(()=>host.Server?.StopPairing());ClearInvite();});
         panel.Children.Add(qr);panel.Children.Add(invite);
@@ -54,7 +54,7 @@ internal sealed class ConnectionWindow : Window
     private void Refresh()
     {
         if(!busy)status.Text=host.Status;
-        var log=host.Diagnostics.Text();if(diagnostics.Text!=log)diagnostics.Text=log;
+        var log=host.DiagnosticText();if(diagnostics.Text!=log)diagnostics.Text=log;
         var s=host.Server;
         if(s?.Invitation.Active!=true && uri!=null)ClearInvite();
         displayed=s?.Pending;
@@ -66,7 +66,7 @@ internal sealed class ConnectionWindow : Window
     private void Add(Panel panel,string label,Func<Task> action)
     {
         var button=new Button{Content=label,Padding=new(8),Margin=new(0,4,0,4),HorizontalAlignment=HorizontalAlignment.Left};
-        button.Click+=async(_,_)=>{if(busy)return;busy=true;button.IsEnabled=false;error.Text="";try{await action();status.Text=host.Status;}catch(Exception e) when(e is System.IO.IOException or System.Security.Cryptography.CryptographicException or InvalidOperationException or System.Net.Sockets.SocketException or System.Runtime.InteropServices.ExternalException){error.Text="Connection operation failed: "+e.GetType().Name+". Check the selected address and protected storage.";}finally{busy=false;button.IsEnabled=true;}};
+        button.Click+=async(_,_)=>{if(busy)return;busy=true;button.IsEnabled=false;error.Text="";try{await action();status.Text=host.Status;}catch(System.Net.Sockets.SocketException e) when(e.SocketErrorCode is System.Net.Sockets.SocketError.AddressAlreadyInUse or System.Net.Sockets.SocketError.AccessDenied){error.Text=$"Secure host not started: TCP {Bluey.Link.LinkServer.DefaultPort} is occupied or unavailable. Stop any old Bluey/other listener or check the port reservation, then retry. No alternate port was chosen.";}catch(Exception e) when(e is System.IO.IOException or System.Security.Cryptography.CryptographicException or InvalidOperationException or System.Net.Sockets.SocketException or System.Runtime.InteropServices.ExternalException){error.Text="Connection operation failed: "+e.GetType().Name+". Check the selected address and protected storage.";}finally{busy=false;button.IsEnabled=true;}};
         panel.Children.Add(button);
     }
     private static ImageSource Qr(string value)

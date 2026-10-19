@@ -23,6 +23,8 @@ fun ConnectionPanel(link:DeviceLink,incoming:String?,close:()->Unit) {
     val context=LocalContext.current
     var replaceIdentity by remember {mutableStateOf(false)}
     var showLog by remember {mutableStateOf(false)}
+    var endpointAddress by remember {mutableStateOf("")}
+    var endpointPort by remember {mutableStateOf(ReconnectEndpoints.DEFAULT_PORT.toString())}
     var invitation by remember(incoming){mutableStateOf(incoming?:"")}
     val displayedInvitation=invitation
     val parsed=remember(displayedInvitation){runCatching{Bootstrap.parse(displayedInvitation,System.currentTimeMillis()/1000)}.getOrNull()}
@@ -43,9 +45,15 @@ fun ConnectionPanel(link:DeviceLink,incoming:String?,close:()->Unit) {
             state.clientPin?.let{Text("This phone certificate SHA-256 (compare on Windows): $it")}
             state.trusted?.let{Text("Saved host: ${it.hostId}\nSHA-256: ${it.pin}")}
             Text(state.discoveryStatus)
+            TextButton(onClick=link::refreshDiscovery){Text("Refresh discovery")}
+            Text("Saved identity reconnects without a new QR. Default Windows TCP port: ${ReconnectEndpoints.DEFAULT_PORT}. Start the Windows host explicitly after reopening it.")
+            OutlinedTextField(value=endpointAddress,onValueChange={if(it.length<=15)endpointAddress=it},label={Text("Current Windows private IPv4 (routing hint)")},modifier=Modifier.fillMaxWidth())
+            OutlinedTextField(value=endpointPort,onValueChange={if(it.length<=5)endpointPort=it},label={Text("Windows TCP port")})
+            TextButton(onClick={link.connectEndpoint(endpointAddress,endpointPort)},enabled=state.trusted!=null){Text("Use endpoint with saved identity")}
+            Text("If the laptop IP changed and discovery is unavailable, enter its displayed endpoint. The saved certificate pin is still required; no trust or key is replaced.")
             Text("Secure hosts discovered (names are untrusted hints):")
             state.hosts.forEach{host->TextButton(onClick={link.connect(host)}){Text("${host.name} · ${host.address}:${host.port}\nConnect using saved identity")}}
-            if(state.hosts.isEmpty())Text("No host discovered. Start Windows secure host; QR/URI works without discovery.")
+            if(state.hosts.isEmpty())Text("No host discovered. Saved endpoint still works; start Windows secure host or update its LAN endpoint. A new QR is only for enrollment.")
             OutlinedTextField(value=invitation,onValueChange={if(it.length<=2048)invitation=it},label={Text("Complete Windows pairing URI")},modifier=Modifier.fillMaxWidth(),maxLines=4)
             parsed?.let{Text("Invitation host: ${it.host.hostId}\n${it.host.address}:${it.host.port}\nServer SHA-256: ${it.host.pin}\nCompare this fingerprint with the Windows invitation. Pair explicitly approves this identity; Windows will also ask for approval.")}
             Button(onClick={link.pair(displayedInvitation);invitation=""},enabled=parsed!=null){Text("Pair with this Windows identity")}

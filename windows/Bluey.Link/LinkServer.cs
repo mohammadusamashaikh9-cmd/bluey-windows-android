@@ -27,12 +27,14 @@ public sealed class LinkServer : IAsyncDisposable
     public string Pin => Identity.Fingerprint(store.Certificate);
     public IReadOnlyList<Peer> Peers => store.Peers;
     public int Connections => sessions.Count;
-    public int Port => ((IPEndPoint)listener!.LocalEndpoint).Port;
+    public int Port => listener?.LocalEndpoint is IPEndPoint endpoint?endpoint.Port:throw new InvalidOperationException("Secure host not started");
     public LinkServer(ITrustStore store, ConnectionDiagnostics? diagnostics=null) { this.store = store; Diagnostics=diagnostics??new(); Invitation = new(() => clock.ElapsedMilliseconds); }
-    public void Start(IPAddress address,int port=0)
+    public void Start(IPAddress address,int port=DefaultPort)
     {
         if (listener != null) throw new InvalidOperationException("already started");
-        listener = new(address, port); listener.Start(8); accepting = AcceptLoop();
+        var next=new TcpListener(address,port){ExclusiveAddressUse=true};
+        try {next.Start(8);} catch {next.Stop();throw;}
+        listener=next;accepting=AcceptLoop();
     }
     public string StartPairing() { StopPairing(); return Invitation.Start(); }
     public void StopPairing() { Invitation.Stop(); Pending?.Decision.TrySetResult(false); }

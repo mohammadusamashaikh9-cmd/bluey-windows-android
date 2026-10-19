@@ -256,3 +256,59 @@ CI forces TLS 1.2 and TLS 1.3 independently, including identity rejection and fu
 approval/confirmed face delivery. Those are software-key tests, not evidence of
 phone Keystore/SChannel interoperability. Production still enables both TLS
 versions with exact pinning, mandatory mutual authentication and no downgrade.
+
+## F3-R3: restart and saved-identity reconnection
+
+Windows now listens on **TCP 47654** at the private IPv4 you explicitly select.
+Start secure host is still required after application launch; opening the app does
+not start a listener. Status/safe diagnostics say `listening=IP:47654` only after
+bind succeeds. An occupied/unavailable port leaves the host stopped and reports
+that conflict; close the old/conflicting listener or check the reservation, then
+retry. There is no silent dynamic-port fallback or automatic firewall change.
+47654 is a project development default, not an IANA reservation claim.
+
+Android retains the saved host UUID/pin and its existing phone key. It tries the
+saved endpoint, that IP at 47654 (for R2's old dynamic ports), then bounded rotating
+matching DNS-SD hints. A candidate still must pass exact pinned mutual TLS and
+hello/ready identity checks before a changed endpoint is saved. Ordinary TCP
+refusal/timeouts while the host is stopped remain retryable; neither those nor a
+rejected hint erase trust or authorize a different server. Explicit Disconnect
+stops retrying. Explicit Pair still requires a fresh invitation and both approvals;
+a revoked phone can re-enroll with the same key after the user authorizes it.
+
+Use **Refresh discovery** without forgetting trust. If DHCP changed the laptop's
+IP and multicast discovery is unavailable, enter its displayed private IPv4 and
+port in Android and choose **Use endpoint with saved identity**. This is an
+untrusted route, not re-enrollment; there is no LAN scan or pin replacement.
+Stable port handles unchanged-IP restarts without discovery. Automatic discovery
+success is not guaranteed on networks that block multicast; typed routing is the
+fallback for IP changes. Safe logs now include the selected private endpoint and
+Windows running/stopped state; review/redact LAN metadata before sharing.
+
+One physical restart/reconnect test:
+
+1. Verify the matching R3 artifacts/manifests and keep Windows DPAPI data intact.
+   Check APK SIGNING-CERT.txt: independently signed CI debug builds may require a
+   one-time uninstall/install and initial enrollment, which loses the old phone
+   app data/key. This packaging limitation is separate from the restart test;
+   never bypass signature checks or replace identity during restart recovery.
+2. Establish an authenticated R3 session once, record both pins/host UUID and
+   endpoint, and confirm gaze/mood. Exit Windows fully while Android stays foreground.
+   Check Android retries/offline demo without forgetting its saved identity.
+3. Reopen Windows. Confirm status says stopped before clicking Start secure host.
+   Select the same Wi-Fi IPv4, start host, and confirm `listening=IP:47654`.
+   Tap Android Reconnect saved host if needed. Do not start pairing, scan a QR,
+   Forget, Replace identity or approve enrollment. Require SessionReady and
+   SESSION_CONFIRMED and unchanged pins/UUID with resumed live gaze/mood.
+4. If IP changed, use discovery refresh or type the displayed new private endpoint;
+   require the same pin/UUID and confirmed session without QR. If bind failed,
+   resolve its reported conflict and explicitly retry Start host; do not attribute
+   Android timeouts to TLS while Windows says stopped.
+5. Revoke the phone on Windows: reconnect must fail. For the separate authorized
+   re-enrollment check, start a fresh invitation and approve both sides using the
+   same phone key; no identity replacement is needed. Copy only both safe logs
+   after the tests, with times/OS/model/build hashes; no QR/URI/keys/raw traffic.
+
+Developer reports R2 real mTLS, gaze/mood, touch precedence, Wi-Fi reconnect and
+revocation rejection passed. This R3 restart correction, DNS-SD/network behavior
+and latency still require the above real-device retest. CI is separate evidence.
