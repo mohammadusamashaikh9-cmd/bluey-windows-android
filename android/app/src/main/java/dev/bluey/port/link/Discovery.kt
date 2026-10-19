@@ -32,7 +32,7 @@ class Discovery(context:Context,private val changed:(List<DiscoveredHost>)->Unit
             override fun onServiceResolved(info:NsdServiceInfo){synchronized(this@Discovery){
                 if(run!=generation)return
                 val ip=info.host?.hostAddress
-                    if(ip!=null && Bootstrap.privateAddress(ip) && info.port in 1..65535){hosts[info.serviceName]=DiscoveredHost(info.serviceName,ip,info.port);changed(hosts.values.toList())}
+                if(ip!=null && Bootstrap.privateAddress(ip) && info.port in 1..65535){hosts[info.serviceName]=DiscoveredHost(info.serviceName,ip,info.port);changed(hosts.values.toList())}
                 resolving=false;resolveNext(run)
             }}
         })}catch(e:RuntimeException){resolving=false;status("Discovery resolution unavailable");resolveNext(run)}
