@@ -4,6 +4,7 @@
 verified `origin/main` / `32a38c045e6de87e9d79d44d1114a4f0c76d2b8d`.
 Both supplied applications and the evidence below use **`e0dcda03ca2168ada223bb9f01d7fb231a506202`**.
 Subsequent closeout edits are canonical documentation/tracking only.
+[PR #5](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/5) is open into main and unmerged.
 
 ## Accepted F3 gate
 

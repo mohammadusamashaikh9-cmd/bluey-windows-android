@@ -3,7 +3,7 @@
 F4-A app/evidence commit **`e0dcda03ca2168ada223bb9f01d7fb231a506202`**, branch `port/ai-voice-foundation`.
 Accepted main is merged F3 `32a38c0`; F3 functional QA is developer-reported accepted
 including full Windows restart, explicit host start and saved authenticated reconnect.
-Measured performance/matrix QA remains open. Do not merge the F4-A PR.
+Measured performance/matrix QA remains open. [PR #5](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/5) is open into main; do not merge.
 
 D010: offline six-state Kotlin controller, exact indicator math/native public-corner
 Canvas, preserved face math/remote target, strict session-bound presentation and

@@ -716,3 +716,7 @@ observed; local archive/evidence download policy-blocked at productionresultssa1
 no bypass. Source comparison preserves exact indicator parameters, public-platform
 corner/icon differences documented; no physical parity/performance inferred.
 Canonical STATUS/HANDOFF/CHECKPOINTS list actual evidence and one physical demo next.
+
+F4-A [PR #5](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/5) opened into main and attached to the task.
+Branch remains port/ai-voice-foundation; no merge. Later closeout changes only
+canonical documents; both supplied apps remain the tested e0dcda03 commit.
