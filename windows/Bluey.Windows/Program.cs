@@ -23,13 +23,13 @@ internal static class Program
         var overlay = new OverlayWindow(engine, visuals);
         var host = new Connection.WindowsLinkHost();
         var voice = new VoicePresentation(overlay.Art, host, engine);
-        Connection.ConnectionWindow? connection = null;
+        Connection.ConnectionWindow? connection = null; AI.AiWindow? ai=null;
         var controls = new ControlsWindow(engine, overlay, visuals, () => {
             if (connection == null) { connection = new(host); connection.Closed += (_,_) => connection = null; connection.Show(); }
             else connection.Activate();
-        }, () => voice.Preview(engine.Now));
+        }, () => voice.Preview(engine.Now), () => {if(ai==null){ai=new(host);ai.Closed+=(_,_)=>ai=null;ai.Show();}else ai.Activate();});
         overlay.Frame += () => { voice.Tick(engine.Now); host.Publish(engine.Face(engine.Now)); };
-        app.Exit += (_,_) => { connection?.Close(); Task.Run(host.Stop).GetAwaiter().GetResult(); };
+        app.Exit += (_,_) => { ai?.Close(); connection?.Close(); Task.Run(host.Stop).GetAwaiter().GetResult(); };
         app.MainWindow = controls;
         engine.GoHome(); overlay.Show(); controls.Show();
         return app.Run();

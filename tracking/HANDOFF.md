@@ -1,27 +1,12 @@
 # Handoff
 
-F4-A app/evidence commit **`e0dcda03ca2168ada223bb9f01d7fb231a506202`**, branch `port/ai-voice-foundation`.
-Accepted main is merged F3 `32a38c0`; F3 functional QA is developer-reported accepted
-including full Windows restart, explicit host start and saved authenticated reconnect.
-Measured performance/matrix QA remains open. [PR #5](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/5) is open into main; do not merge.
-
-D010: offline six-state Kotlin controller, exact indicator math/native public-corner
-Canvas, preserved face math/remote target, strict session-bound presentation and
-Windows existing bubble. Planned mic/cloud/screen consents all OFF; no audio, AI,
-key configuration, token endpoint, media/capture or tools. No API key needed.
-
-[STATUS](STATUS.md) contains all46 changed files, source comparisons, 27+35 Windows
-and70 Android passing tests, 16 native checks/13 Windows frames, 41 Android frames,
-CI/artifact URLs, file/ZIP/checksum hashes and actual failed-intermediate evidence.
-Android APK/checksum/signer/XML/frames downloaded and inspected. Windows archive
-local verification is cloud-policy blocked; actual CI build/test/hash/upload passed.
-Use only the matching app-commit downloads; later PR merge artifacts use another signer.
-APK signer differs from R3, so that update requires uninstall/install and explicit
-new enrollment (old Android data/key lost). Preserve Windows DPAPI state. No runtime
-code silently replaces identity. F4-A real-device UX/performance is not yet verified.
-
-**One next action:** execute the [physical offline demonstration](../project/QA.md#f4-a-physical-offline-demonstration-pending):
-verify manifests/install, explicitly start secure host, connect saved/re-enrolled
-phone, double tap wake, hold300 ms/release, verify mock stream/Windows bubble/cleanup,
-then interrupt with sleep, pause and disconnect without late reactivation. Record
-actual device/OS/build/time/results. No live mic/cloud/capture authorization.
+F4-B active on port/live-ai-voice from verified main7930efd1bca650ed0358bfc56201950083ea530c.
+PR #5 is merged; developer reports F4-A physical functional acceptance. Do not reopen
+F4-A. Performance/compatibility measurements remain unverified. D011 defines protected
+Windows key configuration, current-device authorization and opt-in foreground audio.
+No real OpenAI connection, credential mint or paid session is authorized during dev/CI.
+Current work: implement native adapters and run fake-provider/issuer integration and
+existing CI. Direct official pricing/guides blocked by cloud policy; documentation
+allowlist draft saved, requires review/save/publish. Official current generated SDK
+OpenAPI docs checked for GA endpoint/session/events/model IDs; no pricing inferred.
+One next action: finish matching-commit CI/artifacts and offline security verification.

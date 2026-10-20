@@ -6,6 +6,9 @@ namespace Bluey.Windows.Connection;
 internal sealed class WindowsLinkHost
 {
     private ProtectedTrust? store; private LinkServer? server; private Advertisement? advertisement; private IPAddress? address;
+    internal AI.ProtectedApiKey ApiKey {get;}=new();
+    private Bluey.Link.LiveAuthority? live;private readonly object liveGate=new();
+    internal Bluey.Link.LiveAuthority Live {get{lock(liveGate)return live??=new(new Bluey.Link.OpenAiIssuer(ApiKey,new System.Net.Http.HttpClient(new System.Net.Http.SocketsHttpHandler{AllowAutoRedirect=false,UseCookies=false}){Timeout=TimeSpan.FromSeconds(8)}));}}
     internal ConnectionDiagnostics Diagnostics {get;}=new();
     internal LinkServer? Server => Volatile.Read(ref server);
     internal string Status => Server is {} s ? $"TLS host {address}:{s.Port} · {s.Connections} authenticated connection(s)\n{advertisement?.Status}\nHost identity: {s.HostId}\nServer SHA-256: {s.Pin}" : "Secure host stopped";
@@ -16,7 +19,7 @@ internal sealed class WindowsLinkHost
     {
         if(Server!=null) return;
         if(!IPAddress.TryParse(selected,out var ip)||!Private(ip)||!Addresses().Contains(selected)) throw new InvalidOperationException("Select this laptop's private IPv4 Wi-Fi/LAN address.");
-        store ??= new ProtectedTrust(); var next=new LinkServer(store,Diagnostics);
+        store ??= new ProtectedTrust(); var next=new LinkServer(store,Diagnostics,Live);
         try {next.Start(ip);} catch {await next.DisposeAsync();throw;}
         address=ip;
         Volatile.Write(ref server,next); advertisement=new(ip,next.Port,next.HostId);
@@ -27,9 +30,10 @@ internal sealed class WindowsLinkHost
         var s=Server??throw new InvalidOperationException("Start the secure host first."); var secret=s.StartPairing();
         return $"bluey-secure://pair?host={address}&port={s.Port}&id={s.HostId}&pin={s.Pin}&secret={secret}&exp={DateTimeOffset.UtcNow.ToUnixTimeSeconds()+300}";
     }
+    internal void StopLive(){foreach(var peer in Live.Peers.Where(p=>p.Authorized))Server?.Presentations.Release(peer.Lease);Live.StopAll();}
     internal async Task Stop()
     {
-        var s=Interlocked.Exchange(ref server,null); advertisement?.Stop(); advertisement=null;
+        live?.StopAll();var s=Interlocked.Exchange(ref server,null); advertisement?.Stop(); advertisement=null;
         if(s!=null) await s.DisposeAsync();
     }
     internal void Publish(Bluey.Core.FaceState f) => Server?.Publish(f.GazeX,f.GazeY,f.Mood.ToString().ToLowerInvariant(),f.Talk);

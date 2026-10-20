@@ -37,6 +37,25 @@ public sealed class TlsTests
     {
         var e=await Record.ExceptionAsync(operation);Assert.True(e is AuthenticationException or IOException,$"Expected TLS/authentication denial, got {e?.GetType().Name??"success"}");
     }
+    private sealed class LoopbackIssuer:IClientSecretIssuer {public int Calls;public Task<ClientCredential> Mint(string model,LiveLimits limits,CancellationToken stop){Calls++;return Task.FromResult(new ClientCredential("offline-loopback-client-placeholder",DateTimeOffset.UtcNow.ToUnixTimeSeconds()+30));}}
+    [Fact] public async Task ActualMutualTlsGatesLiveIssuanceAndRevokedSessionCannotMint()
+    {
+        using var store=new MemoryStore();var issuer=new LoopbackIssuer();var live=new LiveAuthority(issuer);await using var server=new LinkServer(store,live:live);server.Start(IPAddress.Loopback,0);
+        using var cert=Identity.Create("live-phone",false);var device=Guid.NewGuid().ToString();var consent=Guid.NewGuid().ToString();server.StartPairing();
+        using(var u=await Connect(server,cert)){await u.Wire.Send("liveConsent",new{consentId=consent,microphone=true,cloud=true,continuous=false},default);await Denied(async()=>await u.Wire.Read(default));Assert.Equal(0,issuer.Calls);}
+        server.StopPairing();store.Add(new(device,"phone",Identity.Fingerprint(cert)));
+        using(var c=await Connect(server,cert)) {
+            await c.Wire.Send("connect",new{hostId=server.HostId,deviceId=device},default);Assert.Equal("ready",(await c.Wire.Read(default)).Type);
+            await c.Wire.Send("liveConsent",new{consentId=consent,microphone=true,cloud=true,continuous=false},default);
+            for(int n=0;n<100&&!live.Peers.Any(p=>p.ConsentId==consent);n++)await Task.Delay(10);
+            Assert.Equal(0,issuer.Calls);var peer=Assert.Single(live.Peers);
+            var auth=live.Authorize(peer.Lease,consent,LiveProtocol.Models[0],new());Assert.Equal("liveGrant",(await c.Wire.Read(default)).Type);
+            await c.Wire.Send("liveRequest",new{authorizationId=auth,consentId=consent,requestId=Guid.NewGuid().ToString()},default);
+            Assert.Equal("liveToken",(await c.Wire.Read(default)).Type);Assert.Equal(1,issuer.Calls);
+            server.Revoke(Identity.Fingerprint(cert));Assert.Empty(live.Peers);
+        }
+        await Denied(async()=>{using var c=await Connect(server,cert);});Assert.Equal(1,issuer.Calls);
+    }
     [Fact] public async Task PresentationRequiresReadyAndIsClearedWhenAuthenticatedSessionEnds()
     {
         using var store=new MemoryStore();await using var server=new LinkServer(store);server.Start(IPAddress.Loopback,0);

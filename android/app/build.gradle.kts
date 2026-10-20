@@ -11,8 +11,8 @@ android {
         applicationId = "dev.bluey.port"
         minSdk = 26
         targetSdk = 36
-        versionCode = 7
-        versionName = "0.4.0-f4a"
+        versionCode = 8
+        versionName = "0.4.1-f4b"
     }
     buildFeatures { compose = true }
     compileOptions {
@@ -37,6 +37,7 @@ kotlin {
 }
 
 dependencies {
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.google.code.gson:gson:2.13.2")
     implementation(platform("androidx.compose:compose-bom:2025.12.01"))
     implementation("androidx.activity:activity-compose:1.12.2")

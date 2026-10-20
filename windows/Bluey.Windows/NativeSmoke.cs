@@ -33,6 +33,18 @@ internal static class NativeSmoke
                 Check(rejected,"Corrupted protected trust fails closed without identity replacement");
                 first.Certificate.Dispose();second.Certificate.Dispose();third.Certificate.Dispose();
             } finally { if(Directory.Exists(trustDirectory))Directory.Delete(trustDirectory,true); }
+            var keyDirectory=Path.Combine(Path.GetTempPath(),"bluey-ai-check-"+Guid.NewGuid());
+            try {
+                var key=new AI.ProtectedApiKey(keyDirectory);var firstKey=System.Text.Encoding.UTF8.GetBytes("offline-test-master-placeholder");
+                Check(key.Status=="Not configured","Live master key starts unconfigured");key.Set(firstKey,false);
+                var read=key.Read();Check(read.SequenceEqual(firstKey)&&key.Status.StartsWith("Configured"),"Actual CurrentUser DPAPI key roundtrip without redisplay");System.Security.Cryptography.CryptographicOperations.ZeroMemory(read);
+                var encrypted=File.ReadAllBytes(Path.Combine(keyDirectory,"openai.dpapi"));Check(!System.Text.Encoding.UTF8.GetString(encrypted).Contains("offline-test-master"),"Credential file contains DPAPI ciphertext only");
+                var replaced=false;try{key.Set(firstKey,false);}catch(IOException){replaced=true;}Check(replaced,"Configured key requires explicit Replace");
+                var secondKey=System.Text.Encoding.UTF8.GetBytes("offline-replacement-placeholder");key.Set(secondKey,true);read=key.Read();Check(read.SequenceEqual(secondKey),"Protected key replacement is atomic and readable");System.Security.Cryptography.CryptographicOperations.ZeroMemory(read);
+                encrypted=File.ReadAllBytes(Path.Combine(keyDirectory,"openai.dpapi"));encrypted[0]^=255;File.WriteAllBytes(Path.Combine(keyDirectory,"openai.dpapi"),encrypted);Check(key.Status.StartsWith("Unavailable"),"Corrupted master key fails closed without regeneration");
+                key.Remove();Check(key.Status=="Not configured"&&!File.Exists(Path.Combine(keyDirectory,"openai.dpapi")),"Explicit key Remove removes protected credential");
+                System.Security.Cryptography.CryptographicOperations.ZeroMemory(firstKey);System.Security.Cryptography.CryptographicOperations.ZeroMemory(secondKey);
+            }finally{if(Directory.Exists(keyDirectory))Directory.Delete(keyDirectory,true);}
             var e = new CursorEngine(new(), () => 0, () => .5); var v = new VisualState(e, () => .5);
             window = new(e, v); var before = Native.GetForegroundWindow(); window.Show();
             window.Dispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);

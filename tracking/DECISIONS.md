@@ -266,3 +266,45 @@ session plus explicit current mic/cloud authorization, request/expiry/rate bound
 and cancellation/revocation; screen consent independent. No token endpoint or fake
 credential exists in F4-A. Follow current official GA client_secrets documentation
 in F4-B, not upstream beta token shapes/model constants. No live/billable request.
+
+## D011 / 2026-10-20 UTC — opt-in native live text voice
+
+F4-A PR #5 merged at `7930efd1bca650ed0358bfc56201950083ea530c`, verified through
+GitHub and origin/main. Its physical functional acceptance is developer-reported;
+measured fidelity/performance remains separate. F4-B keeps the accepted controller,
+indicator, face spring math, F3 TLS/trust and F4-A presentation path.
+
+Windows owns a separate CurrentUser DPAPI master-key store and explicit, in-memory,
+one-phone authorization bound to the current TLS lease, pin and Android consent ID.
+Configuring a key or starting the LAN host never calls OpenAI. Android must explicitly
+start live mode with OS microphone permission and cloud consent, then Windows must
+review/authorize that exact active phone. Each authorization allows at most two
+30-second client-secret requests, separated by 30 seconds, one active live phone,
+and a bounded session deadline. Stop/revoke/disconnect cancels mint work and signals
+closure. Delivered secrets cannot be reliably revoked by this local host: cooperative
+phone closure and TTL are not a hard provider/billing cap. No tools/media on LAN.
+
+Use GA `POST /v1/realtime/client_secrets`, nested realtime session config, text-only
+output, PCM16 little-endian mono24kHz input, manual commit/response with VAD disabled,
+no transcription/tracing/tools. Default model gpt-realtime-2.1-mini; Windows permits
+gpt-realtime-2.1 as an explicit higher-cost option. Current official generated SDK
+OpenAPI documentation verifies these model IDs, TTL10–7200 seconds and session shapes.
+Direct official web guides/pricing are currently cloud-policy blocked; documentation
+access draft saved, no pricing numbers/access entitlement inferred. Recheck official
+pricing and account availability before any separately authorized billable test.
+
+Android uses one pinned OkHttp4.12 WebSocket dependency because public Android APIs
+at min26 do not supply a suitable WebSocket client. No relay or second UI framework.
+Native AudioRecord starts only during authorized foreground live activity; streaming
+conversion emits bounded20ms PCM frames. Hold-only capture defaults on; separate
+informed continuous-awake opt-in matches source context but consumes more audio.
+Manual asks only, text deltas with local synthesized chirps, no generated cloud speech.
+Offline provider remains independent and never initializes microphone/network provider.
+
+Default local safeguards:300s session,5 responses,60s total input audio,256 output
+tokens/response, bounded queues and no automatic live reconnect. Windows can lower/
+raise within hard local ranges (600s/20/120s/1024 maxima). Explicit user wake can
+request the remaining refresh; sleep/background/disconnect stops capture/provider
+and invalidates callbacks. Provider response IDs, local gesture generations and LAN
+request/envelope IDs remain separate. Usage is memory-only metadata, not billing proof.
+No raw audio/transcripts logged or persisted. No API requests or real keys in dev/CI.

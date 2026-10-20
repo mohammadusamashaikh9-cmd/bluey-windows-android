@@ -4,7 +4,11 @@
 verified `origin/main` / `32a38c045e6de87e9d79d44d1114a4f0c76d2b8d`.
 Both supplied applications and the evidence below use **`e0dcda03ca2168ada223bb9f01d7fb231a506202`**.
 Subsequent closeout edits are canonical documentation/tracking only.
-[PR #5](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/5) is open into main and unmerged.
+[PR #5](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/5) is merged at `7930efd1bca650ed0358bfc56201950083ea530c` (GitHub verified).
+Developer reports F4-A functional physical acceptance; no measured performance or
+advanced compatibility data supplied. F4-B is active on `port/live-ai-voice` from
+that verified main. D011 records new live consent/credential/cost boundaries.
+All F4-B provider tests are offline; no paid call or real key is authorized.
 
 ## Accepted F3 gate
 

@@ -1,7 +1,7 @@
 name: Android face
 on:
   push:
-    branches: [main, port/android-face, port/secure-device-link, port/ai-voice-foundation]
+    branches: [main, port/android-face, port/secure-device-link, port/ai-voice-foundation, port/live-ai-voice]
     paths: ['android/**', 'Shared/Fonts/**', 'protocol/**', '.github/workflows/android.yml']
   pull_request:
     branches: [main]
