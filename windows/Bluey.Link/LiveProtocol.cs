@@ -2,7 +2,7 @@ using System.Text.Json;
 namespace Bluey.Link;
 public sealed record LiveLimits(int SessionSeconds=300,int Responses=5,int AudioSeconds=60,int MaxTokens=256)
 {
-    public void Validate(){if(SessionSeconds is <30 or >600 || Responses is <1 or >20 || AudioSeconds is <1 or >120 || MaxTokens is <16 or >1024)throw new ProtocolException("live limits");}
+    public void Validate(int minimumSeconds=30){if(SessionSeconds < minimumSeconds || SessionSeconds >600 || Responses is <1 or >20 || AudioSeconds is <1 or >120 || MaxTokens is <16 or >1024)throw new ProtocolException("live limits");}
 }
 public static class LiveProtocol
 {
@@ -20,7 +20,7 @@ public static class LiveProtocol
             Wire.Keys(p,"authorizationId","requestId","secret","expiresAt","model","sessionSeconds","responses","audioSeconds","maxTokens");Id(p,"authorizationId");Id(p,"requestId");
             var secret=Wire.Text(p,"secret",512);if(secret.Length<16||secret.Any(c=>c<33||c>126))throw new ProtocolException("live secret");
             if(!Models.Contains(Wire.Text(p,"model",64)))throw new ProtocolException("model");Wire.Integer(p,"expiresAt");
-            new LiveLimits(checked((int)Wire.Integer(p,"sessionSeconds")),checked((int)Wire.Integer(p,"responses")),checked((int)Wire.Integer(p,"audioSeconds")),checked((int)Wire.Integer(p,"maxTokens"))).Validate();break;
+            new LiveLimits(checked((int)Wire.Integer(p,"sessionSeconds")),checked((int)Wire.Integer(p,"responses")),checked((int)Wire.Integer(p,"audioSeconds")),checked((int)Wire.Integer(p,"maxTokens"))).Validate(1);break;
         default:throw new ProtocolException("live command");}
     }
 }

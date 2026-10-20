@@ -52,7 +52,7 @@ class ProtocolTest {
     }
     @Test fun liveFixturesDecodeIdentically() {
         val lines=javaClass.getResourceAsStream("/f4b-cases.jsonl")!!.bufferedReader().readLines()
-        assertEquals(27,lines.size)
+        assertEquals(28,lines.size)
         for(line in lines) {
             val fixture=JsonParser.parseString(line).asJsonObject;val frames=Frames();val decoded=mutableListOf<Message>()
             val accepted=try {

@@ -751,3 +751,9 @@ fixture fired the old capture error after release/drain, now correctly rejected 
 capture-generation gating. Moved that interruption to the active asking phase;
 kept explicit stale-error and abandoned-drain tests. No implementation assertion
 was weakened and no test was disabled. Final matching builds rerun.
+
+Timed minimum-duration test reproduced a real bug: a30-second Windows approval
+with one-second request delay returned liveStop because remaining29 seconds was
+validated against configuration minimum30. Separated token remaining-time range
+1–600 from UI30–600; new shared fixture and actual delayed fake-issuer regression
+verify29-second metadata and original deadline expiry. No paid request involved.

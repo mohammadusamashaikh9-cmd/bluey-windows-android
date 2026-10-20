@@ -308,3 +308,9 @@ request the remaining refresh; sleep/background/disconnect stops capture/provide
 and invalidates callbacks. Provider response IDs, local gesture generations and LAN
 request/envelope IDs remain separate. Usage is memory-only metadata, not billing proof.
 No raw audio/transcripts logged or persisted. No API requests or real keys in dev/CI.
+
+D011 timing clarification: UI-configured session duration is30–600 seconds from
+Windows authorization. Live-token sessionSeconds is remaining time,1–600, so a
+30-second approval remains usable after transport/user delay without extension.
+A deterministic one-second-delay regression first reproduced the rejection, then
+verified29-second metadata and expiry at the original deadline.

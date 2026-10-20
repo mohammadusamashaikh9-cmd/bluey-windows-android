@@ -73,7 +73,7 @@ units, each delta256, with existing4096-byte framing and sequence/rate checks.
 
 ## F4-B live authorization
 
-27 additional f4b-cases fixtures are tested by both languages. Types, directions,
+28 additional f4b-cases fixtures are tested by both languages. Types, directions,
 limits and revocation are specified in [canonical schema](../project/PROTOCOL-DATA-SCHEMA.md#f4-b-live-authorization-extension-d011).
 Only short-lived client secrets cross the authenticated LAN; no master key/audio/
 transcripts/tools/capture. Consent declarations alone cannot mint: desktop authorization

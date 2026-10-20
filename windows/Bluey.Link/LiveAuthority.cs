@@ -43,7 +43,7 @@ public sealed class LiveAuthority(IClientSecretIssuer issuer,Func<long>? millise
             if(result==null||result.ExpiresAt<=unix()||result.ExpiresAt>unix()+60||mono()>=s.Deadline){Cancel(s,"issuer");}
             else {
                 var remaining=(int)Math.Min(s.Limits.SessionSeconds,(s.Deadline-mono())/1000);
-                if(remaining<30)Cancel(s,"expired");
+                if(remaining<1)Cancel(s,"expired");
                 else if(!s.Out.Writer.TryWrite(new("liveToken",new{authorizationId=auth,requestId=request,secret=result.Value,expiresAt=result.ExpiresAt,model=s.Model,sessionSeconds=remaining,responses=s.Limits.Responses,audioSeconds=s.Limits.AudioSeconds,maxTokens=s.Limits.MaxTokens})))Cancel(s,"limit");
             }
         }issue.Dispose();

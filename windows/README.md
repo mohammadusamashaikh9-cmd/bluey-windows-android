@@ -359,3 +359,6 @@ Late capture errors/drain completions are generation-bound and cannot stop a
 replacement live session or commit an abandoned question.
 Offline tests distinguish an active microphone interruption from a late error
 after a stopped capture; neither can reactivate an abandoned turn.
+The configured session minimum is30 seconds, counted from Windows authorization;
+the token carries only remaining time (possibly below30 after network/user delay).
+The phone never receives an extended deadline to compensate for that delay.

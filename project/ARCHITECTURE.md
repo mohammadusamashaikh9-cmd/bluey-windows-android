@@ -5,8 +5,10 @@ remain [proposals](TRD.md).
 Source owners are in [PORTING-MAP](PORTING-MAP.md).
 
 F1 supplies the Android animator/renderer in `android/` (D007); F2 supplies the
-Windows overlay (D008). F3 adds the authenticated local face link (D009). Voice,
-capture/OCR, action and cloud components below remain future boundaries.
+Windows overlay (D008). F3 adds the authenticated local face link (D009). F4-A
+adds offline voice presentation; F4-B adds opt-in live voice/credential issuance.
+Capture/OCR, actions and notes below remain future boundaries unless explicitly
+identified as implemented in the checkpoint sections.
 
 ```mermaid
 flowchart LR

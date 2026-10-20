@@ -56,3 +56,8 @@ limitations in release documentation and no unsupported claim of complete parity
 F4-A is an explicitly labeled offline simulation of the original voice UX: it uses
 mock captions and local animation only. It does not authorize microphone collection,
 cloud sessions or desktop capture; separate future permissions default OFF.
+
+F4-B adds explicitly authorized, foreground live voice while retaining offline
+simulation. Hold-only audio is the default; continuous-awake context needs a separate
+informed choice. Windows owns protected credentials and current-device authorization.
+No background recording, capture, tools or hosted service enters this slice.

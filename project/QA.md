@@ -267,7 +267,13 @@ unchanged TLS identities, confirmed session after restart, conflict handling,
 IP-change recovery and intentional revocation/re-enrollment. No new physical R3
 pass or measured latency is inferred from builds/loopback/software-key tests.
 
-## F4-A physical offline demonstration (pending)
+<a id="f4-a-physical-offline-demonstration-pending"></a>
+
+## F4-A physical offline demonstration (functional acceptance reported)
+
+PR #5 merged at7930efd; the developer reports functional physical acceptance.
+Retained procedure below is historical QA guidance; FPS/resources/latency and
+advanced compatibility remain unmeasured. No agent-operated device test is inferred.
 
 Install matching-commit apps and verify SHA256SUMS first. Compare APK signer to the
 installed APK: CI debug signers are ephemeral. If update is rejected for a differing

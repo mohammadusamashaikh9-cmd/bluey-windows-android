@@ -2,7 +2,7 @@ package dev.bluey.port.live
 import com.google.gson.JsonObject
 import dev.bluey.port.link.*
 data class LiveLimits(val sessionSeconds:Int=300,val responses:Int=5,val audioSeconds:Int=60,val maxTokens:Int=256) {
-    fun validate(){if(sessionSeconds !in 30..600||responses !in 1..20||audioSeconds !in 1..120||maxTokens !in 16..1024)throw ProtocolException("live limits")}
+    fun validate(minimumSeconds:Int=30){if(sessionSeconds !in minimumSeconds..600||responses !in 1..20||audioSeconds !in 1..120||maxTokens !in 16..1024)throw ProtocolException("live limits")}
 }
 class LiveToken(val authorizationId:String,val requestId:String,val secret:String,val expiresAt:Long,val model:String,val limits:LiveLimits){override fun toString()="[client secret redacted]"}
 object LiveProtocol {
@@ -17,7 +17,7 @@ object LiveProtocol {
             "liveStop"->{Wire.keys(p,"code");if(Wire.text(p,"code") !in setOf("stopped","denied","expired","limit","issuer","disconnected"))throw ProtocolException("live stop")}
             "liveToken"->{Wire.keys(p,"authorizationId","requestId","secret","expiresAt","model","sessionSeconds","responses","audioSeconds","maxTokens");id(p,"authorizationId");id(p,"requestId")
                 val secret=Wire.text(p,"secret",512);if(secret.length<16||secret.any{it.code !in 33..126})throw ProtocolException("live secret")
-                if(Wire.text(p,"model",64) !in models)throw ProtocolException("model");Wire.integer(p,"expiresAt");limits(p).validate()}
+                if(Wire.text(p,"model",64) !in models)throw ProtocolException("model");Wire.integer(p,"expiresAt");limits(p).validate(1)}
             else->throw ProtocolException("live command")
         }
     }

@@ -48,6 +48,13 @@ public sealed class LiveTests
         var issuer=new Issuer{Expiry=expiry};var a=new LiveAuthority(issuer,()=>0,()=>1000);a.Open("tls","pin","device");ConsentTo(a);
         var auth=a.Authorize("tls",Consent,LiveProtocol.Models[0],new());await Next(a);Request(a,auth,Guid.NewGuid().ToString());Assert.Equal("liveStop",(await Next(a)).Type);
     }
+    [Fact] public async Task MinimumSessionStillMintsAfterConsentNetworkDelayWithoutExtendingDeadline() {
+        long time=0;var issuer=new Issuer();var a=new LiveAuthority(issuer,()=>time,()=>1000);a.Open("tls","pin","device");ConsentTo(a);
+        var auth=a.Authorize("tls",Consent,LiveProtocol.Models[0],new(SessionSeconds:30));await Next(a);
+        time=1000;Request(a,auth,Guid.NewGuid().ToString());var packet=await Next(a);Assert.Equal("liveToken",packet.Type);
+        var decoded=Wire.Decode(Wire.Encode(packet.Type,Guid.NewGuid().ToString(),0,packet.Payload)[..^1]);Assert.Equal(29,Wire.Integer(decoded.Payload,"sessionSeconds"));
+        time=30000;a.Expire();Assert.Equal("liveStop",(await Next(a)).Type);
+    }
     private sealed class Key:IMasterKey {public byte[] Read()=>Encoding.UTF8.GetBytes("offline-master-placeholder-never-real");}
     private sealed class Handler:HttpMessageHandler {
         public string? Body;public int Calls;
