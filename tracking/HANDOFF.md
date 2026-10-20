@@ -1,6 +1,7 @@
 # Handoff
 
 F4-B app/artifact commit **5df67442c2cb5e8967a9caca8de3aba42e4a3099**, port/live-ai-voice, from verified main7930efd.
+[PR #6](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/6) is open into main and must remain unmerged.
 PR #5 is merged; developer-reported F4-A functional physical acceptance is recorded.
 No F4-A reopening; performance/matrix QA remains separate. F4-B code/offline CI passed;
 no paid call, real key/mint or microphone capture was used in development/CI.

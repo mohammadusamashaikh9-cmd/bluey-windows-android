@@ -773,3 +773,6 @@ blocked by cloud policy (Androidsa10/Windowssa15), hashes/results from actual CI
 superseded a65 Android and2f4 Windows downloads were independently inspected, not
 claimed as final artifact rehashes. STATUS records all exact hashes/links, source
 boundaries, consent/cost limits and one developer decision before any billable test.
+
+F4-B [PR #6](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/6) opened into main. No merge. Later closeout
+edits are canonical tracking only; both supplied apps remain the tested5df67442 commit.

@@ -7,7 +7,8 @@ physical acceptance; no new agent-operated device tests or measured performance
 are inferred. F1/F2/F3/F4-A measured FPS/resources/latency/compatibility remain separate.
 
 Both supplied apps use **`5df67442c2cb5e8967a9caca8de3aba42e4a3099`**. Later closeout edits are canonical documentation
-only. No real key, microphone capture, client-secret mint or paid OpenAI call was
+only. [PR #6](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/6) is open into main and unmerged.
+No real key, microphone capture, client-secret mint or paid OpenAI call was
 performed during development/CI. Real API/device acceptance remains pending a
 separate user decision; code/offline checks are complete, not a live-service pass.
 
