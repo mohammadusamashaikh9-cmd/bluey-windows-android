@@ -757,3 +757,19 @@ with one-second request delay returned liveStop because remaining29 seconds was
 validated against configuration minimum30. Separated token remaining-time range
 1–600 from UI30–600; new shared fixture and actual delayed fake-issuer regression
 verify29-second metadata and original deadline expiry. No paid request involved.
+
+## 2026-10-20 UTC — F4-B final automated evidence
+
+App/artifacts5df67442c2cb5e8967a9caca8de3aba42e4a3099: Windows39455054721 passes27 core+45 link,
+WPF build0 warnings/errors, self-contained publish,23 native DPAPI/HWND checks/13
+frames. Android39455054729 passes89 tests, zero failures/errors/skips,
+lint0 errors18 warnings, apksigner/debug APK/evidence uploaded. Shared40+27+28 corpus.
+Local final link45/45; minimum30s delayed-request red/green reproduced and repaired.
+Actual native hardware microphone/OpenAI API not exercised; all issuers/HTTP/Realtime/
+capture adapters fake in tests. No secrets added to cloud/Git/logs/artifacts.
+
+Final APKa3cc890747f9f9e685d578608b608cd980e0574f72d372b8a115dd4cc9037290; signer14a5c577e03ba05a977e38960cd31181b4b5c5bc6bf416ffc65b64242fcfc992 differs from delivered F4-A. Final downloads
+blocked by cloud policy (Androidsa10/Windowssa15), hashes/results from actual CI;
+superseded a65 Android and2f4 Windows downloads were independently inspected, not
+claimed as final artifact rehashes. STATUS records all exact hashes/links, source
+boundaries, consent/cost limits and one developer decision before any billable test.
