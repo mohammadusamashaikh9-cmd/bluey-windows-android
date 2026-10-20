@@ -22,6 +22,7 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
     private var consent:String?=null;private var authorization:String?=null;private var request:String?=null
     private var continuous=false;var chirps=true;private var foreground=true;private var last=VoiceMode.asleep
     private var engine:RealtimeEngine?=null;private var capture:CaptureDevice?=null;private val chirp=LocalChirp(scope)
+    @Volatile private var captureEpoch=0L
     @Volatile private var providerEpoch=0L;private var started=0L;private var requestAt=0L
     private var pendingGen=0L;private var pendingTurn=""
     private fun now()=SystemClock.elapsedRealtime()
@@ -49,18 +50,21 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
                 if(!port.send("liveRequest",Wire.payload("authorizationId" to authorization!!,"consentId" to consent!!,"requestId" to request!!)))stop("LAN unavailable")
                 else mutable.update{it.copy(status="Requesting short-lived credential; microphone OFF")}}
             VoiceMode.asking->{engine?.interrupt();engine?.bind(state.generation,state.turnId);if(!continuous){engine?.clearInput();startCapture()}}
+            VoiceMode.listening->if(!continuous&&old==VoiceMode.asking){
+                captureEpoch++;capture?.cancel();capture=null;engine?.clearInput()
+            }
             VoiceMode.asleep->if(old!=VoiceMode.asleep)stop("Slept — authorize a fresh live session to restart")
             else->Unit
         }
     }
     private fun startCapture() {
         if(capture!=null||engine==null||!foreground||!mutable.value.armed||!mutable.value.connected||authorization==null||ContextCompat.checkSelfPermission(context,Manifest.permission.RECORD_AUDIO)!=PackageManager.PERMISSION_GRANTED)return
-        val epoch=providerEpoch;val active=engine!!;val next=captureFactory?.invoke(scope)?:AndroidCapture(context,scope);capture=next
-        next.start({bytes->if(providerEpoch==epoch&&mutable.value.armed)active.append(bytes)},{scope.launch{if(providerEpoch==epoch)stop("Microphone interrupted/unavailable")}})
+        val epoch=providerEpoch;val captureTag=++captureEpoch;val active=engine!!;val next=captureFactory?.invoke(scope)?:AndroidCapture(context,scope);capture=next
+        next.start({bytes->if(providerEpoch==epoch&&captureEpoch==captureTag&&mutable.value.armed)active.append(bytes)},{scope.launch{if(providerEpoch==epoch)stop("Microphone interrupted/unavailable")}})
     }
     private fun commit(g:Long,t:String) {
         val epoch=providerEpoch;val active=engine
-        scope.launch{try {if(!continuous){val old=capture;capture=null;old?.finish()}
+        scope.launch{try {if(!continuous){val old=capture;capture=null;captureEpoch++;old?.finish()}
             if(active!=null&&engine===active&&epoch==providerEpoch&&voice.snapshot.generation==g&&voice.snapshot.turnId==t)active.ask(g,t)
             else if(mutable.value.armed)stop("Session not ready; no audio committed")
         }catch(_:Exception){stop("Audio cleanup failed")}}
@@ -90,7 +94,7 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
         mutable.update{it.copy(status="Connecting to OpenAI; microphone OFF")}
     }
     fun stop(reason:String="Stopped",notify:Boolean=true) {
-        providerEpoch++;request=null;capture?.cancel();capture=null;chirp.stop();val old=engine;engine=null;old?.stop()
+        providerEpoch++;captureEpoch++;request=null;capture?.cancel();capture=null;chirp.stop();val old=engine;engine=null;old?.stop()
         if(notify&&mutable.value.armed)port.send("liveStop",Wire.payload("code" to "stopped"))
         consent=null;authorization=null;last=VoiceMode.asleep;voice.configureLive(null,now());mutable.value=mutable.value.copy(armed=false,authorized=false,connected=false,status=reason,elapsedMs=if(old!=null)now()-started else mutable.value.elapsedMs,usage=old?.usage?:mutable.value.usage)
         while(packets.tryReceive().isSuccess){}

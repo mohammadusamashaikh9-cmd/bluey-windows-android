@@ -39,6 +39,7 @@ class LiveCoordinatorTest {
     }
     @Test fun authenticatedGrantHoldOnlyPauseAndStaleCallbacksUseFakeNativeAdapters() {scenario(false)}
     @Test fun continuousContextStartsOnlyAfterSeparateConsentGrantAndReady() {scenario(true)}
+    @Test fun cancelingHoldStopsOnlyHoldCaptureWithoutCommitting() {scenario(false,"gesture")}
     @Test fun explicitStopStopsCaptureAndProvider() {scenario(false,"stop")}
     @Test fun sleepStopsCaptureAndProvider() {scenario(false,"sleep")}
     @Test fun lanDisconnectStopsCaptureAndProvider() {scenario(false,"disconnect")}
@@ -60,7 +61,14 @@ class LiveCoordinatorTest {
         assertEquals(VoiceMode.listening,voice.snapshot.mode);assertEquals(if(continuous)1 else 0,factories)
         voice.down(SystemClock.elapsedRealtime());advance(300);voice.tick(SystemClock.elapsedRealtime());live.observe()
         assertEquals(VoiceMode.asking,voice.snapshot.mode);assertEquals(1,capture.starts)
-        repeat(6){capture.callback!!(ByteArray(960))};voice.up(SystemClock.elapsedRealtime());live.observe();idle()
+        repeat(6){capture.callback!!(ByteArray(960))}
+        if(ending=="gesture") {
+            voice.cancelGesture(SystemClock.elapsedRealtime());live.observe();idle()
+            assertEquals(VoiceMode.listening,voice.snapshot.mode);assertTrue(capture.cancels>0);assertFalse(socket.closed)
+            val before=socket.sent.size;capture.callback!!(ByteArray(960));idle();assertEquals(before,socket.sent.size)
+            assertFalse(socket.sent.any{it.contains("input_audio_buffer.commit")});live.close();return
+        }
+        voice.up(SystemClock.elapsedRealtime());live.observe();idle()
         assertEquals(VoiceMode.thinking,voice.snapshot.mode);assertTrue(socket.sent.any{it.contains("input_audio_buffer.commit")})
         when(ending){
             "sleep"->{voice.sleep(SystemClock.elapsedRealtime());live.observe()}

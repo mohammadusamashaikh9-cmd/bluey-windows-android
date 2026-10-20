@@ -350,3 +350,6 @@ limits/cooperative phone closure do not guarantee a hard financial cap or malici
 client revocation. Use separate OpenAI Platform project/organization budgets and
 usage notifications; they are alerts/controls with their own limits, not a local
 proof of spend. No paid API request is authorized for CI/development.
+
+Hold-only touch cancellation stops capture and clears uncommitted audio without
+requesting a response; continuous-awake context retains its separately opted-in policy.

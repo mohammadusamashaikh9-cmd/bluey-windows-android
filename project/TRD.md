@@ -75,3 +75,12 @@ text only; local source-derived pentatonic chirps use AudioTrack. One pinned OkH
 Default limits300s/5 replies/60 input seconds/256 reply tokens; user-configurable
 within600s/20/120s/1024. These are cooperative safeguards, not financial guarantees.
 Physical capture support/routes, API interoperability, pacing and costs unverified.
+
+Public Android semantics checked2026-10-20 UTC: [AudioRecord](https://developer.android.com/reference/android/media/AudioRecord)
+requires RECORD_AUDIO, guarantees44.1kHz support while other rates depend on device,
+and exposes the configured sample rate. Native capture validates initialization and
+reported rate, bounds native buffers and falls back after unsupported constructors.
+[Microphone while-in-use restrictions](https://developer.android.com/develop/background-work/services/fgs/service-types#microphone)
+were inspected: F4-B deliberately uses only a foreground Activity, no microphone
+foreground/background service, and stops on pause. Physical routes/interruptions still
+need testing. Documentation inspection is not hardware evidence.

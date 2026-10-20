@@ -738,3 +738,10 @@ corrected readable reducer. Second39449838450 ran82 tests,81 passed/1 failed: re
 F1 manifest allowlist expected only LAN, now requires intentional live RECORD_AUDIO.
 Updated that assertion to exact LAN+mic only while retaining font/license checks;
 new offline/capture/provider tests passed, no test removed/disabled. Final evidence pending.
+
+F4-B pre-closeout CI at a65cab7 passed Windows27+44 tests/23 native checks and
+Android87 tests/lint0 errors18 warnings. Lifecycle code review then found canceled
+hold-only gestures left capture active while listening. Added capture-generation
+invalidation, cancel/clear on asking→listening and a fake-native regression proving
+late frames are dropped without commit. Matching final builds rerun for that repair.
+No real capture/provider request occurred.
