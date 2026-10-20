@@ -40,5 +40,6 @@ class LocalChirp(private val scope:CoroutineScope) {
     fun play(){stop();job=scope.launch(Dispatchers.IO){var track:AudioTrack?=null
         try{val data=Chirp.samples();track=AudioTrack.Builder().setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION).setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build()).setAudioFormat(AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_16BIT).setSampleRate(24000).setChannelMask(AudioFormat.CHANNEL_OUT_MONO).build()).setTransferMode(AudioTrack.MODE_STATIC).setBufferSizeInBytes(data.size*2).build();track.write(data,0,data.size);track.setVolume(.5f);track.play();delay(data.size*1000L/24000+30)}catch(_:Exception){}finally{runCatching{track?.stop()};track?.release()}}
     }
+    suspend fun awaitQuiet(){job?.join()}
     fun stop(){job?.cancel();job=null}
 }

@@ -353,3 +353,5 @@ proof of spend. No paid API request is authorized for CI/development.
 
 Hold-only touch cancellation stops capture and clears uncommitted audio without
 requesting a response; continuous-awake context retains its separately opted-in policy.
+Provider text completion waits for the local chirp to finish before returning the
+phone to listening; sleep/Stop invalidates that delayed completion.

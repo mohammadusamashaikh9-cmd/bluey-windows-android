@@ -86,7 +86,7 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
     private fun connect(token:LiveToken) {
         val epoch=++providerEpoch;started=now();while(packets.tryReceive().isSuccess){}
         val transport=transportFactory(token,{text->if(providerEpoch==epoch&&!packets.trySend(epoch to text).isSuccess)scope.launch{stop("Provider queue full")}}, {scope.launch{if(providerEpoch==epoch)stop("Provider connection ended; no automatic reconnect")}})
-        val active=RealtimeEngine(transport,token.limits,::now,{event->scope.launch{if(providerEpoch==epoch&&foreground)voice.accept(event,now())}}, {code->scope.launch{if(providerEpoch==epoch)stop("Live stopped: $code")}}, {
+        val active=RealtimeEngine(transport,token.limits,::now,{event->scope.launch{if(event.kind=="done")chirp.awaitQuiet();if(providerEpoch==epoch&&foreground)voice.accept(event,now())}}, {code->scope.launch{if(providerEpoch==epoch)stop("Live stopped: $code")}}, {
             if(providerEpoch==epoch){val s=voice.snapshot
                 voice.accept(MockEvent(now(),pendingGen,pendingTurn,"ready"),now());mutable.update{it.copy(connected=true,status="Live text session — billable; ${if(continuous)"CONTINUOUS AWAKE audio"else "HOLD-ONLY audio"}")};if(chirps)chirp.play();if(continuous)startCapture()}
         },{if(chirps)chirp.play()})

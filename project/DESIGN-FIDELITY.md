@@ -193,3 +193,7 @@ upstream unbounded reconnect/recording/transcription/tool paths, this checkpoint
 on background/failure and requires explicit restart/current desktop authorization.
 Physical chirp/gesture/face-border timing comparison remains pending. No original
 source/vector/preview or motion library is changed.
+
+Live reply completion awaits local chirp quiet before the listening transition, as
+LiveVoice.finishIfQuiet does; generation checks discard completion after sleep or
+interruption. Local AudioTrack buffering/latency remains device-unverified.

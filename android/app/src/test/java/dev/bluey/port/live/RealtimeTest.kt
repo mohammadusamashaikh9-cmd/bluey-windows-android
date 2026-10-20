@@ -76,6 +76,6 @@ class RealtimeTest {
             assertEquals(whole,chunks);assertTrue(whole.size in 47040..48000)
         }
         var first:ByteArray?=null;Pcm24k(24000){first=it}.accept(ShortArray(480){0x1234});assertEquals(0x34,first!![0].toInt());assertEquals(0x12,first!![1].toInt())
-        assertTrue(Chirp.samples().isNotEmpty());assertTrue(Chirp.samples().all{kotlin.math.abs(it.toInt())<12000})
+        assertEquals(8976,Chirp.samples().size);assertTrue(Chirp.samples().all{kotlin.math.abs(it.toInt())<12000})
     }
 }
