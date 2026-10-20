@@ -30,13 +30,96 @@ require informed consent. Offline mode needs no key or microphone permission.
 
 Local observed .NET10.0.402 Link108 tests pass (61 retained+47 new fake-HTTP cases).
 Initial xUnit2009 analyzer rejected a substring Assert.True; changed to Assert.Contains,
-then tests passed. No assertion/suite disabled. Revised Windows/Android CI and matching
-artifacts pending. Physical/live API acceptance is unverified. Original Apple/Shared,
+then tests passed. No assertion/suite disabled. Revised Windows/Android CI passed at the matching application commit below;
+checksums and observed artifact evidence are recorded separately. Physical/live API acceptance is unverified. Original Apple/Shared,
 FaceAnimator, VoiceController, ModeIndicator, Windows Core/overlay remain untouched.
 
-One next action after matching build validation: perform the documented offline
+One next action: perform the documented offline
 physical retest with keys empty/provider OfflineSimulation and microphone denied.
 No billable or free cloud test is authorized by this development task.
+
+
+## Completion CI and matching artifacts
+
+Both supplied applications are from **685a5e883ffcfdca784641d2d086a885409871cb**.
+Later closeout edits change canonical documentation/tracking only. Existing
+[PR #6](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/6)
+remains open into main and unmerged.
+
+| Target | Actual results | Artifacts |
+| --- | --- | --- |
+| [Windows39494775781](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39494775781) | Windows2025/.NET10.0.402:27 Core+108 Link tests,0 failed/skipped; WPF0 warnings/errors; self-contained win-x64;26 native checks,0 failed | [App/full SHA256SUMS](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39494775781/artifacts/12297695977), [TRX/native evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39494775781/artifacts/12298140136) |
+| [Android39494775790](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39494775790) | JDK17/Gradle8.13/SDK36:102 tests,0 failed/errors/skipped; lint0 errors18 warnings; APK/signature verified | [APK/manifest/public signer](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39494775790/artifacts/12297606597), [JUnit/lint/frames](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39494775790/artifacts/12298040076) |
+
+The push workflows tested the same exact application SHA. PR workflows39494783369
+(Windows) and39494783112 (Android) also succeeded; their merge-build artifacts are
+not the supplied downloads. No regression suite was disabled. Windows108 includes
+47 new fake HTTP cases, plus retained61 codec/authority/actual TLS cases. Tests
+cover exact WAV/request/header, allowlist/missing key, safe parsing/safety/empty/
+quota/network/provider failures, UTF-8/duplicates/nontext/bounds, header/body timeout,
+cancellation, existing authorization/one-response limits and revocation. Android adds
+quota-stop/offline/no-retry coverage and retains all gesture/animation/F3 tests.
+
+| Item | SHA-256 |
+| --- | --- |
+| Windows EXE (CI) | `0b9d42f3e83d28798916942f5fd7eb9b7b36eeae22962be0e01cc719e040202d` |
+| Windows DLL (CI) | `80c247ca406e88188950fc80e6f75d499d45a748a2702fdbc922585eebae92e3` |
+| Full Windows SHA256SUMS.txt (CI) | `7b564c725eb67c7c271a937635db9778c4700731f1fe36b5d1914d19f578010b` |
+| Windows app ZIP (metadata) | `2c7aac08332b9d49fc1a55d85f9c9e0f42a5d636edddd7959801ee616b36a387` |
+| Android APK (CI and local rehash) | `92906750e68f46f169ea707b8836c167caf99846bd1ec97b9d3505c346edf100` |
+| Android SHA256SUMS.txt (local) | `e8fd455c3cf2f034bab1d8b33a00a9f451e01baf7ab51cc2e23a3f69dd7cda42` |
+| Android app ZIP (metadata) | `685b6c30c2d058d597d7155d34ae80fb7b5696c858c4ee844e36a8729583cb30` |
+| Android public debug signer | `c48278f165f2c5df743db2ffa3075bfe777f4d9cc4c17c627f50ac9c08c4a2bb` |
+
+Android app/evidence downloaded: packaged APK manifest rehashed successfully and
+JUnit independently parsed102/0/0/0. Windows app/evidence downloads were policy403
+at productionresultssa15.blob.core.windows.net. Final Windows hashes/test/publish/
+upload are observed CI evidence, not a local archive/manifest rehash. No bypass.
+Windows is self-contained, unsigned development output; no runtime install needed.
+No installer/signing/release was created.
+
+The new APK signer differs from prior amendment39527af1f27b0308194f66306fb8add295c85c9bd76a83d8e7a0b77083ba87a3.
+Compare against the actually installed APK before updating. A differing signer needs
+a deliberate uninstall/install, losing Android Keystore identity/trust; revoke the
+old Windows phone entry and explicitly pair again. Preserve Windows protected data.
+No signing private key or application credential was committed/published.
+
+No real Gemini/OpenAI request, user key, cloud test, billing configuration or physical
+microphone capture occurred. Public-contract verification is developer-reported;
+accessible official Google source corroborates serialization. Real account eligibility,
+API behavior/audio quality/consent indicators/fidelity/latency/CPU/multi-device QA
+remain unverified. Existing F3/F4-A functional acceptance stays accepted. Follow
+[one offline physical sequence](../project/QA.md#f4-b-gemini-amendment--offline-and-future-free-tier-qa)
+with keys empty/provider offline/microphone denied. Any real Free Tier test still
+requires separate explicit user authorization.
+
+## Exact completion files
+
+Compared with56bcbb5;20 files. No original Apple/Shared or accepted animation source
+changed. Application commit685a5e8; later evidence-only edits stay in these paths.
+
+```text
+android/app/build.gradle.kts
+android/app/src/main/java/dev/bluey/port/live/LiveCoordinator.kt
+android/app/src/main/java/dev/bluey/port/live/LivePanel.kt
+android/app/src/test/java/dev/bluey/port/live/AudioCoordinatorTest.kt
+project/IMPLEMENTATION.md
+project/PROTOCOL-DATA-SCHEMA.md
+project/QA.md
+project/SECURITY.md
+protocol/README.md
+tracking/CHECKPOINTS.md
+tracking/DECISIONS.md
+tracking/HANDOFF.md
+tracking/SESSION-LOG.md
+tracking/STATUS.md
+windows/Bluey.Link.Tests/GeminiTests.cs
+windows/Bluey.Link/AudioAuthority.cs
+windows/Bluey.Link/GeminiAnswers.cs
+windows/Bluey.Windows/AI/AiWindow.cs
+windows/Bluey.Windows/Connection/WindowsLinkHost.cs
+windows/README.md
+```
 
 ---
 

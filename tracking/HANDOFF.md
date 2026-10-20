@@ -14,10 +14,16 @@ explicit per-phone Windows/phone consents and Free Tier confirmation still gate 
 STOP cancels work; key checks cannot revive a withdrawn UI authorization.
 
 Local Link108 tests pass (47 new fake HTTP cases), no real credential/API/audio capture.
-CI/artifacts pending; STATUS will record matching revision, actual results, hashes,
-public APK signer and install guidance. Keep physical/performance/real API evidence
+App/artifact revision685a5e883ffcfdca784641d2d086a885409871cb.
+Windows39494775781 passes27+108 tests/26 native checks/WPF clean/self-contained;
+Android39494775790 passes102 tests/lint0 errors18 warnings/signature. STATUS records
+links, exact20 files/hashes/signers. Android manifest/JUnit downloaded and verified;
+Windows final download blocked at sa15, with actual CI hash/upload evidence only.
+New signer c48278f1… differs from previous39527af1…; compare installed signer, then
+use deliberate reinstall/re-pair if necessary. Preserve Windows DPAPI data.
+Later closeout commits only change canonical evidence/docs. Keep physical/performance/real API evidence
 separate. Read project/QA.md for offline sequence and separately authorized future
 Free Tier test; no live test is authorized now.
 
-One next action after validation: developer offline physical retest, keys empty,
+One next action: developer offline physical retest, keys empty,
 provider OfflineSimulation, microphone denied; leave PR #6 unmerged.

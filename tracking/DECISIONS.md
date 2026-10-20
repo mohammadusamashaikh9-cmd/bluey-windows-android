@@ -336,7 +336,7 @@ free-tier content may be used to improve products; avoid sensitive conversations
 Initial budget is one answer,5 seconds input,128 output tokens,20-second request
 and60-second local authorization. Delivery/revocation cannot undo submitted audio.
 
-**Contract prerequisite currently blocked:** all four user-provided official Google
+**Historical prerequisite at the2026-10-20 checkpoint (resolved by completion below):** all four user-provided official Google
 pages returned proxy403 on2026-10-20. An additive ai.google.dev environment draft
 was saved, requires publication. Neither gemini-3.8-flash availability/free-tier
 audio eligibility nor current request/response contract is verified. Do not guess,

@@ -813,3 +813,14 @@ No new trust/protocol architecture, dependencies or animation rewrite. Fake HTTP
 coverage47 cases plus retained61 Link tests pass locally (108 total); initial xUnit
 substring analyzer issue corrected. CI/artifacts pending, physical/live untested.
 No real provider request/key, hardware microphone or billing configuration used.
+
+Completion evidence: implementation685a5e883ffcfdca784641d2d086a885409871cb.
+Windows CI39494775781 passes Core27/Link108/native26/WPF clean/self-contained x64;
+Android CI39494775790 passes102 tests/lint0 errors18 warnings/debug APK signature.
+Matching artifacts/checksums uploaded; Android manifest and JUnit downloaded/verified.
+Windows archive download blocked at sa15, CI evidence only. Exact hashes/artifacts/
+20 changed paths and signer-change reinstall guidance in STATUS. No real provider
+request, key, hardware microphone, billing, new PR, merge or later milestone.
+Public-contract implementation complete; user eligibility and physical/cloud
+acceptance remain unverified. Next: one offline physical retest, provider offline,
+keys empty and microphone denied; any live test needs separate authorization.

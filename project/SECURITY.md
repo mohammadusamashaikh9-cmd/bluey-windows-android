@@ -215,7 +215,7 @@ Google Free Tier/non-billing-project confirmation before one completed hold-only
 question. Permission alone cannot authorize cloud processing. Continuous Gemini
 context is disabled. Initial hard transport bounds5s/240000 bytes; provider
 bounds128 output tokens/20s, no tools/grounding/audio generation/retries. Quota429
-stops and offer offline; free eligibility uncertainty must prevent sending.
+stops and offers offline; free eligibility uncertainty must prevent sending.
 Google free-tier inputs may improve products under applicable terms; users must
 avoid sensitive conversations. Local code cannot attest an arbitrary project's
 billing status or revoke already submitted audio. No live test is authorized here.
