@@ -15,13 +15,13 @@ public sealed class LiveTests
     private static async Task<LivePacket> Next(LiveAuthority a,string lease="tls") {using var c=new CancellationTokenSource(2000);return await a.Reader(lease).ReadAsync(c.Token);}
     private static void Request(LiveAuthority a,string auth,string request,string lease="tls")=>a.Handle(lease,M("liveRequest",new{authorizationId=auth,consentId=Consent,requestId=request}));
     [Fact] public async Task NoIssuanceWithoutCurrentDesktopAuthorizationAndAndroidConsent() {
-        var i=new Issuer();var a=new LiveAuthority(i,()=>0,()=>1000);
+        var i=new Issuer();var a=new LiveAuthority(i,()=>0,()=>1000,openAiEnabled:true);
         Assert.Throws<ProtocolException>(()=>ConsentTo(a));a.Open("tls","pin","device");ConsentTo(a,cloud:false);
         Assert.Throws<ProtocolException>(()=>a.Authorize("tls",Consent,LiveProtocol.Models[0],new()));
         ConsentTo(a);Request(a,Guid.NewGuid().ToString(),Guid.NewGuid().ToString());Assert.Equal("liveStop",(await Next(a)).Type);Assert.Equal(0,i.Calls);
     }
     [Fact] public async Task CurrentGrantMintsBoundedShortLivedMetadataWithoutMasterKey() {
-        long time=0;var i=new Issuer();var a=new LiveAuthority(i,()=>time,()=>1000);a.Open("tls","pin","device");ConsentTo(a);
+        long time=0;var i=new Issuer();var a=new LiveAuthority(i,()=>time,()=>1000,openAiEnabled:true);a.Open("tls","pin","device");ConsentTo(a);
         var auth=a.Authorize("tls",Consent,LiveProtocol.Models[0],new());Assert.Equal("liveGrant",(await Next(a)).Type);
         var id=Guid.NewGuid().ToString();Request(a,auth,id);var token=await Next(a);Assert.Equal("liveToken",token.Type);
         var wire=Wire.Decode(Wire.Encode(token.Type,Guid.NewGuid().ToString(),0,token.Payload)[..^1]);Assert.Equal(id,Wire.Text(wire.Payload,"requestId"));Assert.Equal(1030,Wire.Integer(wire.Payload,"expiresAt"));
@@ -30,7 +30,7 @@ public sealed class LiveTests
     }
     [Fact] public async Task WithdrawalDisconnectConsentReplacementExpiryAndRevocationDiscardInFlightReply() {
         for(int mode=0;mode<4;mode++) {
-            long time=0;var i=new Issuer{Pending=new(TaskCreationOptions.RunContinuationsAsynchronously)};var a=new LiveAuthority(i,()=>time,()=>1000);a.Open("tls","pin","device");ConsentTo(a);
+            long time=0;var i=new Issuer{Pending=new(TaskCreationOptions.RunContinuationsAsynchronously)};var a=new LiveAuthority(i,()=>time,()=>1000,openAiEnabled:true);a.Open("tls","pin","device");ConsentTo(a);
             var auth=a.Authorize("tls",Consent,LiveProtocol.Models[0],new());await Next(a);Request(a,auth,Guid.NewGuid().ToString());
             for(int n=0;n<100&&i.Calls==0;n++)await Task.Delay(1);
             if(mode==0)a.StopAll();if(mode==1)a.Close("tls");if(mode==2)ConsentTo(a,cloud:false);if(mode==3){time=300001;a.Expire();}
@@ -39,17 +39,17 @@ public sealed class LiveTests
         }
     }
     [Fact] public async Task AtMostTwoMintsAndOneAuthorizedPhonePerGrant() {
-        long time=0;var i=new Issuer();var a=new LiveAuthority(i,()=>time,()=>1000);a.Open("tls","pin","device");ConsentTo(a);
+        long time=0;var i=new Issuer();var a=new LiveAuthority(i,()=>time,()=>1000,openAiEnabled:true);a.Open("tls","pin","device");ConsentTo(a);
         var auth=a.Authorize("tls",Consent,LiveProtocol.Models[0],new());await Next(a);Request(a,auth,Guid.NewGuid().ToString());await Next(a);
         time=30000;Request(a,auth,Guid.NewGuid().ToString());await Next(a);time=60000;Request(a,auth,Guid.NewGuid().ToString());Assert.Equal("liveStop",(await Next(a)).Type);Assert.Equal(2,i.Calls);
         a.Authorize("tls",Consent,LiveProtocol.Models[0],new());a.Open("other","pin2","device2");ConsentTo(a,"other");a.Authorize("other",Consent,LiveProtocol.Models[1],new());Assert.Single(a.Peers,p=>p.Authorized);
     }
     [Theory][InlineData(1000)][InlineData(1061)] public async Task ExpiredOrUnboundedProviderCredentialIsNotDelivered(long expiry) {
-        var issuer=new Issuer{Expiry=expiry};var a=new LiveAuthority(issuer,()=>0,()=>1000);a.Open("tls","pin","device");ConsentTo(a);
+        var issuer=new Issuer{Expiry=expiry};var a=new LiveAuthority(issuer,()=>0,()=>1000,openAiEnabled:true);a.Open("tls","pin","device");ConsentTo(a);
         var auth=a.Authorize("tls",Consent,LiveProtocol.Models[0],new());await Next(a);Request(a,auth,Guid.NewGuid().ToString());Assert.Equal("liveStop",(await Next(a)).Type);
     }
     [Fact] public async Task MinimumSessionStillMintsAfterConsentNetworkDelayWithoutExtendingDeadline() {
-        long time=0;var issuer=new Issuer();var a=new LiveAuthority(issuer,()=>time,()=>1000);a.Open("tls","pin","device");ConsentTo(a);
+        long time=0;var issuer=new Issuer();var a=new LiveAuthority(issuer,()=>time,()=>1000,openAiEnabled:true);a.Open("tls","pin","device");ConsentTo(a);
         var auth=a.Authorize("tls",Consent,LiveProtocol.Models[0],new(SessionSeconds:30));await Next(a);
         time=1000;Request(a,auth,Guid.NewGuid().ToString());var packet=await Next(a);Assert.Equal("liveToken",packet.Type);
         var decoded=Wire.Decode(Wire.Encode(packet.Type,Guid.NewGuid().ToString(),0,packet.Payload)[..^1]);Assert.Equal(29,Wire.Integer(decoded.Payload,"sessionSeconds"));

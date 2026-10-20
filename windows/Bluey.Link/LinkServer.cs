@@ -194,7 +194,8 @@ public sealed class LinkServer : IAsyncDisposable
         {
             var m = await wire.Read(stop);
             if (!store.Peers.Any(p => p.Pin == pin)) throw new ProtocolException("untrusted/command");
-            if(m.Type is "liveConsent" or "liveRequest" or "liveStop")Live.Handle(lease,m);
+            if(m.Type is "audioBegin" or "audioChunk" or "audioEnd" or "audioCancel")Live.HandleAudio(lease,m);
+            else if(m.Type is "liveConsent" or "liveRequest" or "liveStop")Live.Handle(lease,m);
             else if(m.Type=="presentation")Presentations.Apply(lease,m,clock.ElapsedMilliseconds);
             else if(m.Type=="ping")await wire.Send("pong", new { }, stop);
             else throw new ProtocolException("command");

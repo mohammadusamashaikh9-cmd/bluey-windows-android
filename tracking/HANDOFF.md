@@ -1,30 +1,25 @@
 # Handoff
 
-F4-B app/artifact commit **5df67442c2cb5e8967a9caca8de3aba42e4a3099**, port/live-ai-voice, from verified main7930efd.
-[PR #6](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/6) is open into main and must remain unmerged.
-PR #5 is merged; developer-reported F4-A functional physical acceptance is recorded.
-No F4-A reopening; performance/matrix QA remains separate. F4-B code/offline CI passed;
-no paid call, real key/mint or microphone capture was used in development/CI.
+F4-B Gemini amendment remains on `port/live-ai-voice`, existing
+[PR #6](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/6), unmerged.
+Preserve F3/F4-A accepted functional QA; no foundation cycle or new PR.
 
-D011 covers CurrentUser DPAPI key UI, current lease/consent-specific desktop cloud
-approval, bounded GA client secrets, foreground hold-only/default or separately
-opted-in continuous context, native PCM/chirps and existing captions. No capture/tools/
-background service/backend. Window authorization UI minimum30s; token metadata is only
-remaining time1–600s. Canceled holds and stale capture/drain callbacks are tested.
+D012 implements/tests bounded authenticated hold-only PCM transfer and completed
+answer presentation, reusing LiveAuthority/LiveCoordinator. Windows has separate
+DPAPI Gemini/OpenAI credentials and Free Tier review controls. Offline defaults on;
+OpenAI code is dormant and disabled in production. No key or provider credential is
+sent to Android. No paid or real API request was made; synthetic adapters only.
 
-[STATUS](STATUS.md) contains exact files, final Windows27+45 tests/23 native checks,
-Android89 tests/lint0 errors18 warnings, matching artifacts/hash/public signer links,
-actual intermediate failures, SDK-document verification and physical/API limits.
-Final archive download is cloud-policy blocked; actual final CI logs/hashes/upload
-are recorded. Earlier downloaded artifacts are superseded and must not be mixed.
-APK signer differs from F4-A; deliberate reinstall loses trust and needs re-pairing.
-Preserve Windows DPAPI data. No silent identity reset or key redistribution.
+**Required prerequisite unresolved:** all four official Google docs returned cloud
+proxy403. Saved additive ai.google.dev allowlist draft needs publication. Candidate
+model/free-tier/MIME/response contract is unverified. Production Gemini fails closed:
+no HTTP adapter or provider-specific fake HTTP tests exist yet. This is a partial
+amendment, not working Gemini inference. Do not substitute a model or make a live call.
 
-Client-secret TTL is not revocation of active sessions or a hard financial cap.
-Official web pricing/account access/retention and real device/API remain unverified;
-doc-network draft saved, needs environment review/save/publish to activate. Current
-GA schema/models/events were verified through official SDK-generated OpenAPI docs.
+STATUS records observed tests/builds and updated CI/artifact evidence when available.
+QA contains offline physical regression and a future free-tier procedure requiring
+separate user authorization. Debug APK signer must be compared before updating;
+reinstall loses Android trust/Keystore and requires deliberate re-pairing.
 
-**One next action:** developer decision on a separate, limited billable
-[30-second hold-only mini-model test](../project/QA.md#f4-b-offline-and-future-billable-qa)
-after current pricing/account review. Do not run a paid session or merge automatically.
+**One next action:** publish the saved ai.google.dev documentation-access draft in
+cloud environment settings, then resume exact model/free-tier contract verification.

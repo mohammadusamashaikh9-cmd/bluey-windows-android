@@ -7,8 +7,9 @@ internal sealed class WindowsLinkHost
 {
     private ProtectedTrust? store; private LinkServer? server; private Advertisement? advertisement; private IPAddress? address;
     internal AI.ProtectedApiKey ApiKey {get;}=new();
+    internal AI.ProtectedApiKey GeminiKey {get;}=new(provider:"gemini");
     private Bluey.Link.LiveAuthority? live;private readonly object liveGate=new();
-    internal Bluey.Link.LiveAuthority Live {get{lock(liveGate)return live??=new(new Bluey.Link.OpenAiIssuer(ApiKey,new System.Net.Http.HttpClient(new System.Net.Http.SocketsHttpHandler{AllowAutoRedirect=false,UseCookies=false}){Timeout=TimeSpan.FromSeconds(8)}));}}
+    internal Bluey.Link.LiveAuthority Live {get{lock(liveGate)return live??=new(new Bluey.Link.DeniedIssuer(),openAiEnabled:false);}}
     internal ConnectionDiagnostics Diagnostics {get;}=new();
     internal LinkServer? Server => Volatile.Read(ref server);
     internal string Status => Server is {} s ? $"TLS host {address}:{s.Port} · {s.Connections} authenticated connection(s)\n{advertisement?.Status}\nHost identity: {s.HostId}\nServer SHA-256: {s.Pin}" : "Secure host stopped";

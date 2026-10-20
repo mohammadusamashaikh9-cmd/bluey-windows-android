@@ -71,8 +71,8 @@ class DeviceLink(context:Context) {
     private data class LanOutgoing(val type:String,val payload:com.google.gson.JsonObject)
     val liveMessages=Channel<Message?>(8)
     fun sendLive(type:String,payload:com.google.gson.JsonObject):Boolean {
-        if(type !in setOf("liveConsent","liveRequest","liveStop"))return false
-        dev.bluey.port.live.LiveProtocol.validate(type,payload)
+        if(type !in setOf("liveConsent","liveRequest","liveStop","audioBegin","audioChunk","audioEnd","audioCancel"))return false
+        if(type.startsWith("audio"))dev.bluey.port.live.AudioProtocol.validate(type,payload) else dev.bluey.port.live.LiveProtocol.validate(type,payload)
         val sink=presentationSink?:return false
         if(sink.trySend(LanOutgoing(type,payload)).isSuccess)return true
         sink.close(java.io.IOException("live backpressure"));return false
@@ -260,7 +260,7 @@ class DeviceLink(context:Context) {
                 val message=wire.read()
                 when(message.type) {
                     "face"->{val f=Wire.face(message);val now=SystemClock.elapsedRealtime();wire.incoming.fresh(f,now);latest.value=RemoteFace(f,now,message.id)}
-                    "liveGrant","liveToken","liveStop"->if(!liveMessages.trySend(message).isSuccess)throw ProtocolException("live receive queue")
+                    "liveGrant","liveToken","liveStop","audioGrant","audioReply","audioDone"->if(!liveMessages.trySend(message).isSuccess)throw ProtocolException("live receive queue")
                     "pong"->Unit
                     else->throw ProtocolException("session command")
                 }

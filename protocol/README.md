@@ -78,3 +78,9 @@ limits and revocation are specified in [canonical schema](../project/PROTOCOL-DA
 Only short-lived client secrets cross the authenticated LAN; no master key/audio/
 transcripts/tools/capture. Consent declarations alone cannot mint: desktop authorization
 must match current trusted TLS lease and consent. Existing40+27 fixtures retained.
+
+### Gemini amendment (D012)
+
+The53 shared F4-B cases include bounded audio-turn fields under the unchanged4096-byte
+cap; see canonical schema. Production provider is unavailable until exact official
+Gemini contract/free-tier verification. Fixtures prove codec behavior, not API support.

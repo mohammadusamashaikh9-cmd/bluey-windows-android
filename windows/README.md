@@ -362,3 +362,13 @@ after a stopped capture; neither can reactivate an abandoned turn.
 The configured session minimum is30 seconds, counted from Windows authorization;
 the token carries only remaining time (possibly below30 after network/user delay).
 The phone never receives an extended deadline to compensate for that delay.
+
+## Current PR #6 Gemini amendment
+
+Offline simulation defaults on; OpenAI production invocation is disabled. Provider
+settings manage separately named CurrentUser DPAPI Gemini/OpenAI credentials without
+redisplay or connectivity tests. Gemini live authorization is BLOCKED in this build:
+official model/audio/free-tier docs were inaccessible, so no HTTP adapter is enabled
+or implemented. This is a transport/key/consent foundation, not live inference.
+No API key is needed for the offline demo. Follow project/QA.md for offline checks
+and a separate, future user-authorized free-tier test after contract verification.

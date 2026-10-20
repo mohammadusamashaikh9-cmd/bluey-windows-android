@@ -1,4 +1,46 @@
-# Current verified state
+# Current amendment state — Gemini provider prerequisite blocked
+
+2026-10-20 UTC — existing `port/live-ai-voice`, PR #6 remains open/unmerged.
+The user-authorized Gemini amendment supersedes the previous active OpenAI UI.
+No real Gemini/OpenAI request, API key, microphone hardware capture or billing
+configuration was used. Original Apple/Shared, FaceAnimator, VoiceController,
+ModeIndicator, Windows overlay/Core and F3 trust/identity remain unchanged.
+
+Implemented provider-independent work: D012 bounded authenticated audio turn types,
+960-byte numbered PCM chunks,5s/240000-byte/250-chunk cap, strict sequence/length/
+format validation,8s assembly/20s answer/60s approval bounds; current lease/consent/
+Windows authorization reuse; cancellation/backpressure/zeroing/stale replies; completed
+answer presentation via existing controller/chirps/captions; separate Gemini DPAPI
+purpose/file and explicit Free Tier/cloud UI. Default offline; production OpenAI is
+disabled on both sides, without paid fallback or reconnect requests.53 shared F4-B
+fixtures cover old live messages and new audio types. Synthetic adapters only.
+
+**Blocked/incomplete:** all four official Google audio/pricing/billing/rate-limit
+URLs returned proxy403. ai.google.dev additive environment draft saved, requires
+publication. Candidate gemini-3.8-flash/audio MIME/schema/free-tier eligibility remain
+unverified. There is no Gemini HTTP adapter, fake HTTP schema/quota/safety suite or
+live capability in this revision. UnavailableAudioAnswers prevents authorization
+even if keys/checkboxes are set. Do not infer that the candidate is unavailable or
+silently switch. Finish the verified adapter after documentation access; do not claim
+this amendment complete. Google Free Tier project confirmation cannot prove zero
+cost for arbitrary credentials; sensitive conversations are excluded from testing.
+
+Observed locally before CI: .NET10.0.402 Core27/27 and Link61/61 pass, including actual
+loopback mTLS audio-ready/approval/revocation and synthetic answer tests; WPF cross-build
+0 warnings/errors. Android/Windows CI and revised artifact results pending. Existing
+OpenAI/F1/F2/F3/F4-A regressions are retained, not disabled. Physical QA unrun.
+
+The completed F3 and F4-A developer-reported functional acceptance stays accepted;
+unmeasured performance/latency/resource/device-matrix QA stays unverified.
+[QA](../project/QA.md#f4-b-gemini-amendment--offline-and-future-free-tier-qa) supplies
+one offline physical sequence and a separately authorized future free-tier procedure.
+
+One next action: publish the saved ai.google.dev documentation-access draft in
+cloud environment settings, then resume exact model/free-tier contract verification.
+
+---
+
+# Previous OpenAI implementation evidence (runtime superseded below)
 
 2026-10-20 UTC — F4-B live voice implementation on `port/live-ai-voice`.
 Accepted main: **7930efd1bca650ed0358bfc56201950083ea530c**, verified through

@@ -183,3 +183,40 @@ Provider event IDs/response IDs, local gesture generation/turn UUID and LAN enve
 request IDs are independent. F4-A presentation remains the sole caption path. Older
 apps reject unknown live commands; update both apps before live use. Manual refresh
 requires a fresh Start/current Windows approval; no automatic live reconnect loop.
+
+## F4-B Gemini audio-turn extension (D012; provider blocked)
+
+This is an additive v1 allowlist on the existing ready, pinned mTLS session.
+4096-byte newline frame limit, duplicate-key/UTF-8 validation, session/envelope
+sequence and120 messages/second limit remain unchanged. No Gemini credential is
+sent to Android. Production cannot grant audio until the official provider contract
+is verified; the tests inject synthetic audio-answer adapters only.
+
+| Type / direction | Exact payload |
+| --- | --- |
+| audioGrant / Windows→Android | authorizationId UUID, consentId UUID, provider=`GeminiFree`, sessionSeconds1..60 |
+| audioBegin / Android→Windows | authorizationId UUID, turnId UUID, format=`pcm_s16le_24000_mono` |
+| audioChunk / Android→Windows | authorizationId UUID, turnId UUID, index0..249, data canonical base64 of exactly960 bytes |
+| audioEnd / Android→Windows | authorizationId UUID, turnId UUID, chunks5..250, bytes=chunks×960 |
+| audioCancel / Android→Windows | authorizationId UUID, turnId UUID |
+| audioReply / Windows→Android | authorizationId UUID, turnId UUID, text1..256 noncontrol BMP characters |
+| audioDone / Windows→Android | authorizationId UUID, turnId UUID |
+
+The internal PCM format is a transport contract, **not a verified Gemini MIME
+claim**. A future verified Windows adapter must package it into a supported audio
+container/MIME. At most240000 bytes/5 seconds mono24k PCM16 per turn. Chunks must
+arrive exactly in order for the current turn and authorization; duplicates, reorder,
+wrong IDs, incomplete lengths, missing begin/end and unexpected direction fail.
+Capture/transfer begins only after the hold threshold and ends on release, with
+5-second Android capture cap,8-second assembly deadline,20-second answer deadline,
+60-second desktop authorization and one submitted response per approval. The native
+callback sends one20ms frame; existing32-slot LAN and8-slot response queues bound
+backpressure. Overflow cancels, never retries. No separate server or frame increase.
+
+Cancel/Stop/sleep/background/consent change/disconnect/revocation wipes host assembly
+and invalidates pending replies. Queued base64 strings are transient, not guaranteed
+in-place erasable managed memory; no audio is persisted/logged. Host owned binary
+buffers are zeroed. A completed audioReply represents one completed answer; existing
+VoiceController emits its presentation delta and local chirp, then audioDone completes
+the existing caption lifecycle. This is not provider response streaming or user
+transcription. Shared f4b fixtures now contain53 positive/negative framing cases.

@@ -41,6 +41,9 @@ internal static class NativeSmoke
                 var encrypted=File.ReadAllBytes(Path.Combine(keyDirectory,"openai.dpapi"));Check(!System.Text.Encoding.UTF8.GetString(encrypted).Contains("offline-test-master"),"Credential file contains DPAPI ciphertext only");
                 var replaced=false;try{key.Set(firstKey,false);}catch(IOException){replaced=true;}Check(replaced,"Configured key requires explicit Replace");
                 var secondKey=System.Text.Encoding.UTF8.GetBytes("offline-replacement-placeholder");key.Set(secondKey,true);read=key.Read();Check(read.SequenceEqual(secondKey),"Protected key replacement is atomic and readable");System.Security.Cryptography.CryptographicOperations.ZeroMemory(read);
+                var gemini=new AI.ProtectedApiKey(keyDirectory,"gemini");Check(gemini.Status=="Not configured","Gemini credential is independent from configured OpenAI key");gemini.Set(firstKey,false);
+                read=key.Read();Check(read.SequenceEqual(secondKey),"Setting Gemini does not overwrite OpenAI");System.Security.Cryptography.CryptographicOperations.ZeroMemory(read);
+                gemini.Remove();read=key.Read();Check(gemini.Status=="Not configured"&&read.SequenceEqual(secondKey),"Removing Gemini leaves OpenAI protected credential intact");System.Security.Cryptography.CryptographicOperations.ZeroMemory(read);
                 encrypted=File.ReadAllBytes(Path.Combine(keyDirectory,"openai.dpapi"));encrypted[0]^=255;File.WriteAllBytes(Path.Combine(keyDirectory,"openai.dpapi"),encrypted);Check(key.Status.StartsWith("Unavailable"),"Corrupted master key fails closed without regeneration");
                 key.Remove();Check(key.Status=="Not configured"&&!File.Exists(Path.Combine(keyDirectory,"openai.dpapi")),"Explicit key Remove removes protected credential");
                 System.Security.Cryptography.CryptographicOperations.ZeroMemory(firstKey);System.Security.Cryptography.CryptographicOperations.ZeroMemory(secondKey);

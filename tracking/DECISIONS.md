@@ -314,3 +314,37 @@ Windows authorization. Live-token sessionSeconds is remaining time,1–600, so a
 30-second approval remains usable after transport/user delay without extension.
 A deterministic one-second-delay regression first reproduced the rejection, then
 verified29-second metadata and expiry at the original deadline.
+
+## D012 / 2026-10-20 UTC — Gemini amendment, host-side bounded audio turns
+
+The authorized amendment selects OfflineSimulation (default), GeminiFree (explicit
+Windows selection) and dormant optional OpenAIRealtime. Gemini must keep its own
+CurrentUser DPAPI credential; no Gemini credential travels to Android. Reuse D009
+TLS and D011 current lease/consent/desktop authorization rather than creating a
+second trust system. Hold-only PCM16LE mono24kHz turns are capped at5 seconds,
+240000 bytes,250 960-byte chunks, individually under the unchanged4096-byte frame
+cap. Only an authorized completed turn can reach a host-side audio-answer adapter.
+Cancellation/disconnect/revocation clear buffers and invalidate delayed results.
+No continuous Gemini recording, automatic retries, reconnect requests, provider
+fallback, tools, grounding or generated speech. Replies are completed text, not
+pretended provider streaming. Existing VoiceController/animation code remains intact.
+
+GeminiFree requires a separately reviewed Free Tier/non-billing-project confirmation
+and informed Google cloud-audio consent; arbitrary credentials cannot prove zero
+cost. Quota exhaustion ends authorization and offers offline simulation. Google
+free-tier content may be used to improve products; avoid sensitive conversations.
+Initial budget is one answer,5 seconds input,128 output tokens,20-second request
+and60-second local authorization. Delivery/revocation cannot undo submitted audio.
+
+**Contract prerequisite currently blocked:** all four user-provided official Google
+pages returned proxy403 on2026-10-20. An additive ai.google.dev environment draft
+was saved, requires publication. Neither gemini-3.8-flash availability/free-tier
+audio eligibility nor current request/response contract is verified. Do not guess,
+silently choose another model or implement/enable a provider-specific HTTP adapter
+before verification. Implement/test provider-independent bounded transfer and key/
+consent isolation meanwhile; production Gemini authorization fails closed until a
+verified adapter exists. Test adapters use synthetic bytes/text only. This is an
+external documentation blocker, not evidence that the candidate model is absent.
+The previous OpenAI adapter remains source-preserved but production-disabled for
+this amendment; no paid fallback is permitted. A new SDK/plugin or hosted relay
+would add complexity without resolving this prerequisite and is rejected.

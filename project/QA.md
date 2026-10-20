@@ -326,3 +326,42 @@ billable session; do not run it as part of this task:
 6. Remove key/withdraw grants, close sessions and compare actual OpenAI usage dashboard
    after propagation. Record actual device/OS/audio route, latency, FPS/resources and
    provider categories, never raw audio/transcripts/keys/tokens. Report failures honestly.
+
+## F4-B Gemini amendment — offline and future free-tier QA
+
+Current amendment is a **provider-blocked foundation**, not a live Gemini pass.
+No API key or microphone hardware is needed for automated tests. Synthetic PCM,
+fake audio-answer adapters, existing fake OpenAI HTTP/socket and actual .NET mTLS
+loopback are distinct evidence; no Gemini HTTP request/schema test has run because
+that adapter is not implemented pending official documentation access.
+
+Offline physical sequence (no cloud authorization):
+
+1. Compare the supplied APK's public signer with the installed app. Update only if
+   matching; otherwise deliberately uninstall/reinstall (loses Android Keystore/trust),
+   revoke the old phone on Windows and explicitly pair again. Preserve Windows data.
+2. Install the matching-commit Windows folder; explicitly start the secure host and
+   reconnect the trusted phone. Leave provider OfflineSimulation, both keys empty
+   and Android microphone permission denied. Confirm gaze/moods/touch precedence.
+3. Run the existing offline voice demonstration: double-tap wake, hold≥300ms,
+   release; verify blue asking→purple thinking→pink reply/local chirp→blue listening,
+   Windows mock caption and cleanup. Sleep/background must cancel delayed captions.
+4. In Windows provider settings select GeminiFree, without entering a key. Verify
+   contract-blocked notice; attempted authorization remains denied. OpenAI selection
+   returns to OfflineSimulation. No microphone capture/cloud request is expected.
+
+**Future live test — requires a separate explicit user authorization; do not run
+with this build:** first verify the exact candidate's current audio method, supported
+MIME, text response schema and Free Tier eligibility using the four official Google
+pages. Complete/review the bounded Windows adapter and fake HTTP quota/safety/timeout
+suite, then produce matching builds. If the candidate is unavailable/ineligible,
+stop and document; do not silently replace it. User checks AI Studio Free Tier and
+that billing is not enabled, accepts Google content-use terms and separately grants
+cloud-audio consent. Configure only a Windows protected Gemini key, choose Gemini,
+start Android hold-only with while-in-use microphone permission, then authorize one
+phone/question on Windows. Ask one nonsensitive question≤5 seconds; verify completed
+answer/border/chirp/Windows bubble. Stop immediately, inspect only sanitized status
+and quota metadata, and verify no second automatic request. Do not request billing
+upgrade, use sensitive content or treat the application as a zero-cost attestation.
+Physical audio quality/latency/resource usage, consent indicators, cap timing and
+real Gemini model/safety/quota behavior remain unverified until that authorized test.

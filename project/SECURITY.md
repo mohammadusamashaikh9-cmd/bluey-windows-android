@@ -182,3 +182,34 @@ Direct [guide](https://developers.openai.com/api/docs/guides/realtime) and
 network-domain draft saved but not activated. No price/retention/account entitlement
 is inferred. Current model IDs are documented in the official SDK; actual access and
 provider behavior require the later authorized test. No paid endpoint was contacted.
+
+## F4-B Gemini amendment — current production boundary (D012)
+
+This overrides D011's active OpenAI path for the amended builds. OfflineSimulation
+is the startup default. OpenAI issuer/socket code and fake tests remain; Windows
+constructs DeniedIssuer with OpenAI disabled and Android rejects legacy live grants/
+tokens by default. No paid fallback, automatic live reconnect or key-save probe.
+
+Gemini and OpenAI keys use separate DPAPI CurrentUser files in the owner-only AI
+directory. Gemini adds a separate DPAPI purpose entropy; OpenAI's accepted file
+format stays compatible. Set/Replace/Remove/status never returns a saved key to UI
+or phone. No permanent Gemini key or credential belongs in any LAN message.
+
+Provider contract/model/free-tier eligibility is currently UNVERIFIED because the
+four official ai.google.dev docs requests were denied by cloud network policy.
+There is **no Gemini HTTP adapter** in this revision; Gemini authorization fails
+closed through UnavailableAudioAnswers even if a key and checkboxes are configured.
+No zero-cost guarantee, model availability or provider behavior is inferred from
+fake tests. Narrow provider-neutral audio transfer/key/UI work is complete; the
+requested live amendment remains blocked on this prerequisite.
+
+A future verified adapter still requires the current nonrevoked TLS lease, current
+phone microphone/cloud consent, Windows Gemini selection and separate explicit
+Google Free Tier/non-billing-project confirmation before one completed hold-only
+question. Permission alone cannot authorize cloud processing. Continuous Gemini
+context is disabled. Initial hard transport bounds5s/240000 bytes; planned provider
+bounds128 output tokens/20s, no tools/grounding/audio generation/retries. Quota429
+must stop and offer offline; free eligibility uncertainty must prevent sending.
+Google free-tier inputs may improve products under applicable terms; users must
+avoid sensitive conversations. Local code cannot attest an arbitrary project's
+billing status or revoke already submitted audio. No live test is authorized here.

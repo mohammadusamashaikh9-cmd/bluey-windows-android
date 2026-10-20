@@ -34,7 +34,7 @@ class LiveCoordinatorTest {
     private fun advance(ms:Long){ShadowSystemClock.advanceBy(Duration.ofMillis(ms));idle()}
     @Test fun offlineAndDeniedConsentDoNotConstructCaptureOrProvider() {
         val context=RuntimeEnvironment.getApplication();Shadows.shadowOf(context).denyPermissions(Manifest.permission.RECORD_AUDIO);val lan=Lan();val voice=VoiceController();var native=0
-        val live=LiveCoordinator(context,lan,voice,{native++;Capture()},{_,_,_->native++;Socket()});live.chirps=false
+        val live=LiveCoordinator(context,lan,voice,{native++;Capture()},{_,_,_->native++;Socket()},allowOpenAi=true);live.chirps=false
         live.arm(false,false);idle();assertFalse(live.ui.value.armed);assertEquals(0,native)
         live.arm(true,false);idle();assertFalse(live.ui.value.armed);assertEquals(0,native);live.close()
     }
@@ -50,7 +50,7 @@ class LiveCoordinatorTest {
     private fun scenario(continuous:Boolean,ending:String="pause") {
         val context=RuntimeEnvironment.getApplication();Shadows.shadowOf(context).grantPermissions(Manifest.permission.RECORD_AUDIO)
         val lan=Lan();val voice=VoiceController();val capture=Capture();val socket=Socket();var event:((String)->Unit)?=null;var factories=0
-        val live=LiveCoordinator(context,lan,voice,{factories++;capture},{_,callback,_->event=callback;socket});live.chirps=false
+        val live=LiveCoordinator(context,lan,voice,{factories++;capture},{_,callback,_->event=callback;socket},allowOpenAi=true);live.chirps=false
         live.arm(true,continuous);idle();assertTrue(live.ui.value.armed);assertEquals(0,factories)
         val consent=lan.sent.last{it.first=="liveConsent"}.second["consentId"].asString;val auth=UUID.randomUUID().toString()
         lan.message("liveGrant",Wire.payload("authorizationId" to auth,"consentId" to consent));idle();assertTrue(live.ui.value.authorized)

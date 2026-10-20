@@ -15,11 +15,12 @@ data class LiveUi(val armed:Boolean=false,val authorized:Boolean=false,val conne
 // Own controller transitions on Main; capture and native socket adapters run off rendering callbacks.
 class LiveCoordinator(private val context:Context,private val port:LiveLan,private val voice:VoiceController,
     private val captureFactory:((CoroutineScope)->CaptureDevice)?=null,
-    private val transportFactory:(LiveToken,(String)->Unit,()->Unit)->RealtimeTransport={token,event,failed->OpenAiSocket(token,event,failed)}) {
+    private val transportFactory:(LiveToken,(String)->Unit,()->Unit)->RealtimeTransport={token,event,failed->OpenAiSocket(token,event,failed)},private val allowOpenAi:Boolean=false) {
     constructor(context:Context,link:DeviceLink,voice:VoiceController):this(context,DeviceLiveLan(link),voice)
     private val scope=CoroutineScope(SupervisorJob()+Dispatchers.Main.immediate);private val packets=Channel<Pair<Long,String>>(8)
     private val mutable=MutableStateFlow(LiveUi());val ui:StateFlow<LiveUi> = mutable
     private var consent:String?=null;private var authorization:String?=null;private var request:String?=null
+    private var audioMode=false;private var upload:AudioUpload?=null;private var audioDeadline=0L;private var audioReply=false;private var audioComplete=false
     private var continuous=false;var chirps=true;private var foreground=true;private var last=VoiceMode.asleep
     private var engine:RealtimeEngine?=null;private var capture:CaptureDevice?=null;private val chirp=LocalChirp(scope)
     @Volatile private var captureEpoch=0L
@@ -29,7 +30,8 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
     init {
         scope.launch{for(message in port.messages){if(message==null){if(mutable.value.armed)stop("LAN disconnected")}else lan(message)}}
         scope.launch{for(packet in packets)if(packet.first==providerEpoch)engine?.event(packet.second)}
-        scope.launch{while(isActive){delay(200);engine?.check();if(request!=null&&now()-requestAt>15000)stop("Credential request timed out")
+        scope.launch{while(isActive){delay(200);engine?.check();if(audioMode&&now()>=audioDeadline)stop("Audio authorization/request expired; Start again explicitly");if(request!=null&&now()-requestAt>15000)stop("Credential request timed out")
+            if(audioMode)mutable.update{it.copy(elapsedMs=now()-started)}
             if(engine!=null)mutable.update{it.copy(elapsedMs=now()-started,usage=engine?.usage?:it.usage)}}}
     }
     fun arm(cloud:Boolean,continuousAwake:Boolean) {
@@ -45,12 +47,14 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
         val state=voice.snapshot;val changed=state.mode!=last;val old=last;last=state.mode
         if(!changed)return
         when(state.mode) {
-            VoiceMode.waking->{if(authorization==null){stop("Authorize this phone on Windows first");return}
+            VoiceMode.waking->{if(audioMode){pendingGen=state.generation;pendingTurn=state.turnId;voice.accept(MockEvent(now(),pendingGen,pendingTurn,"ready"),now());return}
+                if(authorization==null){stop("Authorize this phone on Windows first");return}
                 pendingGen=state.generation;pendingTurn=state.turnId;request=UUID.randomUUID().toString();requestAt=now()
                 if(!port.send("liveRequest",Wire.payload("authorizationId" to authorization!!,"consentId" to consent!!,"requestId" to request!!)))stop("LAN unavailable")
                 else mutable.update{it.copy(status="Requesting short-lived credential; microphone OFF")}}
-            VoiceMode.asking->{engine?.interrupt();engine?.bind(state.generation,state.turnId);if(!continuous){engine?.clearInput();startCapture()}}
+            VoiceMode.asking->{if(audioMode){startAudioTurn(state);return};engine?.interrupt();engine?.bind(state.generation,state.turnId);if(!continuous){engine?.clearInput();startCapture()}}
             VoiceMode.listening->if(!continuous&&old==VoiceMode.asking){
+                if(audioMode){stop("Audio hold canceled — authorize a fresh turn");return}
                 captureEpoch++;capture?.cancel();capture=null;engine?.clearInput()
             }
             VoiceMode.asleep->if(old!=VoiceMode.asleep)stop("Slept — authorize a fresh live session to restart")
@@ -63,9 +67,10 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
         next.start({bytes->if(providerEpoch==epoch&&captureEpoch==captureTag&&mutable.value.armed)active.append(bytes)},{scope.launch{if(providerEpoch==epoch&&captureEpoch==captureTag)stop("Microphone interrupted/unavailable")}})
     }
     private fun commit(g:Long,t:String) {
-        val epoch=providerEpoch;val active=engine
+        val epoch=providerEpoch;val active=engine;val audio=upload
         scope.launch{try {if(!continuous){val old=capture;capture=null;captureEpoch++;old?.finish()}
             if(epoch!=providerEpoch||engine!==active||voice.snapshot.generation!=g||voice.snapshot.turnId!=t)return@launch
+            if(audioMode){if(audio!=null&&voice.snapshot.mode==VoiceMode.thinking&&audio.complete()){audioDeadline=minOf(audioDeadline,now()+25000);mutable.update{it.copy(status="Audio transferred — Windows processing; no automatic retry")}}else stop("Empty/canceled audio; no provider request");return@launch}
             if(active!=null&&voice.snapshot.mode==VoiceMode.thinking)active.ask(g,t)
             else if(mutable.value.armed)stop("Session not ready; no audio committed")
         }catch(_:Exception){if(epoch==providerEpoch)stop("Audio cleanup failed")}}
@@ -74,15 +79,45 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
         if(!mutable.value.armed)return
         val p=message.payload
         when(message.type) {
-            "liveGrant"->{if(Wire.text(p,"consentId")!=consent)return;authorization=Wire.text(p,"authorizationId");mutable.update{it.copy(authorized=true,status="Windows authorized — double tap to wake; OpenAI API use is billable")}}
+            "audioGrant"->{
+                if(Wire.text(p,"consentId")!=consent)return
+                if(continuous){stop("Gemini requires current hold-only consent");return}
+                authorization=Wire.text(p,"authorizationId");audioMode=true;audioReply=false;audioComplete=false;audioDeadline=now()+Wire.integer(p,"sessionSeconds")*1000;started=now();++providerEpoch
+                mutable.update{it.copy(authorized=true,connected=true,status="GeminiFree authorized for ONE hold-only question (5 seconds maximum); double tap to wake")}
+            }
+            "audioReply"->{
+                if(!currentAudio(p)||audioReply||audioComplete||voice.snapshot.mode!=VoiceMode.thinking)return
+                audioReply=true;voice.accept(MockEvent(now(),pendingGen,pendingTurn,"delta",Wire.text(p,"text",256)),now());if(chirps)chirp.play()
+                mutable.update{it.copy(status="Completed answer received — local chirp; text is an answer, not a transcription")}
+            }
+            "audioDone"->{
+                if(!currentAudio(p)||!audioReply||audioComplete)return;audioComplete=true
+                val epoch=providerEpoch;scope.launch{chirp.awaitQuiet();if(epoch==providerEpoch&&foreground&&voice.snapshot.generation==pendingGen&&voice.snapshot.turnId==pendingTurn){voice.accept(MockEvent(now(),pendingGen,pendingTurn,"done"),now());mutable.update{it.copy(status="Question complete — one-response budget used. Stop/Start and authorize again for another.")}}}
+            }
+            "liveGrant"->{if(!allowOpenAi){stop("OpenAI is disabled in this free-tier build");return};if(Wire.text(p,"consentId")!=consent)return;authorization=Wire.text(p,"authorizationId");mutable.update{it.copy(authorized=true,status="Windows authorized — double tap to wake; OpenAI API use is billable")}}
             "liveStop"->stop("Windows ended live authorization: "+Wire.text(p,"code"),notify=false)
-            "liveToken"->{val token=LiveProtocol.token(p)
+            "liveToken"->{if(!allowOpenAi){stop("OpenAI is disabled in this free-tier build");return};val token=LiveProtocol.token(p)
                 if(token.authorizationId!=authorization||token.requestId!=request||voice.snapshot.mode!=VoiceMode.waking||voice.snapshot.generation!=pendingGen||voice.snapshot.turnId!=pendingTurn)return
                 request=null
                 if(token.expiresAt<=System.currentTimeMillis()/1000||token.expiresAt>System.currentTimeMillis()/1000+60){stop("Credential expired or clock mismatch; start again explicitly");return}
                 connect(token)
             }
         }
+    }
+    private fun currentAudio(p:com.google.gson.JsonObject)=audioMode&&Wire.text(p,"authorizationId")==authorization&&Wire.text(p,"turnId")==pendingTurn&&voice.snapshot.generation==pendingGen&&voice.snapshot.turnId==pendingTurn
+    private fun startAudioTurn(state:VoiceSnapshot) {
+        if(upload!=null||!foreground||!port.connected||!mutable.value.armed||authorization==null||ContextCompat.checkSelfPermission(context,Manifest.permission.RECORD_AUDIO)!=PackageManager.PERMISSION_GRANTED){stop("Audio turn unavailable; authorize a fresh question");return}
+        pendingGen=state.generation;pendingTurn=state.turnId;audioReply=false;audioComplete=false
+        val audio=AudioUpload(authorization!!,pendingTurn,port::send);upload=audio
+        if(!audio.begin()){stop("LAN unavailable; no recording");return}
+        val epoch=providerEpoch;val tag=++captureEpoch;val next=captureFactory?.invoke(scope)?:AndroidCapture(context,scope);capture=next
+        next.start({bytes->
+            if(providerEpoch!=epoch||captureEpoch!=tag||!mutable.value.armed){bytes.fill(0)}
+            else if(!audio.append(bytes)){scope.launch{if(epoch==providerEpoch&&tag==captureEpoch)stop("Audio transfer backpressure/invalid frame; canceled")}}
+            else if(audio.full()){captureEpoch++;next.cancel();scope.launch{if(epoch==providerEpoch)mutable.update{it.copy(status="5-second input limit reached — microphone OFF; release to submit")}}}
+        },{scope.launch{if(epoch==providerEpoch&&tag==captureEpoch)stop("Microphone interrupted/unavailable")}})
+        scope.launch{delay(5000);if(epoch==providerEpoch&&tag==captureEpoch){captureEpoch++;next.cancel();mutable.update{it.copy(status="5-second input limit reached — microphone OFF; release to submit")}}}
+        mutable.update{it.copy(status="Hold-only capture and encrypted transfer — release to submit; maximum 5 seconds")}
     }
     private fun connect(token:LiveToken) {
         val epoch=++providerEpoch;started=now();while(packets.tryReceive().isSuccess){}
@@ -95,7 +130,7 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
         mutable.update{it.copy(status="Connecting to OpenAI; microphone OFF")}
     }
     fun stop(reason:String="Stopped",notify:Boolean=true) {
-        providerEpoch++;captureEpoch++;request=null;capture?.cancel();capture=null;chirp.stop();val old=engine;engine=null;old?.stop()
+        providerEpoch++;captureEpoch++;upload?.cancel();upload=null;audioMode=false;audioReply=false;audioComplete=false;request=null;capture?.cancel();capture=null;chirp.stop();val old=engine;engine=null;old?.stop()
         if(notify&&mutable.value.armed)port.send("liveStop",Wire.payload("code" to "stopped"))
         consent=null;authorization=null;last=VoiceMode.asleep;voice.configureLive(null,now());mutable.value=mutable.value.copy(armed=false,authorized=false,connected=false,status=reason,elapsedMs=if(old!=null)now()-started else mutable.value.elapsedMs,usage=old?.usage?:mutable.value.usage)
         while(packets.tryReceive().isSuccess){}

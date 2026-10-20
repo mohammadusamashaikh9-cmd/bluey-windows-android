@@ -22,3 +22,13 @@ counted as complete. If that kit is later supplied, retain its IDs only as alias
 to F0–F6 after checking actual scope/evidence; do not assume `C1` means `F1`.
 Never double count fork creation as F0 implementation or infer completion from
 an alias. [STATUS](STATUS.md) holds current verified facts; this table owns gate state.
+
+## F4-B Gemini amendment / 2026-10-20 UTC
+
+Partial implementation, provider prerequisite blocked (D012). Bounded F3 audio
+transfer, isolated Gemini DPAPI/UI, dormant OpenAI and synthetic completed-answer
+path added. Local Core27/Link61 tests pass; WPF cross-build0 warnings/errors.
+Official Google docs proxy403 prevents required candidate/free-tier/schema verification;
+Gemini authorization fails closed and HTTP adapter/tests remain pending. No cloud
+request, real key or microphone hardware used. CI/artifacts pending; physical/live
+acceptance not claimed. F3/F4-A accepted functional evidence remains unchanged.

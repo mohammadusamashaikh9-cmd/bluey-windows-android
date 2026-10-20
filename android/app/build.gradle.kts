@@ -11,8 +11,8 @@ android {
         applicationId = "dev.bluey.port"
         minSdk = 26
         targetSdk = 36
-        versionCode = 8
-        versionName = "0.4.1-f4b"
+        versionCode = 9
+        versionName = "0.4.2-f4b-gemini-foundation"
     }
     buildFeatures { compose = true }
     compileOptions {

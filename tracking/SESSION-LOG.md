@@ -776,3 +776,16 @@ boundaries, consent/cost limits and one developer decision before any billable t
 
 F4-B [PR #6](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/6) opened into main. No merge. Later closeout
 edits are canonical tracking only; both supplied apps remain the tested5df67442 commit.
+
+## 2026-10-20 UTC — F4-B Gemini amendment (partial, documentation blocked)
+
+Continued PR #6 at dc5d6d9 on the same branch with a clean starting tree. Four
+official Google docs GETs denied by restricted cloud proxy; additive ai.google.dev
+draft saved, requires publication. Recorded D012 before implementation. Did not
+guess provider/model/free eligibility. Implemented independent bounded audio
+protocol/authority/coordinator, protected Gemini key isolation, Free Tier/privacy UI
+and disabled production OpenAI. Synthetic answer/capture tests and actual loopback
+mTLS tests preserve old suites. Core27/Link61 pass locally; WPF cross-build clean.
+No Gemini HTTP adapter or fake HTTP provider tests until contract verification.
+No API keys, billing, real API/cloud tests, hardware capture, source animation rewrite,
+new PR or merge. CI/artifacts and physical acceptance remain distinct evidence.

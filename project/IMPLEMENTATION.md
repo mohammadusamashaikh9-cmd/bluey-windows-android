@@ -79,3 +79,22 @@ foreground Android capture/resampling/WSS, GA text events and local chirps are i
 Offline F4-A remains available. Fake integration/real loopback TLS/DPAPI checks precede
 physical or paid acceptance. No cloud session is executed in development/CI. Screen
 capture/OCR/pointing, tools, notes, hosted relay and background services remain excluded.
+
+### F4-B Gemini amendment / D012
+
+Provider-neutral implementation uses AudioProtocol/AudioTurn and a partial
+AudioAuthority on the existing LiveAuthority; no second authorization/trust system.
+Android AudioUpload and the existing LiveCoordinator reuse native capture, gestures,
+caption events and chirps. Existing32-slot F3 outbox streams bounded numbered chunks;
+Windows assembles one authorized turn and zeroes it on completion/cancel/timeout.
+Windows UI supports provider selection plus separate protected Gemini/OpenAI key
+operations, Free Tier and cloud review; Gemini live authorization is explicitly
+blocked, and OpenAI production invocation is disabled. Existing offline simulation
+and original F1/F2/F3/F4-A code paths stay available.
+
+**Incomplete prerequisite:** official Gemini audio/pricing/billing/rate-limit docs
+are policy403; gemini-3.8-flash and free-tier audio support cannot be verified.
+Do not implement a guessed HTTP contract or substitute a model. The production
+IAudioAnswers adapter, fake HTTP contract tests and quota/safety-schema handling
+remain unimplemented until verification. Tests of synthetic adapters establish
+transport/cancellation behavior only. This is not a completed live Gemini integration.

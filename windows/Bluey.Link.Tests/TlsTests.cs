@@ -40,7 +40,7 @@ public sealed class TlsTests
     private sealed class LoopbackIssuer:IClientSecretIssuer {public int Calls;public Task<ClientCredential> Mint(string model,LiveLimits limits,CancellationToken stop){Calls++;return Task.FromResult(new ClientCredential("offline-loopback-client-placeholder",DateTimeOffset.UtcNow.ToUnixTimeSeconds()+30));}}
     [Fact] public async Task ActualMutualTlsGatesLiveIssuanceAndRevokedSessionCannotMint()
     {
-        using var store=new MemoryStore();var issuer=new LoopbackIssuer();var live=new LiveAuthority(issuer);await using var server=new LinkServer(store,live:live);server.Start(IPAddress.Loopback,0);
+        using var store=new MemoryStore();var issuer=new LoopbackIssuer();var live=new LiveAuthority(issuer,openAiEnabled:true);await using var server=new LinkServer(store,live:live);server.Start(IPAddress.Loopback,0);
         using var cert=Identity.Create("live-phone",false);var device=Guid.NewGuid().ToString();var consent=Guid.NewGuid().ToString();server.StartPairing();
         using(var u=await Connect(server,cert)){await u.Wire.Send("liveConsent",new{consentId=consent,microphone=true,cloud=true,continuous=false},default);await Denied(async()=>await u.Wire.Read(default));Assert.Equal(0,issuer.Calls);}
         server.StopPairing();store.Add(new(device,"phone",Identity.Fingerprint(cert)));
@@ -296,6 +296,27 @@ public sealed class TlsTests
         server.Decide(pin,true,request);Assert.Equal("approve",(await client.Wire.Read(default)).Type);
         await client.Wire.Send("confirm",new{requestId=request},default);Assert.Equal("ready",(await client.Wire.Read(default)).Type);
         Assert.Equal(pin,Assert.Single(store.Peers).Pin);
+    }
+
+    private sealed class SyntheticAnswers:IAudioAnswers {
+        public bool ContractVerified=>true;public int Calls;
+        public Task<string> Answer(ReadOnlyMemory<byte> pcm,CancellationToken stop){Calls++;return Task.FromResult("Synthetic completed answer.");}
+    }
+    [Fact] public async Task ActualMutualTlsAudioRequiresReadyConsentApprovalAndCompletionThenRejectsRevocation() {
+        using var store=new MemoryStore();var fake=new SyntheticAnswers();var live=new LiveAuthority(new DeniedIssuer(),audioAnswers:fake,openAiEnabled:false);live.SelectProvider(VoiceProvider.GeminiFree);
+        await using var server=new LinkServer(store,live:live);server.Start(IPAddress.Loopback,0);using var cert=Identity.Create("audio-phone",false);
+        var device=Guid.NewGuid().ToString();var consent=Guid.NewGuid().ToString();var turn=Guid.NewGuid().ToString();server.StartPairing();
+        using(var unauth=await Connect(server,cert)){await unauth.Wire.Send("audioBegin",new{authorizationId=Guid.NewGuid().ToString(),turnId=turn,format=AudioProtocol.Format},default);await Denied(async()=>await unauth.Wire.Read(default));Assert.Equal(0,fake.Calls);}
+        server.StopPairing();store.Add(new(device,"audio phone",Identity.Fingerprint(cert)));using var c=await Connect(server,cert);
+        await c.Wire.Send("connect",new{hostId=server.HostId,deviceId=device},default);Assert.Equal("ready",(await c.Wire.Read(default)).Type);
+        await c.Wire.Send("liveConsent",new{consentId=consent,microphone=true,cloud=true,continuous=false},default);
+        for(int i=0;i<100&&!live.Peers.Any(p=>p.ConsentId==consent);i++)await Task.Delay(10);
+        Assert.Equal(0,fake.Calls);var peer=Assert.Single(live.Peers);var auth=live.AuthorizeAudio(peer.Lease,consent,true);Assert.Equal("audioGrant",(await c.Wire.Read(default)).Type);
+        await c.Wire.Send("audioBegin",new{authorizationId=auth,turnId=turn,format=AudioProtocol.Format},default);
+        for(int i=0;i<5;i++)await c.Wire.Send("audioChunk",new{authorizationId=auth,turnId=turn,index=i,data=Convert.ToBase64String(new byte[960])},default);
+        Assert.Equal(0,fake.Calls);await c.Wire.Send("audioEnd",new{authorizationId=auth,turnId=turn,chunks=5,bytes=4800},default);
+        Assert.Equal("audioReply",(await c.Wire.Read(default)).Type);Assert.Equal("audioDone",(await c.Wire.Read(default)).Type);Assert.Equal(1,fake.Calls);
+        server.Revoke(Identity.Fingerprint(cert));Assert.Empty(live.Peers);await Denied(async()=>{using var rejected=await Connect(server,cert);});Assert.Equal(1,fake.Calls);
     }
 
 }
