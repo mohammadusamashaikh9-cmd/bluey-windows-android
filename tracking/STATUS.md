@@ -27,7 +27,7 @@ cost for arbitrary credentials; sensitive conversations are excluded from testin
 
 Observed locally before CI: .NET10.0.402 Core27/27 and Link61/61 pass, including actual
 loopback mTLS audio-ready/approval/revocation and synthetic answer tests; WPF cross-build
-0 warnings/errors. Android/Windows CI and revised artifact results pending. Existing
+0 warnings/errors. Final matching-revision CI/results are recorded below. Existing
 OpenAI/F1/F2/F3/F4-A regressions are retained, not disabled. Physical QA unrun.
 
 The completed F3 and F4-A developer-reported functional acceptance stays accepted;
@@ -37,6 +37,122 @@ one offline physical sequence and a separately authorized future free-tier proce
 
 One next action: publish the saved ai.google.dev documentation-access draft in
 cloud environment settings, then resume exact model/free-tier contract verification.
+
+
+## Revised Android CI evidence
+
+Application revision **5a8978a86e9dea18cb38be0c6a87b5daf176ae82**.
+[Android run39463749191](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39463749191)
+succeeded:101 tests,0 failures/errors/skips; lint0 errors18 warnings; APK built,
+apksigner verified and artifacts uploaded. [APK/SHA256SUMS/public signer](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39463749191/artifacts/12284311183),
+[JUnit/lint/frames](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39463749191/artifacts/12284470378).
+
+- APK SHA-256 (actual CI log): `f67f55034dcfbbdf80d5a15346f458f60514f3ba424a79d7c7eedd22f4dbff4c`.
+- App ZIP SHA-256 (GitHub metadata): `c6339117115d7176b83ad48e60c0a85200e0b004548e49d7d43936676e4fa056`.
+- Public debug signer: `39527af1f27b0308194f66306fb8add295c85c9bd76a83d8e7a0b77083ba87a3`.
+
+Signer differs from prior F4-B artifact14a5c577e03ba05a977e38960cd31181b4b5c5bc6bf416ffc65b64242fcfc992.
+An installed app with that signer cannot be updated in place. Deliberate uninstall/
+install loses Android identity/trust; revoke the old Windows entry and re-pair.
+No automatic identity deletion. Preserve Windows DPAPI/trust data.
+
+Both final Android archive downloads were proxy-blocked at
+productionresultssa9.blob.core.windows.net. CI logs/API prove tests/signature/hashes/
+upload, not a local manifest rehash. The additive environment draft now includes
+that observed artifact host as well as ai.google.dev, requires publication. No bypass.
+Windows run39463744341 was queued at the initial Android observation and subsequently
+succeeded; its final evidence is recorded below. Earlier superseded/canceled runs are not passes.
+The Android PR run39463678121 also passed101/lint18 but has a different debug signer;
+do not mix its APK with the supplied manual-run artifact.
+
+Initial local test build briefly failed CS1739 because an opt-in argument was
+applied to the fake OpenAiIssuer call; corrected, then Link61 and WPF clean pass.
+No assertion or existing suite was disabled. Gemini-specific HTTP/429/safety parsing
+is unimplemented/unrun, not a mocked pass. Google contract/pricing/billing remain
+unverified; no live call or free-tier acceptance is claimed.
+
+
+## Revised Windows CI evidence and artifact integrity
+
+The same application revision **5a8978a86e9dea18cb38be0c6a87b5daf176ae82** passed
+[Windows run39463744341](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39463744341):
+27 Core+61 Link tests,0 failed/skipped; actual loopback mTLS/enrollment/reconnection/
+revocation regression retained; WPF build0 warnings/errors; self-contained win-x64
+publish;26 native HWND/DPAPI/render checks. Includes actual CurrentUser DPAPI
+Gemini/OpenAI file isolation and removal; no real credential. Offscreen rendering
+is not a physical animation/click-through/DPI/performance pass.
+
+[Windows application/full SHA256SUMS](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39463744341/artifacts/12284311803),
+[TRX/native/frame evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39463744341/artifacts/12283409683).
+
+| Item | SHA-256 from final CI logs / GitHub metadata |
+| --- | --- |
+| Windows EXE | `05541aebb3d04fafb5153d50daefc5e9f1e0046803f545d74d2cbf9716ee3afb` |
+| Windows DLL | `6c4539d94378053f01a2b201a166737cf7ee299b33e0d508d13f5fa9c056a7fd` |
+| Full Windows SHA256SUMS.txt | `f4245afedf87aafa918346b03ce84fbf97cb01d8a6201812b14b09cabd0cf687` |
+| Windows app ZIP | `53f6f8c021cfc76d12f01cab2a502085c6a7d0b632bcfbac0a96d0c01b9dd982` |
+
+Windows app/evidence downloads were policy403 at productionresultssa1; Android
+app/evidence at productionresultssa9. Both observed hosts were added to the saved
+additive documentation/artifact environment draft, requires publication. CI logs/
+metadata prove build/test/hash/upload; no local final archive/manifest rehash was
+possible. No policy bypass. Both supplied artifact names include the same exact
+application SHA. Later tracking-only edits do not change application source.
+No Windows runtime installation is needed for this self-contained unsigned dev build.
+No installer/signing/release or merge was performed.
+
+All code tests retain existing suites. New checks cover provider denial/defaults,
+current consent/free-tier confirmation, strict audio fields and shared53 fixtures,
+250 bounded chunks, short/invalid/duplicate/reordered/stale audio, backpressure,
+assembly/request timeout, completion, cancellation/wiping, permission denial,
+OpenAI fallback rejection, sleep/background/disconnect/withdrawal, duplicate grants,
+local caption states/cleanup and existing actual mTLS/revocation. Provider-specific
+Gemini HTTP/429/safety schema tests remain blocked/unrun; fake answer tests do not
+establish Gemini interoperability or physical audio quality. No real Gemini/OpenAI
+request or key was used; Windows constructs DeniedIssuer/UnavailableAudioAnswers,
+Android rejects optional OpenAI grants by default, tests inject synthetic adapters.
+
+## Exact amendment files
+
+Compared with dc5d6d9; application revision5a8978a:
+
+```text
+android/app/build.gradle.kts
+android/app/src/main/java/dev/bluey/port/link/DeviceLink.kt
+android/app/src/main/java/dev/bluey/port/link/Wire.kt
+android/app/src/main/java/dev/bluey/port/live/AudioProtocol.kt
+android/app/src/main/java/dev/bluey/port/live/LiveCoordinator.kt
+android/app/src/main/java/dev/bluey/port/live/LivePanel.kt
+android/app/src/test/java/dev/bluey/port/link/ProtocolTest.kt
+android/app/src/test/java/dev/bluey/port/live/AudioCoordinatorTest.kt
+android/app/src/test/java/dev/bluey/port/live/AudioUploadTest.kt
+android/app/src/test/java/dev/bluey/port/live/LiveCoordinatorTest.kt
+project/IMPLEMENTATION.md
+project/PROTOCOL-DATA-SCHEMA.md
+project/QA.md
+project/SECURITY.md
+protocol/README.md
+protocol/f4b-cases.jsonl
+tracking/CHECKPOINTS.md
+tracking/DECISIONS.md
+tracking/HANDOFF.md
+tracking/SESSION-LOG.md
+tracking/STATUS.md
+windows/Bluey.Link.Tests/AudioTests.cs
+windows/Bluey.Link.Tests/LiveTests.cs
+windows/Bluey.Link.Tests/ProtocolTests.cs
+windows/Bluey.Link.Tests/TlsTests.cs
+windows/Bluey.Link/AudioAuthority.cs
+windows/Bluey.Link/AudioProtocol.cs
+windows/Bluey.Link/LinkServer.cs
+windows/Bluey.Link/LiveAuthority.cs
+windows/Bluey.Link/Wire.cs
+windows/Bluey.Windows/AI/AiWindow.cs
+windows/Bluey.Windows/AI/ProtectedApiKey.cs
+windows/Bluey.Windows/Connection/WindowsLinkHost.cs
+windows/Bluey.Windows/NativeSmoke.cs
+windows/README.md
+```
 
 ---
 

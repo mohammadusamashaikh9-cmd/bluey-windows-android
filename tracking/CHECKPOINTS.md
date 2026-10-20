@@ -32,3 +32,15 @@ Official Google docs proxy403 prevents required candidate/free-tier/schema verif
 Gemini authorization fails closed and HTTP adapter/tests remain pending. No cloud
 request, real key or microphone hardware used. CI/artifacts pending; physical/live
 acceptance not claimed. F3/F4-A accepted functional evidence remains unchanged.
+
+Final amendment evidence: app5a8978a86e9dea18cb38be0c6a87b5daf176ae82;
+Windows39463744341 succeeds Core27/Link61/native26/WPF0 warnings-errors/self-contained;
+Android39463749191 succeeds101 tests/lint0 errors18 warnings/signature/debug APK.
+Matching app artifacts/manifests uploaded; actual hashes/public signer/links and
+exact35 paths in STATUS. Downloads blocked by policy at sa1/sa9; additive draft
+saved, requires publication. Android signer39527af1… differs from previous14a5c577…,
+so deliberate reinstall/re-pairing may be required; no automatic trust deletion.
+No Google/OpenAI call/key/hardware capture; synthetic adapters only. Documentation
+contract prerequisite and Gemini HTTP implementation remain unresolved; gate partial.
+PR #6 updated in place, no new PR/merge. One next action: publish the saved Google
+and observed artifact-domain draft, then resume exact contract verification.
