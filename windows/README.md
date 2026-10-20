@@ -357,3 +357,5 @@ Provider text completion waits for the local chirp to finish before returning th
 phone to listening; sleep/Stop invalidates that delayed completion.
 Late capture errors/drain completions are generation-bound and cannot stop a
 replacement live session or commit an abandoned question.
+Offline tests distinguish an active microphone interruption from a late error
+after a stopped capture; neither can reactivate an abandoned turn.

@@ -745,3 +745,9 @@ hold-only gestures left capture active while listening. Added capture-generation
 invalidation, cancel/clear on asking→listening and a fake-native regression proving
 late frames are dropped without commit. Matching final builds rerun for that repair.
 No real capture/provider request occurred.
+
+Android0216f7c ran89 tests with88 passes/1 fixture failure: the microphone-interruption
+fixture fired the old capture error after release/drain, now correctly rejected by
+capture-generation gating. Moved that interruption to the active asking phase;
+kept explicit stale-error and abandoned-drain tests. No implementation assertion
+was weakened and no test was disabled. Final matching builds rerun.

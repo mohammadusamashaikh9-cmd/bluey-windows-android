@@ -71,6 +71,12 @@ class LiveCoordinatorTest {
             capture.failure!!();idle();assertTrue(live.ui.value.armed);assertFalse(socket.closed)
             assertFalse(socket.sent.any{it.contains("input_audio_buffer.commit")});live.close();return
         }
+        if(ending=="audio") {
+            capture.failure!!();idle();assertTrue(socket.closed);assertTrue(capture.cancels>0)
+            assertEquals(VoiceMode.asleep,voice.snapshot.mode);assertFalse(live.ui.value.armed)
+            val before=socket.sent.size;capture.callback!!(ByteArray(960));idle();assertEquals(before,socket.sent.size)
+            assertFalse(socket.sent.any{it.contains("input_audio_buffer.commit")});live.close();return
+        }
         if(ending=="lateDrain")capture.drain=CompletableDeferred()
         voice.up(SystemClock.elapsedRealtime());live.observe();idle()
         if(ending=="lateDrain") {
@@ -83,7 +89,6 @@ class LiveCoordinatorTest {
             "sleep"->{voice.sleep(SystemClock.elapsedRealtime());live.observe()}
             "disconnect"->{lan.messages.trySend(null);idle()}
             "withdraw"->{lan.message("liveStop",Wire.payload("code" to "stopped"));idle()}
-            "audio"->{capture.failure!!();idle()}
             "stop"->live.stop()
             else->live.pause()
         }
