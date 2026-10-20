@@ -46,7 +46,7 @@ public sealed class ProtocolTests
     }
     [Fact] public void LiveFixturesDecodeWithDeclaredOutcomes()
     {
-        var cases=File.ReadAllLines(Path.Combine(AppContext.BaseDirectory,"f4b-cases.jsonl")); Assert.Equal(26,cases.Length);
+        var cases=File.ReadAllLines(Path.Combine(AppContext.BaseDirectory,"f4b-cases.jsonl")); Assert.Equal(27,cases.Length);
         foreach(var line in cases)
         {
             using var doc=JsonDocument.Parse(line);var root=doc.RootElement;var framer=new Frames();var count=0;var decoded=new List<Message>();

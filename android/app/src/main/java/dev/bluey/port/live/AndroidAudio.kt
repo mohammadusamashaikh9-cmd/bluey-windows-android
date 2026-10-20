@@ -18,9 +18,10 @@ class AndroidCapture(private val context:Context,private val scope:CoroutineScop
                 var rate=0
                 for(candidate in listOf(24000,48000,44100,16000)) {
                     if(!wanted.get())return@launch
-                    val minimum=AudioRecord.getMinBufferSize(candidate,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT);if(minimum<=0)continue
-                    val next=AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION,candidate,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT,maxOf(minimum,candidate/5*2))
-                    if(next.state==AudioRecord.STATE_INITIALIZED){record=next;rate=candidate;break}else next.release()
+                    val minimum=AudioRecord.getMinBufferSize(candidate,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT);if(minimum<=0||minimum>candidate*2)continue
+                    val next=try{AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION,candidate,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT,maxOf(minimum,candidate/5*2))}catch(_:IllegalArgumentException){continue}
+                    catch(_:UnsupportedOperationException){continue}
+                    if(next.state==AudioRecord.STATE_INITIALIZED){record=next;rate=next.sampleRate;if(rate !in setOf(16000,24000,44100,48000))throw IllegalStateException();break}else next.release()
                 }
                 val active=record?:throw IllegalStateException();recorder.set(active)
                 if(!wanted.get())return@launch

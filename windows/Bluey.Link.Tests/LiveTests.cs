@@ -6,8 +6,8 @@ namespace Bluey.Link.Tests;
 public sealed class LiveTests
 {
     private sealed class Issuer: IClientSecretIssuer {
-        public int Calls;public TaskCompletionSource<ClientCredential>? Pending;
-        public Task<ClientCredential> Mint(string model,LiveLimits limits,CancellationToken stop){Calls++;return Pending?.Task??Task.FromResult(new ClientCredential("offline-test-secret-not-real",1030));}
+        public int Calls;public long Expiry=1030;public TaskCompletionSource<ClientCredential>? Pending;
+        public Task<ClientCredential> Mint(string model,LiveLimits limits,CancellationToken stop){Calls++;return Pending?.Task??Task.FromResult(new ClientCredential("offline-test-secret-not-real",Expiry));}
     }
     private static Message M(string type,object p)=>Wire.Decode(Wire.Encode(type,Guid.NewGuid().ToString(),0,p)[..^1]);
     private static readonly string Consent=Guid.NewGuid().ToString();
@@ -43,6 +43,10 @@ public sealed class LiveTests
         var auth=a.Authorize("tls",Consent,LiveProtocol.Models[0],new());await Next(a);Request(a,auth,Guid.NewGuid().ToString());await Next(a);
         time=30000;Request(a,auth,Guid.NewGuid().ToString());await Next(a);time=60000;Request(a,auth,Guid.NewGuid().ToString());Assert.Equal("liveStop",(await Next(a)).Type);Assert.Equal(2,i.Calls);
         a.Authorize("tls",Consent,LiveProtocol.Models[0],new());a.Open("other","pin2","device2");ConsentTo(a,"other");a.Authorize("other",Consent,LiveProtocol.Models[1],new());Assert.Single(a.Peers,p=>p.Authorized);
+    }
+    [Theory][InlineData(1000)][InlineData(1061)] public async Task ExpiredOrUnboundedProviderCredentialIsNotDelivered(long expiry) {
+        var issuer=new Issuer{Expiry=expiry};var a=new LiveAuthority(issuer,()=>0,()=>1000);a.Open("tls","pin","device");ConsentTo(a);
+        var auth=a.Authorize("tls",Consent,LiveProtocol.Models[0],new());await Next(a);Request(a,auth,Guid.NewGuid().ToString());Assert.Equal("liveStop",(await Next(a)).Type);
     }
     private sealed class Key:IMasterKey {public byte[] Read()=>Encoding.UTF8.GetBytes("offline-master-placeholder-never-real");}
     private sealed class Handler:HttpMessageHandler {

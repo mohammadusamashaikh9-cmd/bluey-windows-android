@@ -176,7 +176,7 @@ time, two mints maximum per grant with30-second spacing; mint deadline10 seconds
 Provider expiry must be future and at most60 seconds away (requested TTL30).
 No master key, arbitrary provider URL, audio, tool or capture payload is accepted.
 Live queues are bounded: phone LAN32, host live8; credential replies are memory-only.
-`protocol/f4b-cases.jsonl` adds26 shared fixtures; old40+27 remain unchanged.
+`protocol/f4b-cases.jsonl` adds27 shared fixtures; old40+27 remain unchanged.
 
 Audio goes directly from phone to fixed OpenAI WSS, never across LAN or to Windows.
 Provider event IDs/response IDs, local gesture generation/turn UUID and LAN envelope/
