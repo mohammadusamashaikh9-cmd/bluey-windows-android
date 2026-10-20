@@ -59,6 +59,15 @@ class RealtimeTest {
         c.pause(1500);c.accept(MockEvent(1600,turn.generation,turn.turnId,"delta","late"),1600);assertEquals(VoiceMode.asleep,c.snapshot.mode)
         c.configureLive(null,1601);c.toggle(1602);c.tick(2202);assertEquals(VoiceMode.listening,c.snapshot.mode)
     }
+    @Test fun downsamplingFiltersOutOfBandEnergyAndProviderTimeoutsAreBounded() {
+        fun energy(frequency:Double):Double {
+            val data=mutableListOf<Byte>();Pcm24k(48000){data.addAll(it.toList())}.accept(ShortArray(48000){(10000*kotlin.math.sin(2*Math.PI*frequency*it/48000)).toInt().toShort()})
+            return data.chunked(2).drop(100).map{((it[0].toInt() and 255)or(it[1].toInt() shl 8)).toShort().toDouble()}.map{it*it}.average()
+        }
+        assertTrue(energy(18000.0)<energy(3000.0)*.01)
+        val h=Harness();h.time=10001;h.engine.check();assertEquals("session_config_timeout",h.failures.single())
+        val reply=Harness();reply.configure();reply.audio();reply.engine.ask(2,"turn");reply.time=30001;reply.engine.check();assertEquals("response_timeout",reply.failures.single())
+    }
     @Test fun pcmConversionIsChunkInvariantLittleEndianAndFramesAreBounded() {
         for(rate in listOf(16000,24000,44100,48000)) {
             val input=ShortArray(rate){(it%2000-1000).toShort()};val whole=mutableListOf<Byte>();val chunks=mutableListOf<Byte>()

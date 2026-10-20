@@ -2,8 +2,9 @@
 
 Unofficial source-based port of Riley's Bluey. Windows 11 x64; C#/.NET 10 and WPF.
 Original Apple sources are retained unchanged. F3 adds an explicitly started
-authenticated local TLS host; F4-A adds offline voice presentation. No microphone,
-cloud API, capture, OCR or input automation is implemented. The visual burst does not click anything.
+authenticated local TLS host; F4-A adds offline presentation. F4-B adds opt-in
+Android live voice and Windows protected credential issuance. Live AI defaults OFF;
+no screen capture, OCR or input automation is implemented. The visual burst does not click anything.
 
 ## Run the development artifact (no developer SDK)
 
@@ -326,3 +327,26 @@ The old Show speech / Clear speech controls remain available for F2 comparison.
 CI evidence includes a Windows voice-preview frame and Android border/face composites,
 with regression tests for restoring the original remote face after local interaction.
 Use the [physical QA sequence](../project/QA.md#f4-a-physical-offline-demonstration-pending).
+
+## F4-B live AI configuration (OFF by default)
+
+Controls → Live AI settings. Set a key once using the password field (saved values
+are never displayed). Replace/Remove stop all live authorizations first. Storage is
+CurrentUser DPAPI with an owner-only directory ACL under LocalAppData/Bluey/AI.
+Missing/corrupt/inaccessible keys fail closed; no auto regeneration. File removal
+revokes local availability, not SSD snapshots/backups or a key already stolen.
+
+Saving a key, opening controls and starting the LAN host make no OpenAI request.
+Android must Start with cloud consent/OS mic permission, then Windows displays the
+current trusted device/pin and hold-only/continuous preference. Review current
+OpenAI pricing and budgets; explicitly authorize that selected device/session.
+Only its subsequent wake can request a30-second client secret. Default mini model,
+text-only output/local chirps,300s/5 responses/60s input/256 response-token safeguards.
+The full gpt-realtime-2.1 option is explicit. No auto live reconnect. Stop, sleep,
+background, LAN loss/revocation withdraw current live consent. No capture or tools.
+
+Client secrets can be reused until expiry, and sessions can outlive expiry. Local
+limits/cooperative phone closure do not guarantee a hard financial cap or malicious
+client revocation. Use separate OpenAI Platform project/organization budgets and
+usage notifications; they are alerts/controls with their own limits, not a local
+proof of spend. No paid API request is authorized for CI/development.

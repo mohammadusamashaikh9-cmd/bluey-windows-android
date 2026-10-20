@@ -70,7 +70,7 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
         val p=message.payload
         when(message.type) {
             "liveGrant"->{if(Wire.text(p,"consentId")!=consent)return;authorization=Wire.text(p,"authorizationId");mutable.update{it.copy(authorized=true,status="Windows authorized — double tap to wake; OpenAI API use is billable")}}
-            "liveStop"->stop("Windows stopped/denied/expired this live authorization",notify=false)
+            "liveStop"->stop("Windows ended live authorization: "+Wire.text(p,"code"),notify=false)
             "liveToken"->{val token=LiveProtocol.token(p)
                 if(token.authorizationId!=authorization||token.requestId!=request||voice.snapshot.mode!=VoiceMode.waking||voice.snapshot.generation!=pendingGen||voice.snapshot.turnId!=pendingTurn)return
                 request=null
@@ -92,7 +92,7 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
     fun stop(reason:String="Stopped",notify:Boolean=true) {
         providerEpoch++;request=null;capture?.cancel();capture=null;chirp.stop();val old=engine;engine=null;old?.stop()
         if(notify&&mutable.value.armed)port.send("liveStop",Wire.payload("code" to "stopped"))
-        consent=null;authorization=null;last=VoiceMode.asleep;voice.configureLive(null,now());mutable.value=LiveUi(status=reason)
+        consent=null;authorization=null;last=VoiceMode.asleep;voice.configureLive(null,now());mutable.value=mutable.value.copy(armed=false,authorized=false,connected=false,status=reason,elapsedMs=if(old!=null)now()-started else mutable.value.elapsedMs,usage=old?.usage?:mutable.value.usage)
         while(packets.tryReceive().isSuccess){}
     }
     fun pause(){foreground=false;stop("Paused/background — microphone and live session stopped")}

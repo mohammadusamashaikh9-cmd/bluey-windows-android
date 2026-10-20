@@ -1,14 +1,19 @@
 package dev.bluey.port.live
 import kotlin.math.*
-// Streaming rational linear interpolation; input chunk boundaries do not change output.
+// Streaming rational interpolation with a normalized Hamming FIR before downsampling.
+// Input chunk boundaries do not change output; filter history is session-local.
 // Android supplies mono PCM16; the wire is explicitly PCM16 little endian / 24kHz.
 class Pcm24k(private val sourceRate:Int,private val frame:(ByteArray)->Unit) {
     init{require(sourceRate in setOf(16000,24000,44100,48000))}
+    private val kernel=if(sourceRate>24000)DoubleArray(31){i->val x=i-15;val cutoff=.45*24000/sourceRate
+        (if(x==0)2*cutoff else sin(2*PI*cutoff*x)/(PI*x))*(.54-.46*cos(2*PI*i/30))}.let{a->val sum=a.sum();a.map{it/sum}.toDoubleArray()}else doubleArrayOf(1.0)
+    private val history=DoubleArray(kernel.size);private var head=0
+    private fun filtered(sample:Short):Double{history[head]=sample.toDouble();var result=0.0;for(i in kernel.indices)result+=kernel[i]*history[(head-i+kernel.size)%kernel.size];head=(head+1)%kernel.size;return result}
     private var index=-1L;private var next=0L;private var previous=0.0
     private var buffer=ByteArray(960);private var used=0
     fun accept(samples:ShortArray,count:Int=samples.size) {
         require(count in 0..samples.size)
-        for(i in 0 until count){index++;val current=samples[i].toDouble();if(index==0L)previous=current
+        for(i in 0 until count){index++;val current=filtered(samples[i]);if(index==0L)previous=current
             while(next<=index*24000) {
                 val fraction=if(index==0L)1.0 else (next-(index-1)*24000)/24000.0
                 val value=(previous+(current-previous)*fraction).roundToInt().coerceIn(-32768,32767)

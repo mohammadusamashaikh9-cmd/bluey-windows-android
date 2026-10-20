@@ -31,7 +31,7 @@ class AndroidCapture(private val context:Context,private val scope:CoroutineScop
             finally {wanted.set(false);recorder.set(null);runCatching{record?.stop()};record?.release()}
         }
     }
-    override fun cancel(){wanted.set(false);val active=recorder.get();if(active!=null)scope.launch(Dispatchers.IO){runCatching{active.stop()}}}
+    override fun cancel(){wanted.set(false);val active=recorder.get();if(active!=null)scope.launch(Dispatchers.IO+NonCancellable){runCatching{active.stop()}}}
     override suspend fun finish(){cancel();withTimeout(1500){job?.join()}}
 }
 class LocalChirp(private val scope:CoroutineScope) {

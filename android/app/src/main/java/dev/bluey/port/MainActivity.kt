@@ -191,7 +191,7 @@ private fun FaceDemo(incoming: String?) {
             val shape=ScreenShape(size.width,size.height,radii,safeLeft,safeTop)
             drawIntoCanvas{borderRenderer.draw(it.nativeCanvas,shape,indicatorFrame,densityPx,cutouts)}
         }
-        TextButton(onClick = { voicePanel=true },modifier=Modifier.align(Alignment.BottomEnd).safeDrawingPadding()) {Text("Offline simulation · ${voiceState.mode}")}
+        TextButton(onClick = { live.stop("Offline simulation selected");flushVoice();voicePanel=true },modifier=Modifier.align(Alignment.BottomEnd).safeDrawingPadding()) {Text("Offline simulation")}
         TextButton(onClick={livePanel=true},modifier=Modifier.align(Alignment.BottomCenter).safeDrawingPadding()){Text("Live AI settings (opt-in)")}
         if(livePanel)LivePanel(live){livePanel=false}
         if(voicePanel)VoicePreview(voiceState,cornerFallback,{cornerFallback=it},{voice.toggle(SystemClock.elapsedRealtime());flushVoice()},{voice.sleep(SystemClock.elapsedRealtime());flushVoice()}){voicePanel=false}
@@ -199,7 +199,7 @@ private fun FaceDemo(incoming: String?) {
             Text("Connection", color = Color(0xFFB9B2CC))
         }
         if (connectionPanel) ConnectionPanel(link, incoming) { connectionPanel = false }
-        TextButton(onClick = { panel = !panel }, modifier = Modifier.align(Alignment.TopEnd).safeDrawingPadding()) {
+        TextButton(onClick = { if(!panel){live.stop("Offline face demo selected");flushVoice()};panel = !panel }, modifier = Modifier.align(Alignment.TopEnd).safeDrawingPadding()) {
             Text(if (panel) "Hide demo" else "Demo", color = Color(0xFFB9B2CC))
         }
         if (panel) Surface(
