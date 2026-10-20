@@ -355,3 +355,5 @@ Hold-only touch cancellation stops capture and clears uncommitted audio without
 requesting a response; continuous-awake context retains its separately opted-in policy.
 Provider text completion waits for the local chirp to finish before returning the
 phone to listening; sleep/Stop invalidates that delayed completion.
+Late capture errors/drain completions are generation-bound and cannot stop a
+replacement live session or commit an abandoned question.

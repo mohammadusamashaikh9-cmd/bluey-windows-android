@@ -6,6 +6,7 @@ import android.Manifest
 import android.os.SystemClock
 import android.os.Looper
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.CompletableDeferred
 import org.junit.Test
 import org.junit.Assert.*
 import org.junit.runner.RunWith
@@ -22,10 +23,10 @@ class LiveCoordinatorTest {
         override fun send(type:String,payload:JsonObject):Boolean{sent.add(type to payload);return connected}
         fun message(type:String,payload:JsonObject){messages.trySend(Wire.decode(Wire.encode(type,UUID.randomUUID().toString(),0,payload).dropLast(1).toByteArray()))}
     }
-    private class Capture:CaptureDevice {var starts=0;var cancels=0;var callback:((ByteArray)->Unit)?=null;var failure:(()->Unit)?=null
+    private class Capture:CaptureDevice {var starts=0;var cancels=0;var callback:((ByteArray)->Unit)?=null;var failure:(()->Unit)?=null;var drain:CompletableDeferred<Unit>?=null
         override fun start(frame:(ByteArray)->Unit,failed:()->Unit){starts++;callback=frame;failure=failed}
         override fun cancel(){cancels++}
-        override suspend fun finish(){cancel()}
+        override suspend fun finish(){cancel();drain?.await()}
     }
     private class Socket:RealtimeTransport {val sent=mutableListOf<String>();var closed=false
         override fun send(json:String):Boolean{sent.add(json);return true};override fun close(){closed=true}}
@@ -39,6 +40,7 @@ class LiveCoordinatorTest {
     }
     @Test fun authenticatedGrantHoldOnlyPauseAndStaleCallbacksUseFakeNativeAdapters() {scenario(false)}
     @Test fun continuousContextStartsOnlyAfterSeparateConsentGrantAndReady() {scenario(true)}
+    @Test fun staleCaptureDrainCannotStopAReplacementArmedSession() {scenario(false,"lateDrain")}
     @Test fun cancelingHoldStopsOnlyHoldCaptureWithoutCommitting() {scenario(false,"gesture")}
     @Test fun explicitStopStopsCaptureAndProvider() {scenario(false,"stop")}
     @Test fun sleepStopsCaptureAndProvider() {scenario(false,"sleep")}
@@ -66,9 +68,16 @@ class LiveCoordinatorTest {
             voice.cancelGesture(SystemClock.elapsedRealtime());live.observe();idle()
             assertEquals(VoiceMode.listening,voice.snapshot.mode);assertTrue(capture.cancels>0);assertFalse(socket.closed)
             val before=socket.sent.size;capture.callback!!(ByteArray(960));idle();assertEquals(before,socket.sent.size)
+            capture.failure!!();idle();assertTrue(live.ui.value.armed);assertFalse(socket.closed)
             assertFalse(socket.sent.any{it.contains("input_audio_buffer.commit")});live.close();return
         }
+        if(ending=="lateDrain")capture.drain=CompletableDeferred()
         voice.up(SystemClock.elapsedRealtime());live.observe();idle()
+        if(ending=="lateDrain") {
+            live.stop();live.arm(true,continuous);idle();assertTrue(live.ui.value.armed)
+            capture.drain!!.complete(Unit);idle();assertTrue(live.ui.value.armed)
+            assertFalse(socket.sent.any{it.contains("input_audio_buffer.commit")});live.close();return
+        }
         assertEquals(VoiceMode.thinking,voice.snapshot.mode);assertTrue(socket.sent.any{it.contains("input_audio_buffer.commit")})
         when(ending){
             "sleep"->{voice.sleep(SystemClock.elapsedRealtime());live.observe()}

@@ -60,14 +60,15 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
     private fun startCapture() {
         if(capture!=null||engine==null||!foreground||!mutable.value.armed||!mutable.value.connected||authorization==null||ContextCompat.checkSelfPermission(context,Manifest.permission.RECORD_AUDIO)!=PackageManager.PERMISSION_GRANTED)return
         val epoch=providerEpoch;val captureTag=++captureEpoch;val active=engine!!;val next=captureFactory?.invoke(scope)?:AndroidCapture(context,scope);capture=next
-        next.start({bytes->if(providerEpoch==epoch&&captureEpoch==captureTag&&mutable.value.armed)active.append(bytes)},{scope.launch{if(providerEpoch==epoch)stop("Microphone interrupted/unavailable")}})
+        next.start({bytes->if(providerEpoch==epoch&&captureEpoch==captureTag&&mutable.value.armed)active.append(bytes)},{scope.launch{if(providerEpoch==epoch&&captureEpoch==captureTag)stop("Microphone interrupted/unavailable")}})
     }
     private fun commit(g:Long,t:String) {
         val epoch=providerEpoch;val active=engine
         scope.launch{try {if(!continuous){val old=capture;capture=null;captureEpoch++;old?.finish()}
-            if(active!=null&&engine===active&&epoch==providerEpoch&&voice.snapshot.generation==g&&voice.snapshot.turnId==t)active.ask(g,t)
+            if(epoch!=providerEpoch||engine!==active||voice.snapshot.generation!=g||voice.snapshot.turnId!=t)return@launch
+            if(active!=null&&voice.snapshot.mode==VoiceMode.thinking)active.ask(g,t)
             else if(mutable.value.armed)stop("Session not ready; no audio committed")
-        }catch(_:Exception){stop("Audio cleanup failed")}}
+        }catch(_:Exception){if(epoch==providerEpoch)stop("Audio cleanup failed")}}
     }
     private fun lan(message:Message) {
         if(!mutable.value.armed)return
