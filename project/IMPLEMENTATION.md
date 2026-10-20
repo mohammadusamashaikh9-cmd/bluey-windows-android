@@ -71,3 +71,11 @@ face override precedence, strict authenticated presentation events, Windows capt
 and planned OFF consents are this checkpoint. F4-B live provider/audio/token issuance,
 key configuration and all capture/privileged tools remain unimplemented. Acceptance
 requires matching app CI plus separately recorded physical gesture/fidelity QA.
+
+## F4-B live slice
+
+Protected desktop key UI, narrow authenticated live consent/grant/request/token/stop,
+foreground Android capture/resampling/WSS, GA text events and local chirps are included.
+Offline F4-A remains available. Fake integration/real loopback TLS/DPAPI checks precede
+physical or paid acceptance. No cloud session is executed in development/CI. Screen
+capture/OCR/pointing, tools, notes, hosted relay and background services remain excluded.

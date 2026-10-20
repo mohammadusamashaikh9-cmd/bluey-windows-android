@@ -132,3 +132,53 @@ and an established session can outlive that expiry: future stop/revoke must clos
 session too. Direct developers.openai.com/platform.openai.com guide fetches failed in
 this cloud; no beta request shape or live API call was used. Recheck current GA docs
 before F4-B implementation. No secret is minted or stored by F4-A.
+
+## F4-B credential, consent and revocation boundary
+
+Live defaults OFF after every app launch. Windows master key is an independent
+CurrentUser DPAPI blob under LocalAppData/Bluey/AI/openai.dpapi, with a current-user
+owner-only directory ACL. Set refuses overwrite; Replace/Remove are explicit and
+withdraw live grants first. No saved-key redisplay. Missing/corrupt/inaccessible
+states fail closed. Atomic ciphertext replacement; plaintext bytes are zeroed where
+owned. Managed header/token strings remain process-memory objects until collection.
+Deletion removes protected files, not guaranteed SSD/snapshot copies. OS/user-account
+compromise is outside CurrentUser protection; rotate a compromised key separately.
+
+Only a ready/nonrevoked F3 TLS peer can submit live consent. Windows action approves
+the reviewed current lease/pin/consent/model/limits after current billable cloud
+consent; phone flags alone do not grant authority. Key configuration and host startup
+make no provider request. Mint runs off render/LAN-reader threads with cancellation;
+stale results are dropped after consent/authorization/connection changes. Generic
+error categories only; no raw API error body, audio, transcript, key or token logging.
+
+Android requests RECORD_AUDIO only from explicit live UI. OS permission alone does
+not arm capture. Cloud consent and continuous-awake context are separate OFF opt-ins.
+Hold-only defaults on. AudioRecord is constructed only for an authorized foreground
+ready session when capture policy permits; pause/background/sleep/Stop/LAN loss/
+revocation disables callbacks, closes provider, cancels/stops/releases audio, clears
+pending turns/captions. No foreground/background recording service. Choosing offline
+simulation also stops live mode. No microphone/provider adapter in offline tests.
+
+Client secrets are bearer capabilities: TTL limits new-session creation, not session
+lifetime or replay into multiple provider sessions. The cooperative phone closes on
+withdrawal and local limits; a hostile previously authorized phone may ignore Stop
+or reuse/exfiltrate a delivered secret until expiry. The desktop has no guaranteed
+remote provider revocation mechanism in this profile. Local caps are not a hard
+financial spending cap. User must review current OpenAI project budgets/usage alerts,
+pricing, availability and retention before a separately authorized billable run.
+No real key, mint or paid request is used in development or CI.
+
+Official API contract inspected2026-10-20 UTC: [client-secret endpoint/docs](https://github.com/openai/openai-python/blob/main/src/openai/resources/realtime/client_secrets.py),
+[TTL](https://github.com/openai/openai-python/blob/main/src/openai/types/realtime/client_secret_create_params.py),
+[session/models/text modalities](https://github.com/openai/openai-python/blob/main/src/openai/types/realtime/realtime_session_create_request_param.py),
+[PCM formats](https://github.com/openai/openai-python/blob/main/src/openai/types/realtime/realtime_audio_formats_param.py),
+[manual commit](https://github.com/openai/openai-python/blob/main/src/openai/types/realtime/input_audio_buffer_commit_event_param.py),
+[response metadata/limits](https://github.com/openai/openai-python/blob/main/src/openai/types/realtime/realtime_response_create_params_param.py),
+[server events](https://github.com/openai/openai-python/blob/main/src/openai/types/realtime/realtime_server_event.py),
+[WSS bearer handshake](https://github.com/openai/openai-python/blob/main/src/openai/resources/realtime/realtime.py).
+These are current official generated OpenAPI docs/source, not upstream beta shapes.
+Direct [guide](https://developers.openai.com/api/docs/guides/realtime) and
+[pricing](https://developers.openai.com/api/docs/pricing) fetches returned proxy403;
+network-domain draft saved but not activated. No price/retention/account entitlement
+is inferred. Current model IDs are documented in the official SDK; actual access and
+provider behavior require the later authorized test. No paid endpoint was contacted.

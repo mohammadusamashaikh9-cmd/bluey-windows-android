@@ -155,3 +155,31 @@ session cannot clear a replacement owner. Disconnect/revocation clears captions.
 Interrupted streams expire15s after the last delta; complete captions use the source
 `clamp(1.2 + words*0.32, 2.8, 12) + 3` seconds. No privileged message is enabled.
 An older F3 host fails closed on the new type; update both apps before this demo.
+
+## F4-B live authorization extension (D011)
+
+Protocol v1 retains exact4096-byte newline frames and replay/session/sequence rules.
+Only these typed messages are added after authenticated ready:
+
+| Type/direction | Exact payload |
+| --- | --- |
+| liveConsent phone→host | consentId UUID; microphone/cloud/continuous booleans |
+| liveGrant host→phone | authorizationId UUID; consentId UUID |
+| liveRequest phone→host | authorizationId, consentId, requestId UUIDs |
+| liveToken host→phone | authorizationId/requestId UUIDs; secret printable ASCII16–512; expiresAt Unix seconds; model allowlist; sessionSeconds30–600; responses1–20; audioSeconds1–120; maxTokens16–1024 |
+| liveStop either | code enum stopped/denied/expired/limit/issuer/disconnected |
+
+Consent is a declaration from an authenticated phone, not desktop authorization.
+Windows explicitly approves its current TLS lease/pin/consent. Changed consent,
+reconnect, stop and revocation invalidate approval. One phone is authorized at a
+time, two mints maximum per grant with30-second spacing; mint deadline10 seconds.
+Provider expiry must be future and at most60 seconds away (requested TTL30).
+No master key, arbitrary provider URL, audio, tool or capture payload is accepted.
+Live queues are bounded: phone LAN32, host live8; credential replies are memory-only.
+`protocol/f4b-cases.jsonl` adds26 shared fixtures; old40+27 remain unchanged.
+
+Audio goes directly from phone to fixed OpenAI WSS, never across LAN or to Windows.
+Provider event IDs/response IDs, local gesture generation/turn UUID and LAN envelope/
+request IDs are independent. F4-A presentation remains the sole caption path. Older
+apps reject unknown live commands; update both apps before live use. Manual refresh
+requires a fresh Start/current Windows approval; no automatic live reconnect loop.

@@ -286,3 +286,37 @@ Repeat disconnected to demonstrate local states. Drag/touch wins over voice; sle
 restores fresh remote gaze/mood. Compare cutouts, corners and landscape to visible
 screen and source previews; measure FPS/resources/latency separately. No mic/privacy
 indicator, external provider traffic or capture permission should appear.
+
+## F4-B offline and future billable QA
+
+All automated tests use fake issuers/HTTP handlers/Realtime transports/capture devices.
+No key or OpenAI endpoint connection is required. Retain F1–F4-A tests and references.
+Exercise consent denial, ready/trusted versus enrollment-only/revoked peers, stale
+mint replies, bounds/rates/expiry, exact GA serialization, audio little-endian/frame
+conversion and chunk invariance, anti-alias filtering, event ordering/duplicates,
+empty commit, response/session/audio limits, errors/cancel, explicit context modes,
+pause and late callbacks. Windows CI performs actual CurrentUser DPAPI set/replace/
+corrupt/remove checks. Software/fake passes do not prove phone hardware or live API.
+
+Future device test requires a separate explicit user decision authorizing a small
+billable session; do not run it as part of this task:
+
+1. Review current official model pricing/access/retention and project budgets/usage
+   notifications. Choose mini, hold-only,30 seconds,1 response,5 input seconds and
+   64 response tokens. Record the authorized test limits/cost decision; no secret in
+   logs/screenshots. Verify both matching artifacts/checksums/signer continuity.
+2. Install safely. Different debug signers require deliberate reinstall, which loses
+   Android trust/key and needs explicit re-pairing; preserve Windows DPAPI app data.
+   Start LAN host explicitly. Verify accepted F3 pairing/face/offline demo first.
+3. Configure key on Windows; confirm no provider request. Grant Android mic permission
+   and cloud consent via live UI, Start, then authorize the reviewed phone/mode on
+   Windows. Double tap wake; verify yellow→blue without mic in hold-only standby.
+4. Hold past300ms and speak briefly, release; verify mic stops, thinking→streamed text,
+   local chirp/pink border, authenticated Windows bubble, then source-timed cleanup.
+   Empty/short holds must not create responses. Usage metadata is not a billing invoice.
+5. Test sleep, Stop, pause/background, denied permission/cloud, Windows withdrawal,
+   Wi-Fi loss and revocation. Require no late wake/caption/capture/reconnect. Continuous
+   mode requires a distinct later opt-in/test authorization; it must never auto-enable.
+6. Remove key/withdraw grants, close sessions and compare actual OpenAI usage dashboard
+   after propagation. Record actual device/OS/audio route, latency, FPS/resources and
+   provider categories, never raw audio/transcripts/keys/tokens. Report failures honestly.

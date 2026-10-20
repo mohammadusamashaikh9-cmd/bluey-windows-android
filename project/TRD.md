@@ -64,3 +64,14 @@ D010 implements offline Kotlin voice simulation plus an authenticated v1 present
 extension. No audio/provider/screen implementation is included. Six source modes,
 300ms hold,250ms indicator transition and source pulse math are independently tested.
 Future live F4 slices still require separate current consent and API review.
+
+## F4-B native live requirements implemented
+
+Opt-in live audio uses PCM16LE mono24kHz; AudioRecord tries24k/48k/44.1k/16k, bounded
+native buffers and streaming rational resampling (31-tap Hamming FIR before downsample).
+Frames are20ms/960 bytes; partial tails are discarded on stop. Realtime output is
+text only; local source-derived pentatonic chirps use AudioTrack. One pinned OkHttp
+4.12 dependency supplies Android WSS; transport application queues/messages are capped.
+Default limits300s/5 replies/60 input seconds/256 reply tokens; user-configurable
+within600s/20/120s/1024. These are cooperative safeguards, not financial guarantees.
+Physical capture support/routes, API interoperability, pacing and costs unverified.

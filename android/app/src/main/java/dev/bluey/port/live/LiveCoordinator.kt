@@ -22,7 +22,7 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
     private var consent:String?=null;private var authorization:String?=null;private var request:String?=null
     private var continuous=false;var chirps=true;private var foreground=true;private var last=VoiceMode.asleep
     private var engine:RealtimeEngine?=null;private var capture:CaptureDevice?=null;private val chirp=LocalChirp(scope)
-    private var providerEpoch=0L;private var started=0L;private var requestAt=0L
+    @Volatile private var providerEpoch=0L;private var started=0L;private var requestAt=0L
     private var pendingGen=0L;private var pendingTurn=""
     private fun now()=SystemClock.elapsedRealtime()
     init {

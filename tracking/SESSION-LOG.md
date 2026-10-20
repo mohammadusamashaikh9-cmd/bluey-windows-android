@@ -720,3 +720,21 @@ Canonical STATUS/HANDOFF/CHECKPOINTS list actual evidence and one physical demo 
 F4-A [PR #5](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/5) opened into main and attached to the task.
 Branch remains port/ai-voice-foundation; no merge. Later closeout changes only
 canonical documents; both supplied apps remain the tested e0dcda03 commit.
+
+## 2026-10-20 UTC — F4-B native live implementation
+
+Verified main/PR #5 merged at7930efd1bca650ed0358bfc56201950083ea530c; developer
+reports F4-A physical functional acceptance. Created port/live-ai-voice; original
+Apple/Shared, motion/face renderer and indicator math unchanged. D011 precedes code.
+Native live defaults OFF, explicit phone/desktop consent and protected credentials.
+No paid calls/real keys in dev or CI. Official current SDK-generated OpenAPI docs
+verify GA endpoint/TTL/model IDs/WSS/events; direct guides/pricing proxy403. Narrow
+doc-domain draft saved requiring review/save/publish; no API domain or secrets added.
+
+Local link42/42 tests pass including actual TLS token gating/revocation with fake
+issuer and fake HTTP GA contract. Windows first CI39449251522 and second39449838285
+pass build/test/native DPAPI checks. First Android39449251755 found reducer syntax;
+corrected readable reducer. Second39449838450 ran82 tests,81 passed/1 failed: retained
+F1 manifest allowlist expected only LAN, now requires intentional live RECORD_AUDIO.
+Updated that assertion to exact LAN+mic only while retaining font/license checks;
+new offline/capture/provider tests passed, no test removed/disabled. Final evidence pending.

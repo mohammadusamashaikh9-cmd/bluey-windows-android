@@ -180,3 +180,16 @@ with synthetic motion only. LiveVoice chirps/audio and network provider timing a
 intentionally excluded; deterministic600ms wake and700/1000/1300ms caption deltas plus
 1600ms completion are labeled mock timing. Mac RealtimeHost reading/cleanup formula
 is preserved in Windows. Original source files and preview assets are unchanged.
+
+## F4-B live source behavior
+
+Existing six-state controller,300ms gestures, indicator curves/colors and animator
+math are preserved. Real readiness/deltas/completion replace only mock session input.
+LiveVoice text-only output and local pentatonic chirp are translated (sample rate24k,
+scoop .18/exp(time/.012),6ms attack,3.2 decay,12% second harmonic,28ms gaps); the port
+uses a deterministic three-note phrase rather than source randomness. Source continuous
+awake context is a distinct informed opt-in; lower-cost hold-only defaults on. Unlike
+upstream unbounded reconnect/recording/transcription/tool paths, this checkpoint stops
+on background/failure and requires explicit restart/current desktop authorization.
+Physical chirp/gesture/face-border timing comparison remains pending. No original
+source/vector/preview or motion library is changed.
