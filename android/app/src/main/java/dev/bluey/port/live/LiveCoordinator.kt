@@ -115,10 +115,10 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
         val epoch=providerEpoch;val tag=captureEpoch.incrementAndGet();val next=captureFactory?.invoke(scope)?:AndroidCapture(context,scope);capture=next
         next.start({bytes->
             if(providerEpoch!=epoch||captureEpoch.get()!=tag||!mutable.value.armed){bytes.fill(0)}
-            else if(!audio.append(bytes)){scope.launch{if(epoch==providerEpoch&&tag==captureEpoch)stop("Audio transfer backpressure/invalid frame; canceled")}}
+            else if(!audio.append(bytes)){scope.launch{if(epoch==providerEpoch&&tag==captureEpoch.get())stop("Audio transfer backpressure/invalid frame; canceled")}}
             else if(audio.full()){next.cancel();scope.launch{if(epoch==providerEpoch&&tag==captureEpoch.get()){captureEpoch.incrementAndGet();mutable.update{it.copy(status="5-second input limit reached — microphone OFF; release to submit")}}}}
-        },{scope.launch{if(epoch==providerEpoch&&tag==captureEpoch)stop("Microphone interrupted/unavailable")}})
-        scope.launch{delay(5000);if(epoch==providerEpoch&&tag==captureEpoch){captureEpoch.incrementAndGet();next.cancel();mutable.update{it.copy(status="5-second input limit reached — microphone OFF; release to submit")}}}
+        },{scope.launch{if(epoch==providerEpoch&&tag==captureEpoch.get())stop("Microphone interrupted/unavailable")}})
+        scope.launch{delay(5000);if(epoch==providerEpoch&&tag==captureEpoch.get()){captureEpoch.incrementAndGet();next.cancel();mutable.update{it.copy(status="5-second input limit reached — microphone OFF; release to submit")}}}
         mutable.update{it.copy(status="Hold-only capture and encrypted transfer — release to submit; maximum 5 seconds")}
     }
     private fun connect(token:LiveToken) {
