@@ -23,7 +23,7 @@ import androidx.core.content.ContextCompat
         Row{Text("I consent to encrypted audio transfer to Windows and Google cloud processing. Free-tier content may improve Google products; I will not share sensitive conversations.",Modifier.weight(1f));Checkbox(cloud,onCheckedChange={cloud=it;if(!it)live.stop("Cloud consent withdrawn")})}
         Text("Microphone permission: ${if(permission)"granted" else "not granted"}. Permission alone never starts recording.")
         TextButton(onClick={launcher.launch(Manifest.permission.RECORD_AUDIO)},enabled=enabled){Text("Request microphone permission (no capture)")}
-        Row{Text("Continuous-awake audio context (separate opt-in)",Modifier.weight(1f));Switch(false,onCheckedChange={},enabled=false)}
+        Row{Text("Continuous-awake context (unavailable for Gemini)",Modifier.weight(1f));Switch(false,onCheckedChange={},enabled=false)}
         Text("Gemini supports HOLD-ONLY in this port: mic starts after a 300 ms hold, at most5 seconds. Release submits one completed question. Continuous-awake context is unavailable; clips are never submitted automatically. Background stops recording.")
         var chirps by remember{mutableStateOf(live.chirps)}
         Row{Text("Local cartoon chirps (no cloud speech)",Modifier.weight(1f));Switch(chirps,onCheckedChange={chirps=it;live.chirps=it})}

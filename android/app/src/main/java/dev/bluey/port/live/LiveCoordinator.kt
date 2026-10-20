@@ -10,6 +10,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicLong
 
 data class LiveUi(val armed:Boolean=false,val authorized:Boolean=false,val connected:Boolean=false,val continuous:Boolean=false,val status:String="Live OFF — offline simulation available",val elapsedMs:Long=0,val usage:Usage=Usage())
 // Own controller transitions on Main; capture and native socket adapters run off rendering callbacks.
@@ -23,7 +24,7 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
     private var audioMode=false;private var upload:AudioUpload?=null;private var audioDeadline=0L;private var audioReply=false;private var audioComplete=false
     private var continuous=false;var chirps=true;private var foreground=true;private var last=VoiceMode.asleep
     private var engine:RealtimeEngine?=null;private var capture:CaptureDevice?=null;private val chirp=LocalChirp(scope)
-    @Volatile private var captureEpoch=0L
+    private val captureEpoch=AtomicLong(0)
     @Volatile private var providerEpoch=0L;private var started=0L;private var requestAt=0L
     private var pendingGen=0L;private var pendingTurn=""
     private fun now()=SystemClock.elapsedRealtime()
@@ -55,7 +56,7 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
             VoiceMode.asking->{if(audioMode){startAudioTurn(state);return};engine?.interrupt();engine?.bind(state.generation,state.turnId);if(!continuous){engine?.clearInput();startCapture()}}
             VoiceMode.listening->if(!continuous&&old==VoiceMode.asking){
                 if(audioMode){stop("Audio hold canceled — authorize a fresh turn");return}
-                captureEpoch++;capture?.cancel();capture=null;engine?.clearInput()
+                captureEpoch.incrementAndGet();capture?.cancel();capture=null;engine?.clearInput()
             }
             VoiceMode.asleep->if(old!=VoiceMode.asleep)stop("Slept — authorize a fresh live session to restart")
             else->Unit
@@ -63,12 +64,12 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
     }
     private fun startCapture() {
         if(capture!=null||engine==null||!foreground||!mutable.value.armed||!mutable.value.connected||authorization==null||ContextCompat.checkSelfPermission(context,Manifest.permission.RECORD_AUDIO)!=PackageManager.PERMISSION_GRANTED)return
-        val epoch=providerEpoch;val captureTag=++captureEpoch;val active=engine!!;val next=captureFactory?.invoke(scope)?:AndroidCapture(context,scope);capture=next
-        next.start({bytes->if(providerEpoch==epoch&&captureEpoch==captureTag&&mutable.value.armed)active.append(bytes)},{scope.launch{if(providerEpoch==epoch&&captureEpoch==captureTag)stop("Microphone interrupted/unavailable")}})
+        val epoch=providerEpoch;val captureTag=captureEpoch.incrementAndGet();val active=engine!!;val next=captureFactory?.invoke(scope)?:AndroidCapture(context,scope);capture=next
+        next.start({bytes->if(providerEpoch==epoch&&captureEpoch.get()==captureTag&&mutable.value.armed)active.append(bytes)},{scope.launch{if(providerEpoch==epoch&&captureEpoch.get()==captureTag)stop("Microphone interrupted/unavailable")}})
     }
     private fun commit(g:Long,t:String) {
         val epoch=providerEpoch;val active=engine;val audio=upload
-        scope.launch{try {if(!continuous){val old=capture;capture=null;captureEpoch++;old?.finish()}
+        scope.launch{try {if(!continuous){val old=capture;capture=null;captureEpoch.incrementAndGet();old?.finish()}
             if(epoch!=providerEpoch||engine!==active||voice.snapshot.generation!=g||voice.snapshot.turnId!=t)return@launch
             if(audioMode){if(audio!=null&&voice.snapshot.mode==VoiceMode.thinking&&audio.complete()){audioDeadline=minOf(audioDeadline,now()+25000);mutable.update{it.copy(status="Audio transferred — Windows processing; no automatic retry")}}else stop("Empty/canceled audio; no provider request");return@launch}
             if(active!=null&&voice.snapshot.mode==VoiceMode.thinking)active.ask(g,t)
@@ -82,6 +83,7 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
             "audioGrant"->{
                 if(Wire.text(p,"consentId")!=consent)return
                 if(continuous){stop("Gemini requires current hold-only consent");return}
+                if(authorization!=null){if(audioMode&&authorization==Wire.text(p,"authorizationId"))return;stop("Authorization changed — Start again explicitly");return}
                 authorization=Wire.text(p,"authorizationId");audioMode=true;audioReply=false;audioComplete=false;audioDeadline=now()+Wire.integer(p,"sessionSeconds")*1000;started=now();++providerEpoch
                 mutable.update{it.copy(authorized=true,connected=true,status="GeminiFree authorized for ONE hold-only question (5 seconds maximum); double tap to wake")}
             }
@@ -110,13 +112,13 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
         pendingGen=state.generation;pendingTurn=state.turnId;audioReply=false;audioComplete=false
         val audio=AudioUpload(authorization!!,pendingTurn,port::send);upload=audio
         if(!audio.begin()){stop("LAN unavailable; no recording");return}
-        val epoch=providerEpoch;val tag=++captureEpoch;val next=captureFactory?.invoke(scope)?:AndroidCapture(context,scope);capture=next
+        val epoch=providerEpoch;val tag=captureEpoch.incrementAndGet();val next=captureFactory?.invoke(scope)?:AndroidCapture(context,scope);capture=next
         next.start({bytes->
-            if(providerEpoch!=epoch||captureEpoch!=tag||!mutable.value.armed){bytes.fill(0)}
+            if(providerEpoch!=epoch||captureEpoch.get()!=tag||!mutable.value.armed){bytes.fill(0)}
             else if(!audio.append(bytes)){scope.launch{if(epoch==providerEpoch&&tag==captureEpoch)stop("Audio transfer backpressure/invalid frame; canceled")}}
-            else if(audio.full()){captureEpoch++;next.cancel();scope.launch{if(epoch==providerEpoch)mutable.update{it.copy(status="5-second input limit reached — microphone OFF; release to submit")}}}
+            else if(audio.full()){next.cancel();scope.launch{if(epoch==providerEpoch&&tag==captureEpoch.get()){captureEpoch.incrementAndGet();mutable.update{it.copy(status="5-second input limit reached — microphone OFF; release to submit")}}}}
         },{scope.launch{if(epoch==providerEpoch&&tag==captureEpoch)stop("Microphone interrupted/unavailable")}})
-        scope.launch{delay(5000);if(epoch==providerEpoch&&tag==captureEpoch){captureEpoch++;next.cancel();mutable.update{it.copy(status="5-second input limit reached — microphone OFF; release to submit")}}}
+        scope.launch{delay(5000);if(epoch==providerEpoch&&tag==captureEpoch){captureEpoch.incrementAndGet();next.cancel();mutable.update{it.copy(status="5-second input limit reached — microphone OFF; release to submit")}}}
         mutable.update{it.copy(status="Hold-only capture and encrypted transfer — release to submit; maximum 5 seconds")}
     }
     private fun connect(token:LiveToken) {
@@ -130,7 +132,7 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
         mutable.update{it.copy(status="Connecting to OpenAI; microphone OFF")}
     }
     fun stop(reason:String="Stopped",notify:Boolean=true) {
-        providerEpoch++;captureEpoch++;upload?.cancel();upload=null;audioMode=false;audioReply=false;audioComplete=false;request=null;capture?.cancel();capture=null;chirp.stop();val old=engine;engine=null;old?.stop()
+        providerEpoch++;captureEpoch.incrementAndGet();upload?.cancel();upload=null;audioMode=false;audioReply=false;audioComplete=false;request=null;capture?.cancel();capture=null;chirp.stop();val old=engine;engine=null;old?.stop()
         if(notify&&mutable.value.armed)port.send("liveStop",Wire.payload("code" to "stopped"))
         consent=null;authorization=null;last=VoiceMode.asleep;voice.configureLive(null,now());mutable.value=mutable.value.copy(armed=false,authorized=false,connected=false,status=reason,elapsedMs=if(old!=null)now()-started else mutable.value.elapsedMs,usage=old?.usage?:mutable.value.usage)
         while(packets.tryReceive().isSuccess){}

@@ -48,10 +48,12 @@ class AudioCoordinatorTest {
         val lan=Lan();val voice=VoiceController();val capture=Capture();var native=0;var sockets=0
         val live=LiveCoordinator(context,lan,voice,{native++;capture},{_,_,_->sockets++;error("Gemini never creates an OpenAI socket")});live.chirps=false
         live.arm(true,false);idle();assertEquals(0,native);val consent=lan.sent.last().second["consentId"].asString;val auth=UUID.randomUUID().toString()
-        lan.message("audioGrant",Wire.payload("authorizationId" to auth,"consentId" to consent,"provider" to "GeminiFree").apply{addProperty("sessionSeconds",60)});idle()
+        val grant=Wire.payload("authorizationId" to auth,"consentId" to consent,"provider" to "GeminiFree").apply{addProperty("sessionSeconds",60)}
+        lan.message("audioGrant",grant);idle()
         voice.toggle(SystemClock.elapsedRealtime());live.observe();live.observe();assertEquals(VoiceMode.listening,voice.snapshot.mode);assertEquals(0,native);assertFalse(lan.sent.any{it.first=="liveRequest"})
         voice.down(SystemClock.elapsedRealtime());advance(299);voice.tick(SystemClock.elapsedRealtime());live.observe();assertEquals(0,native)
         advance(1);voice.tick(SystemClock.elapsedRealtime());live.observe();assertEquals(VoiceMode.asking,voice.snapshot.mode);assertEquals(1,native)
+        lan.message("audioGrant",grant);idle();assertEquals(VoiceMode.asking,voice.snapshot.mode);assertEquals(1,native)
         repeat(if(end=="limit")250 else 6){capture.callback!!(ByteArray(960))};idle()
         if(end=="limit"){assertTrue(capture.stops>0);assertFalse(lan.sent.any{it.first=="audioEnd"});val before=lan.sent.size;capture.callback!!(ByteArray(960));idle();assertEquals(before,lan.sent.size)}
         if(end=="cancel"){voice.cancelGesture(SystemClock.elapsedRealtime());live.observe();idle();assertFalse(lan.sent.any{it.first=="audioEnd"});assertFalse(live.ui.value.armed);assertTrue(capture.stops>0);live.close();return}
