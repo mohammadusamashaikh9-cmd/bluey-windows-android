@@ -88,3 +88,12 @@ the same corpus in `protocol/`; the exact wire/security state machine is documen
 there. Four host slots, bounded frames/rates/deadlines, conflated face data and
 foreground-only client cleanup prevent unbounded animation queues. This F3 link
 has no generalized privileged dispatcher or F4/F5 endpoint.
+
+## F4-A offline presentation
+
+Pure Kotlin `voice/VoiceController`, indicator math and face selection own state,
+clock and mock events. Compose/Canvas adapt gestures/public screen geometry only.
+DeviceLink sends bounded presentation events on its existing authenticated IO path;
+C# Bluey.Link validates schema and per-session caption state. Bluey.Windows adapts
+snapshots to the existing bubble/engine controls. No socket or certificate work runs
+on rendering frames. Planned consent is immutable OFF; no provider/media layer.

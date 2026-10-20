@@ -27,6 +27,7 @@ internal sealed class OverlayArt : Canvas
     private FormattedText? captionText, labelText;
     private Size2 captionSize;
     private (string? Text, double Width, double Height, double Dpi)? textKey;
+    internal string? CurrentCaption => caption;
     internal Rect2? SpeechTarget { get; set; }
     internal OverlayArt(CursorEngine engine, VisualState state)
     {

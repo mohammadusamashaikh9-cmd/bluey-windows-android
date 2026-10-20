@@ -59,3 +59,14 @@ implementation choices, not proven cross-platform performance requirements.
 | TeardropLayer, CursorView | `windows/Bluey.Windows/VectorDrawing.cs`, `OverlayArt.cs` | Cached vector body, native WPF drawing/text |
 | CursorOverlay, layerPoint | `windows/Bluey.Windows/OverlayWindow.cs`, `Native.cs` | Native transparent primary HWND; physical-to-DIP mapping, no layer y flip |
 | Settings, HotKeys, AppDelegate, Fonts | `SettingsStore.cs`, `ControlsWindow.cs`, `Program.cs`, `VectorDrawing.cs` | Offline UI/hotkeys/settings and embedded original fonts only |
+
+## F4-A concrete symbol map
+
+| Source owner | Native owner | Observed boundary |
+| --- | --- | --- |
+| GooglyApp.RootView hold/double tap | Android MainActivity pointer adapter, voice/VoiceController | 300 ms hold; monotonic gesture arbitration; sleep/pause generation cancellation |
+| GooglyApp.ModeIndicator | voice/ModeIndicator + ModeIndicatorRenderer | Exact look/pulse/transition math; native Canvas/public Android corners, adjustable fallback |
+| LiveVoice.State/beginAsk/endAsk/caption events | voice/VoiceController + OfflineProvider | Six modes; deterministic mock events; no audio, chirps or provider network |
+| RootView.syncFace / FaceView | voice/VoiceFace + existing FaceAnimator data override | Touch > local voice > fresh remote > demo; original springs preserved |
+| RealtimeHost.updateCaption/captionDone | Bluey.Link/Presentation + Bluey.Windows/VoicePresentation | Strict TLS-only presentation; source reading time; existing vector bubble/fade |
+| GooglyLink caption/state reference | PresentationCodec / shared f4a-cases | Versioned exact fields; no legacy generalized commands/token/media |

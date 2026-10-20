@@ -63,3 +63,11 @@ and revocation, passive face synchronization, both CI artifacts, and canonical
 evidence. F1/F2 graphics/math stay intact. The developer reports F2 functional
 smoke acceptance; measured performance QA remains open. Physical F3 pairing,
 reconnect and latency need the produced EXE/APK on the actual laptop/phone.
+
+## F4-A implementation boundary
+
+Offline six-state controller, source ModeIndicator math, native border/gestures,
+face override precedence, strict authenticated presentation events, Windows captions
+and planned OFF consents are this checkpoint. F4-B live provider/audio/token issuance,
+key configuration and all capture/privileged tools remain unimplemented. Acceptance
+requires matching app CI plus separately recorded physical gesture/fidelity QA.

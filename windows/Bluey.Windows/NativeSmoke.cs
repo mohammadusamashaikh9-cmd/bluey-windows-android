@@ -56,7 +56,13 @@ internal static class NativeSmoke
             Render(output, "string-flight", 72, true, PointerTrail.String, false, true);
             Render(output, "speech-top", 72, false, PointerTrail.None, true);
             Render(output, "speech-center", 72, false, PointerTrail.None, false);
-            Check(Directory.GetFiles(output, "*.png").Length == 12, "Twelve current offscreen renders produced by actual WPF renderer");
+            Render(output, "voice-preview", 72, false, PointerTrail.None, false);
+            Check(Directory.GetFiles(output, "*.png").Length == 13, "Thirteen current offscreen renders including offline voice caption");
+            var previewArt=new OverlayArt(e,v);var previewHost=new Connection.WindowsLinkHost();var preview=new VoicePresentation(previewArt,previewHost,e);
+            preview.Preview(0);preview.Tick(.69);Check(previewArt.CurrentCaption==null,"Offline preview has deterministic thinking delay");
+            preview.Tick(.7);Check(previewArt.CurrentCaption=="This is an offline ","Offline preview starts with a caption delta");
+            preview.Tick(1.3);Check(previewArt.CurrentCaption!.EndsWith("No audio or cloud is active."),"Offline preview streams complete bounded mock caption");
+            preview.Tick(30);Check(previewArt.CurrentCaption==null && previewHost.Server==null,"Preview clears after source reading time without starting a listener");
             File.WriteAllText(Path.Combine(output, "native-smoke.json"), JsonSerializer.Serialize(new { passed = checks.Count, failed = 0, checks,
                 platform = Environment.OSVersion.ToString(), desktopAcceptance = "UNVERIFIED: physical click routing, focus, DPI changes, capture, fidelity, pacing, CPU" }, new JsonSerializerOptions { WriteIndented = true }));
             return 0;
@@ -79,6 +85,10 @@ internal static class NativeSmoke
         {
             art.Caption("Hello! I'm Bluey. This is a native vector speech bubble."); art.Label("Offline demo");
             for (var i = 1; i <= 60; i++) { e.Step(end + i / 60.0, default, new(1000, 700)); art.Advance(); }
+        }
+        if(name=="voice-preview") {
+            var adapter=new VoicePresentation(art,new Connection.WindowsLinkHost(),e);adapter.Preview(e.Now);
+            for(var i=1;i<=100;i++){e.Step(end+i/60.0,default,new(1000,700));adapter.Tick(e.Now);art.Advance();}
         }
         art.UpdateLayout(); var bitmap = new RenderTargetBitmap(1000, 700, 96, 96, PixelFormats.Pbgra32); bitmap.Render(art);
         var pixels = new byte[1000 * 700 * 4]; bitmap.CopyPixels(pixels, 4000, 0);

@@ -21,6 +21,8 @@ public sealed class LinkServer : IAsyncDisposable
     private TcpListener? listener; private Task? accepting; private int taskId;
     private LinkFace? latest; private Enrollment? pending;
     public Invitation Invitation { get; }
+    public PresentationHub Presentations {get;}=new();
+    public PresentationSnapshot Presentation=>Presentations.Sample(clock.ElapsedMilliseconds);
     public ConnectionDiagnostics Diagnostics { get; }
     public Enrollment? Pending => Volatile.Read(ref pending);
     public string HostId => store.HostId;
@@ -153,7 +155,7 @@ public sealed class LinkServer : IAsyncDisposable
                 if (sessions.TryGetValue(pin, out var old)) old.Cancel(); sessions[pin] = stop;
                 await wire.Send("ready", new { hostId = HostId, deviceId = peer.DeviceId }, stop.Token);Stage(ConnectionStage.SessionReady);
                 var writer = SendFaces(wire, pin, stop.Token);
-                var reader = ReadHeartbeats(wire, pin, stop.Token);
+                var reader = ReadHeartbeats(wire, pin, stop.Token,attempt);
                 await Task.WhenAny(writer, reader); stop.Cancel();
                 await Task.WhenAll(writer, reader);
             }
@@ -177,19 +179,21 @@ public sealed class LinkServer : IAsyncDisposable
         }
         finally
         {
-            stop.Cancel(); client.Dispose();Diagnostics.Record(attempt,ConnectionStage.SessionClosed,port,failure);
+            stop.Cancel(); client.Dispose();Presentations.Release(attempt);Diagnostics.Record(attempt,ConnectionStage.SessionClosed,port,failure);
             if (request != null) Interlocked.CompareExchange(ref pending, null, request);
             if (pin != null) ((ICollection<KeyValuePair<string,CancellationTokenSource>>)sessions).Remove(new(pin, stop));
             slots.Release();
         }
     }
-    private async Task ReadHeartbeats(WireConnection wire, string pin, CancellationToken stop)
+    private async Task ReadHeartbeats(WireConnection wire, string pin, CancellationToken stop,string lease)
     {
         while (true)
         {
             var m = await wire.Read(stop);
-            if (m.Type != "ping" || !store.Peers.Any(p => p.Pin == pin)) throw new ProtocolException("untrusted/command");
-            await wire.Send("pong", new { }, stop);
+            if (!store.Peers.Any(p => p.Pin == pin)) throw new ProtocolException("untrusted/command");
+            if(m.Type=="presentation")Presentations.Apply(lease,m,clock.ElapsedMilliseconds);
+            else if(m.Type=="ping")await wire.Send("pong", new { }, stop);
+            else throw new ProtocolException("command");
         }
     }
     private async Task SendFaces(WireConnection wire, string pin, CancellationToken stop)

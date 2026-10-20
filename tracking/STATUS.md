@@ -1,125 +1,168 @@
 # Current verified state
 
-2026-10-19 UTC: F3-R3 repairs saved-identity endpoint recovery after host restart.
-Existing branch `port/secure-device-link` / [PR #4](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/4) remains open and
-unmerged. R3 started clean at `78d4a6133f4ae9a7c3ec71061123e25cd2dbff45`; no reset/rebase/new PR/merge.
-Both supplied apps use **`d0a7a9b4a5882b5bbbd4da415244d9d2d4115a6c`**; subsequent closeout is tracking only.
+2026-10-20 Asia/Karachi: F4-A implemented on `port/ai-voice-foundation`, based on
+verified `origin/main` / `32a38c045e6de87e9d79d44d1114a4f0c76d2b8d`.
+Both supplied applications and the evidence below use **`e0dcda03ca2168ada223bb9f01d7fb231a506202`**.
+Subsequent closeout edits are canonical documentation/tracking only.
+[PR #5](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/5) is open into main and unmerged.
 
-## Physical evidence and confirmed code defects
+## Accepted F3 gate
 
-The developer now reports R2 real Windows/Android authenticated mTLS pairing,
-live mouse gaze, mood synchronization, Android touch precedence, Wi-Fi recovery
-and intentional revocation rejection passed. These are user-reported physical QA,
-not agent-operated tests. No device/OS matrix or measured latency was supplied.
-This supersedes R2's pending functional pairing status. F3 still needs restart QA;
-F1/F2 detailed visual/performance acceptance remains separate. F1 PR #2 and F2 PR #3
-stay merged; F2 functional smoke remains user-reported accepted.
+GitHub confirms PR #4 squash-merged at the accepted main baseline. Developer reports
+physical mTLS pairing, gaze/moods, Android touch precedence, Wi-Fi recovery, revocation,
+full Windows exit/reopen, explicit host start and saved authenticated reconnect without
+new QR or identity replacement passed. This supersedes R3's pending-retest status.
+This is developer-reported functional acceptance, not agent-operated physical QA.
+Measured latency/FPS/CPU/memory, multiple-device and advanced compatibility QA remain
+UNVERIFIED; F1/F2 detailed visual/performance QA stays separate.
 
-Restart reproduction: after Windows exits/reopens and the user starts the secure
-host, Android reports repeated TCP_CONNECTING/TCP_TIMEOUT/no discovered host over
-3–5 minutes. The supplied video description does not independently establish what
-Windows was listening on at each attempt; physical old/new IP/port and the precise
-DNS-SD failure were not captured. No firewall/TLS/identity failure is inferred.
+## F4-A implementation and source fidelity
 
-Confirmed source failure mechanism: Windows binds port0, which requests an OS-assigned
-port; Android persists that port and has no endpoint fallback without discovery.
-A restart can therefore leave it retrying a stale endpoint indefinitely. Red/green
-regressions also reproduce Android retaining a failed discovery listener and its
-busy resolver across stop/start, blocking recovery of the next discovery generation.
-These defects are confirmed in code/tests; the precise physical route is not claimed.
+D010: pure monotonic Kotlin six-state controller with injected mock events/IDs;
+300 ms hold and double-tap arbitration; generation cancellation on sleep/pause/connection
+changes. Touch > local voice > fresh authenticated remote > offline demo. Existing
+FaceAnimator receives a data override only; spring math and remote receive/stale path
+are retained. C# Bluey.Core and all original Mac/iOS/Shared/previews remain unchanged.
 
-## Implemented behavior and security boundary
+ModeIndicator preserves Swift colors, 0/6/10/16/8/8 border widths, pulse rates/equation,
+250 ms explicit cubic ease-in-out and label layout/Fredoka. Android public per-corner
+radii/cutouts replace the private iOS lookup; adjustable 55 dp fallback. Native vector
+icons preserve intent rather than reproducing SF Symbols. Public circular physical
+corners differ from Apple's continuous-corner primitive; glass alignment needs device QA.
+Deterministic 600 ms wake and 700/1000/1300 ms deltas/1600 ms completion are mock timing.
+Windows reuses existing bubble geometry/pop/fade and source reading time
+`clamp(1.2 + words*0.32, 2.8, 12) + 3` seconds. Offline controls require no host/API key.
 
-- Production listens on **TCP47654**, bound exclusively to the explicitly selected
-  private IPv4. Conflict/unavailable-port errors leave host stopped with clear UI;
-  there is no silent dynamic fallback. Host startup still requires Start secure host
-  after launch. No new auto-start preference/listener or firewall mutation.
-- Android tries saved endpoint, saved IP:47654 (legacy R2 dynamic-port migration),
-  then bounded rotating discovery hints; an explicit manual private endpoint is
-  also available. Every route retains saved host UUID/pin and the existing phone key.
-  Persist a changed endpoint only after pinned mTLS and authenticated hello/ready.
-- TCP refusal/timeouts and rejected untrusted hints remain retryable with existing
-  bounded backoff/foreground lifecycle. Storage/key faults stop; ordinary failures
-  never erase trust, start enrollment or replace identity. Disconnect stops retries.
-- Discovery generation cleanup repairs failed-start/stale-resolver latches. Refresh
-  discovery does not forget trust. If DHCP changes IP while multicast is unavailable,
-  type the displayed private endpoint using the saved identity; no scan/new QR needed.
-- D009 mutual TLS, exact pin, strong five-minute invitation, explicit request-bound
-  approvals, protected stores, revocation and all protocol bounds remain. Revoke
-  blocks connect; fresh authorized enrollment can reuse the same phone key.
-- Safe Android diagnostics v3 include only validated private route address/port in
-  addition to bounded fixed stages/categories. Windows safe-copy includes actual
-  host stopped/listening state and endpoint. Review/redact LAN metadata before sharing.
+Only `presentation` is added after authenticated ready, with exact bounded fields,
+32-entry per-session queue, 2048-unit caption bound and no offline replay. Existing
+mTLS, exact pin, protected trust, approvals, revocation, framing/rate/sequence checks
+remain. One active presentation owner per host; multiple-phone presentation is not
+accepted QA. Mic/cloud/screen planned states are separately OFF and ungrantable.
+No audio recorder, provider client, token endpoint, API key, capture or tool exists.
+Optional protected master-key UI is deferred to F4-B; future GA client-secret boundary
+is documentation only, with current auth/consent/rate/expiry/revocation requirements.
+Official generated OpenAI GA SDK source was inspected; direct web-guide fetches failed.
+No live API was called.
 
-## Actual final validation and artifacts
+## Actual automated evidence
 
-| Target | Observed outcome at the matching app commit | Downloads |
+| Target | Observed result at app commit | Downloads |
 | --- | --- | --- |
-| [Windows CI 39308264542](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308264542) | Windows-2025/.NET10.0.402; 27 core + 30 link tests passed, zero skipped/failed; WPF zero warnings/errors; self-contained publish; 12 native checks/12 offscreen renders | [Windows x64 + SHA256SUMS](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308264542/artifacts/12215465316), [TRX/native/render evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308264542/artifacts/12215011329) |
-| [Android CI 39308263802](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308263802) | JDK17/Gradle8.13/SDK36; 55 tests passed, zero failures/errors/skips; lint zero errors/15 warnings; apksigner verification/debug APK; 17 renders | [APK + SHA256SUMS + SIGNING-CERT](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308263802/artifacts/12215091175), [JUnit/lint/render evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308263802/artifacts/12215106118) |
+| [Windows CI 39335639475](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39335639475) | Windows-2025/.NET10.0.402; 27 core + 35 link tests passed, zero failures/skips; native WPF build zero warnings/errors; self-contained publish; 16 native checks and 13 offscreen WPF frames | [Windows x64 + full SHA256SUMS](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39335639475/artifacts/12225683285), [TRX/native/frame evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39335639475/artifacts/12225593494) |
+| [Android CI 39335639487](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39335639487) | JDK17/Gradle8.13/SDK36; 70 tests passed, zero failures/errors/skips; lint zero errors/17 warnings; apksigner verified; debug APK; 41 frames (17 retained + 24 border/composite) | [APK + SHA256SUMS + SIGNING-CERT](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39335639487/artifacts/12226463377), [JUnit/lint/frame evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39335639487/artifacts/12226781591) |
 
-PR merge-tree [Windows39308271399](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308271399) and
-[Android39308271303](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39308271303) also pass. Local final
-`dotnet test windows/Bluey.Link.Tests -c Release` passes30/30; generated TRX is
-`windows/TestResults/r3-final.trx` (ignored, not committed). Unchanged shared corpus
-still has40 fixtures. Existing animation/TLS/pinning/revocation/cleanup tests retained.
+Tests cover six states/300 ms boundary/short and double taps/canceled holds, mock
+streaming and expiry, stale callbacks after sleep/pause/connection change, flood bounds,
+remote target restoration and 2.5 s stale cutoff, exact border math and interrupted
+transitions, landscape/corner clamping, actual merged manifest's LAN-only permissions.
+Shared 27 F4-A fixtures supplement unchanged 40 F3 fixtures. Actual .NET software-key
+TLS tests prove pre-ready presentation denial, trusted ready/delta/face delivery and
+revocation cleanup; caption tests cover illegal transitions, bounds, source reading,
+late cancellation and owner release. These do not establish physical Keystore/Schannel
+or Compose gesture/fidelity acceptance. All existing protocol/animation tests remain.
 
-Actual TLS tests cover server exit while its client is authenticated, immediate
-stable-port restart with saved trust/no invitation, ready/face delivery, port
-conflict and retry, host not listening, stale port and changed loopback IP/port,
-wrong-pin rejection, revoked connect and explicit same-key re-enrollment. Kotlin
-covers absent/delayed/multiple/malformed hints, legacy-port migration, manual LAN
-routing, unchanged UUID/pin, retry classification and old NSD callback generations.
-NSD callbacks are simulated; these are not physical multicast/Android Keystore tests.
+Local `.NET` core27/link35 tests passed (zero failed/skipped). Initial red presentation
+test failed on unknown command before implementation. First Android CI
+[39334928523](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39334928523) failed three NewApi lint checks; all cutout
+accesses were moved inside the API28 guard. Intermediate
+[39335422436](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39335422436) failed Kotlin's unsupported predicate-split
+word counter; replaced with an explicit Unicode-whitespace run counter. Final CI passes.
+Superseded runs were canceled, not counted as passes. Android emits existing deprecated
+NSD-host warnings and path-library strip warning; 17 lint warnings comprise 15 existing
+plus two optional Canvas KTX suggestions. Pinned trust-manager lint remains an explicit
+D009 policy; no validation was disabled to pass CI.
 
-Downloaded APK/evidence: checksum verified, APK-v2 public signer matches CI report,
-55-test JUnit/lint XML and17 renders inspected, all6 font/OFL assets match source.
-Windows app/evidence local downloads were blocked by this cloud proxy at
-`productionresultssa1.blob.core.windows.net`. Actual Windows CI logs show tests,
-native checks, hashes and uploaded artifacts; **no local R3 Windows archive/per-file
-verification is claimed**. No proxy bypass, rehosting or verification disabling.
-Artifacts retain14 days. Windows is self-contained/untrimmed/unsigned win-x64,
-requiring no extra laptop runtime/SDK; Android is debug0.3.3-f3-r3/versionCode6.
+Downloaded Android APK checksum, embedded public APK-v2 certificate hash, JUnit/lint
+XML and 41 PNGs were inspected. Listening/speaking composites were compared visually
+with the original listening preview and Swift parameters: vector face retained and
+border/label overlaid; different poses/time phases are not pixel-equivalence evidence.
+Windows download redirects to `productionresultssa16.blob.core.windows.net`, blocked by
+this cloud's policy; archive/TRX/frame local inspection was not possible. Actual CI
+logs report the tests/native checks/hashes and upload success. No proxy bypass attempted.
 
-SHA-256 (Windows: observed CI; APK: also checked after download):
+## Published SHA-256 and install continuity
 
-- `Bluey.Windows.exe`: `7c4f029ad98862efec5daac3bc44f8a580194120475f1eb8568c143faad52c4f`
-- `Bluey.Windows.dll`: `7cb4e4dc3e14c22821a405e2f6e3a67ba219897a49fd9431ce6a8b253cbfd937`
-- Windows `SHA256SUMS.txt`: `26e3b78cd9d756d005f63c03e7d8d4c0198f75d21ca7da5f3302b41348cfe899`
-- `app-debug.apk`: `86306a39eb8a21d280b327da464a4f8f2b6c37d2fd27c9a1c6343a915c93cc85`
+All Windows values below are CI-reported; Android APK/manifest/certificate were also
+locally rehashed. Artifact ZIP digests are GitHub metadata and differ from file hashes.
 
-Debug signer changed versus delivered R2: old `de4459d57c8d3441698a3aba9a37dc4a7ffeef67a87925aaf235d7c47e540134`,
-new `2e78aada585a01b285af3dc4baed41a0764da841ab7c468a0d7e8ca74dbd52c1`. Updating that baseline requires uninstall/install and
-initial R3 enrollment, deleting its old phone app data/key. This is a development
-packaging limitation, not reconnection behavior. The restart test then must reuse
-that R3 identity without a QR or key replacement. Preserve Windows DPAPI identity
-and revoke any obsolete phone entry. APK signer differs from TLS identities; no
-signing private key was exported, committed or published.
+| Item | SHA-256 |
+| --- | --- |
+| Windows Bluey.Windows.exe | `01aa3f55718116ca61228e21e1f0b7f39ff3808722a835a55a05f87bd671f474` |
+| Windows Bluey.Windows.dll | `dfa9f1837413ad31182e4c4ae482e922b5ad652148e6971b9b041f67826153fe` |
+| Windows SHA256SUMS.txt | `7b984ee1dc763878ec90b395838ac409dba22f0ddd4e60f0dcac6e533b57b3e9` |
+| Windows application ZIP (GitHub) | `815d4430a49bd7fab78069e69d86c957e64ea05b1eba88c83f013fdf42f3d410` |
+| Android app-debug.apk | `c0e06477b5562f74fe0e78af452cbfdc5269e145e3097c1663058bd47648e2f1` |
+| Android SHA256SUMS.txt | `05200e73d57a74352b39c0ae505e07c404bd9c0b02696ece800dfa759abe4fc6` |
+| Android application ZIP (GitHub) | `06fecc14aaca2928ffbc441d2341bd1f19f3afdad9cea92a10da3cb1901c23ce` |
+| Android debug public signer | `054f151e74b6035f0a73d2c778250e50197c2057bcd6de327147191b0622f3f4` |
 
-## Exact R3 changed files (relative to R2 closeout)
+APK signer differs from delivered R3's `2e78aada585a01b285af3dc4baed41a0764da841ab7c468a0d7e8ca74dbd52c1`.
+An in-place update over that signer will fail. Uninstall/install intentionally loses
+Android data and Keystore identity; explicit re-enrollment is then required. Revoke
+obsolete peer entry separately. No code silently deletes/replaces a phone identity.
+If the installed signer matches, normal update retains data. Do not mix later PR-merge
+artifacts/debug signers with these app-commit downloads. Windows folder is unsigned,
+untrimmed self-contained win-x64; no runtime/SDK install. Preserve Windows DPAPI data
+and existing executable path/firewall rule. Artifacts expire after14 days.
 
-- `android/app/build.gradle.kts`
-- `android/app/src/main/java/dev/bluey/port/link/ConnectionDiagnostics.kt`
-- `android/app/src/main/java/dev/bluey/port/link/ConnectionPanel.kt`
-- `android/app/src/main/java/dev/bluey/port/link/DeviceLink.kt`
-- `android/app/src/main/java/dev/bluey/port/link/Discovery.kt`
-- `android/app/src/main/java/dev/bluey/port/link/ReconnectEndpoints.kt`
-- `android/app/src/test/java/dev/bluey/port/link/DiscoveryLifecycleTest.kt`
-- `android/app/src/test/java/dev/bluey/port/link/ReconnectEndpointsTest.kt`
-- `project/QA.md`
-- `tracking/CHECKPOINTS.md`
-- `tracking/DECISIONS.md`
-- `tracking/HANDOFF.md`
-- `tracking/SESSION-LOG.md`
-- `tracking/STATUS.md`
-- `windows/Bluey.Link.Tests/DiagnosticTests.cs`
-- `windows/Bluey.Link.Tests/TlsTests.cs`
-- `windows/Bluey.Link/LinkServer.cs`
-- `windows/Bluey.Windows/Connection/ConnectionWindow.cs`
-- `windows/Bluey.Windows/Connection/WindowsLinkHost.cs`
-- `windows/README.md`
+## Physical QA and one next action
 
-Original Mac/iOS/Shared/previews and target animation/render math remain unchanged.
-No F4, input/capture automation, relay/backend, architecture rewrite or merge.
-R3 physical restart, route recovery under actual NSD/DHCP conditions, conflict UI
-and same-key re-enrollment still need the single [HANDOFF](HANDOFF.md) retest.
+F4-A real gestures, screen corners/cutouts/safe insets, animations, Windows bubble,
+sleep/pause/disconnect behavior, FPS/resources/latency remain UNVERIFIED. Public API
+and offscreen tests do not prove glass alignment or physical click-through/focus/DPI.
+
+**One next action:** run the [F4-A physical offline demonstration](../project/QA.md#f4-a-physical-offline-demonstration-pending)
+with the two matching app-commit downloads: verify manifests/install continuity,
+explicitly start host and connect, double-tap wake, hold300 ms/release, observe thinking
+→ streamed mock caption/pink speaking → Windows bubble → timed cleanup, then interrupt
+with sleep/pause/disconnect and confirm no late wake. Record device/OS/build/time and
+observed results; no microphone, provider or capture access is authorized.
+
+## Exact changed files
+
+- [.github/workflows/android.yml](../.github/workflows/android.yml)
+- [.github/workflows/windows.yml](../.github/workflows/windows.yml)
+- [android/app/build.gradle.kts](../android/app/build.gradle.kts)
+- [android/app/src/main/java/dev/bluey/port/MainActivity.kt](../android/app/src/main/java/dev/bluey/port/MainActivity.kt)
+- [android/app/src/main/java/dev/bluey/port/animation/FaceAnimator.kt](../android/app/src/main/java/dev/bluey/port/animation/FaceAnimator.kt)
+- [android/app/src/main/java/dev/bluey/port/link/DeviceLink.kt](../android/app/src/main/java/dev/bluey/port/link/DeviceLink.kt)
+- [android/app/src/main/java/dev/bluey/port/link/PresentationCodec.kt](../android/app/src/main/java/dev/bluey/port/link/PresentationCodec.kt)
+- [android/app/src/main/java/dev/bluey/port/link/Wire.kt](../android/app/src/main/java/dev/bluey/port/link/Wire.kt)
+- [android/app/src/main/java/dev/bluey/port/voice/ModeIndicator.kt](../android/app/src/main/java/dev/bluey/port/voice/ModeIndicator.kt)
+- [android/app/src/main/java/dev/bluey/port/voice/ModeIndicatorRenderer.kt](../android/app/src/main/java/dev/bluey/port/voice/ModeIndicatorRenderer.kt)
+- [android/app/src/main/java/dev/bluey/port/voice/VoiceController.kt](../android/app/src/main/java/dev/bluey/port/voice/VoiceController.kt)
+- [android/app/src/main/java/dev/bluey/port/voice/VoiceFace.kt](../android/app/src/main/java/dev/bluey/port/voice/VoiceFace.kt)
+- [android/app/src/main/java/dev/bluey/port/voice/VoicePreview.kt](../android/app/src/main/java/dev/bluey/port/voice/VoicePreview.kt)
+- [android/app/src/test/java/dev/bluey/port/link/ProtocolTest.kt](../android/app/src/test/java/dev/bluey/port/link/ProtocolTest.kt)
+- [android/app/src/test/java/dev/bluey/port/voice/IndicatorRenderTest.kt](../android/app/src/test/java/dev/bluey/port/voice/IndicatorRenderTest.kt)
+- [android/app/src/test/java/dev/bluey/port/voice/VoiceControllerTest.kt](../android/app/src/test/java/dev/bluey/port/voice/VoiceControllerTest.kt)
+- [project/APP-FLOWS.md](../project/APP-FLOWS.md)
+- [project/ARCHITECTURE.md](../project/ARCHITECTURE.md)
+- [project/DESIGN-FIDELITY.md](../project/DESIGN-FIDELITY.md)
+- [project/IMPLEMENTATION.md](../project/IMPLEMENTATION.md)
+- [project/PORTING-MAP.md](../project/PORTING-MAP.md)
+- [project/PRD.md](../project/PRD.md)
+- [project/PROTOCOL-DATA-SCHEMA.md](../project/PROTOCOL-DATA-SCHEMA.md)
+- [project/QA.md](../project/QA.md)
+- [project/SECURITY.md](../project/SECURITY.md)
+- [project/TRD.md](../project/TRD.md)
+- [protocol/README.md](../protocol/README.md)
+- [protocol/f4a-cases.jsonl](../protocol/f4a-cases.jsonl)
+- [tracking/CHECKPOINTS.md](../tracking/CHECKPOINTS.md)
+- [tracking/DECISIONS.md](../tracking/DECISIONS.md)
+- [tracking/HANDOFF.md](../tracking/HANDOFF.md)
+- [tracking/SESSION-LOG.md](../tracking/SESSION-LOG.md)
+- [tracking/STATUS.md](../tracking/STATUS.md)
+- [windows/Bluey.Link.Tests/Bluey.Link.Tests.csproj](../windows/Bluey.Link.Tests/Bluey.Link.Tests.csproj)
+- [windows/Bluey.Link.Tests/PresentationTests.cs](../windows/Bluey.Link.Tests/PresentationTests.cs)
+- [windows/Bluey.Link.Tests/ProtocolTests.cs](../windows/Bluey.Link.Tests/ProtocolTests.cs)
+- [windows/Bluey.Link.Tests/TlsTests.cs](../windows/Bluey.Link.Tests/TlsTests.cs)
+- [windows/Bluey.Link/LinkServer.cs](../windows/Bluey.Link/LinkServer.cs)
+- [windows/Bluey.Link/Presentation.cs](../windows/Bluey.Link/Presentation.cs)
+- [windows/Bluey.Link/Wire.cs](../windows/Bluey.Link/Wire.cs)
+- [windows/Bluey.Windows/ControlsWindow.cs](../windows/Bluey.Windows/ControlsWindow.cs)
+- [windows/Bluey.Windows/NativeSmoke.cs](../windows/Bluey.Windows/NativeSmoke.cs)
+- [windows/Bluey.Windows/OverlayArt.cs](../windows/Bluey.Windows/OverlayArt.cs)
+- [windows/Bluey.Windows/Program.cs](../windows/Bluey.Windows/Program.cs)
+- [windows/Bluey.Windows/VoicePresentation.cs](../windows/Bluey.Windows/VoicePresentation.cs)
+- [windows/README.md](../windows/README.md)

@@ -683,3 +683,40 @@ Original Apple/Shared/previews and target render/animation code unchanged. F1/F2
 measured QA remains separate. No new authentication protocol, F4, network scanning,
 relay/backend, automation, firewall changes or merge. Physical R3 success remains
 pending HANDOFF's one restart/reconnect/revocation sequence and actual endpoint logs.
+
+## 2026-10-20 Asia/Karachi — F4-A implementation
+
+Verified origin/main and PR4 merged at32a38c0; created port/ai-voice-foundation.
+Recorded developer-reported F3 functional acceptance including full Windows restart,
+explicit host start and saved authenticated reconnect. Performance/matrix QA stays
+unverified. Applied all four project skills and cloud setup/runtime guidance;
+existing cloud SDK/Git auth sufficed, no local Android/Windows SDK installation.
+D010 precedes new code. Original Apple/previews unchanged. Deterministic Kotlin
+controller, public-corner native border and authenticated bounded caption events
+implemented. Local .NET core27/27 and link35/35 passed, zero skipped/failed.
+Initial red presentation test failed with command rejection before implementation.
+CI and artifact/physical evidence will be recorded separately when observed.
+
+## 2026-10-20 Asia/Karachi — F4-A validation closeout
+
+App `e0dcda03ca2168ada223bb9f01d7fb231a506202`: Windows CI39335639475 passes27 core+35 link tests, WPF build0
+warnings/errors, self-contained win-x64 publish,16 native checks/13 offscreen frames.
+Android CI39335639487 passes70 tests, lint0 errors17 warnings, apksigner/APK and41
+frames. Original40 F3 fixtures retained;27 new shared presentation fixtures. First
+Android run39334928523 failed NewApi cutout lint; corrected actual guard. Run39335422436
+failed predicate-split compile; corrected explicit Unicode word counter. Superseded
+canceled runs not counted. Final tests retain pairing/pins/revocation/animation suites.
+
+Android downloaded manifest/APK-v2 public signer/JUnit/lint/frame evidence inspected;
+APK c0e06477b5562f74fe0e78af452cbfdc5269e145e3097c1663058bd47648e2f1.
+New debug signer054f151e74b6035f0a73d2c778250e50197c2057bcd6de327147191b0622f3f4
+differs from delivered R3; uninstall/install loses Android key/data, needs explicit
+new enrollment. No signing private key read/exported/committed. Windows CI hash/upload
+observed; local archive/evidence download policy-blocked at productionresultssa16,
+no bypass. Source comparison preserves exact indicator parameters, public-platform
+corner/icon differences documented; no physical parity/performance inferred.
+Canonical STATUS/HANDOFF/CHECKPOINTS list actual evidence and one physical demo next.
+
+F4-A [PR #5](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/5) opened into main and attached to the task.
+Branch remains port/ai-voice-foundation; no merge. Later closeout changes only
+canonical documents; both supplied apps remain the tested e0dcda03 commit.

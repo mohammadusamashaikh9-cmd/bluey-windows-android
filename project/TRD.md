@@ -57,3 +57,10 @@ Windows/Android minimum versions. No target application, target CI or native
 toolchain validation exists at F0. API schema, model capability, account access,
 pricing and current provider retention terms require a live official-doc check
 before F4 and before any billable test.
+
+## F4-A checkpoint
+
+D010 implements offline Kotlin voice simulation plus an authenticated v1 presentation
+extension. No audio/provider/screen implementation is included. Six source modes,
+300ms hold,250ms indicator transition and source pulse math are independently tested.
+Future live F4 slices still require separate current consent and API review.

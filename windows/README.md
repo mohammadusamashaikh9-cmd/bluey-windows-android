@@ -1,9 +1,9 @@
 # Bluey native Windows offline demo
 
 Unofficial source-based port of Riley's Bluey. Windows 11 x64; C#/.NET 10 and WPF.
-The original Apple and Android sources are retained unchanged. This application
-is entirely offline: no networking, microphone, cloud API, capture, OCR or input
-automation. The visual burst does not click anything.
+Original Apple sources are retained unchanged. F3 adds an explicitly started
+authenticated local TLS host; F4-A adds offline voice presentation. No microphone,
+cloud API, capture, OCR or input automation is implemented. The visual burst does not click anything.
 
 ## Run the development artifact (no developer SDK)
 
@@ -312,3 +312,17 @@ One physical restart/reconnect test:
 Developer reports R2 real mTLS, gaze/mood, touch precedence, Wi-Fi reconnect and
 revocation rejection passed. This R3 restart correction, DNS-SD/network behavior
 and latency still require the above real-device retest. CI is separate evidence.
+
+## F4-A offline voice presentation
+
+Existing controls → Offline voice caption preview streams fixed text through the
+existing bubble renderer, then clears after the source reading interval. It needs
+no host, API key or permission. Microphone/cloud/screen consents are separately
+planned and OFF; no live capture is possible. For the cross-device demo, explicitly
+start the secure host and connect the updated Android app using saved F3 trust.
+On Android use Offline simulation instructions, double tap wake, hold300ms, release.
+Matching F4-A APK and Windows commits are required. Mock captions appear on Windows; sleep/pause/disconnect clears the remote bubble.
+The old Show speech / Clear speech controls remain available for F2 comparison.
+CI evidence includes a Windows voice-preview frame and Android border/face composites,
+with regression tests for restoring the original remote face after local interaction.
+Use the [physical QA sequence](../project/QA.md#f4-a-physical-offline-demonstration-pending).

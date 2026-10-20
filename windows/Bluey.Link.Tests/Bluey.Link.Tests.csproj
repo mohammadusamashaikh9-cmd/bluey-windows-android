@@ -5,6 +5,7 @@
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4"><PrivateAssets>all</PrivateAssets></PackageReference>
     <ProjectReference Include="../Bluey.Link/Bluey.Link.csproj" />
+    <None Include="../../protocol/f4a-cases.jsonl" Link="f4a-cases.jsonl" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../protocol/v1-cases.jsonl" Link="v1-cases.jsonl" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

@@ -14,7 +14,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -40,6 +39,12 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import dev.bluey.port.animation.*
 import dev.bluey.port.render.FaceRenderer
+import dev.bluey.port.voice.*
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.platform.LocalView
+import android.view.RoundedCorner
 
 class MainActivity : ComponentActivity() {
     private var pairingUri by mutableStateOf<String?>(null)
@@ -83,6 +88,7 @@ private fun FaceDemo(incoming: String?) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val link = remember(context) { DeviceLink(context) }
     val remote by link.face.collectAsState()
+    val connection by link.ui.collectAsState()
     val remoteInput by rememberUpdatedState(remote)
     var connectionPanel by remember { mutableStateOf(false) }
     LaunchedEffect(incoming) { if (incoming != null) connectionPanel = true }
@@ -101,6 +107,15 @@ private fun FaceDemo(incoming: String?) {
         FaceRenderer(Typeface.createFromAsset(context.assets, "Fredoka.ttf"))
     }
     val frame = remember { mutableStateOf(animator.step()) }
+    val voice=remember{VoiceController()};var voiceState by remember{mutableStateOf(voice.snapshot)}
+    val indicator=remember{IndicatorAnimation()}
+    var indicatorFrame by remember{mutableStateOf(indicator.frame(0))}
+    val borderRenderer=remember(context){ModeIndicatorRenderer(Typeface.createFromAsset(context.assets,"Fredoka.ttf"))}
+    val rootView=LocalView.current
+    var voicePanel by remember{mutableStateOf(false)}
+    var cornerFallback by rememberSaveable{mutableFloatStateOf(55f)}
+    fun flushVoice(){voiceState=voice.snapshot;voice.drain().forEach(link::present)}
+    LaunchedEffect(connection.connected){voice.connectionChanged(SystemClock.elapsedRealtime());flushVoice()}
     var panel by rememberSaveable { mutableStateOf(false) }
     var selectedMood by rememberSaveable { mutableStateOf(Mood.listening.name) }
     var gazeX by rememberSaveable { mutableFloatStateOf(0f) }
@@ -116,14 +131,17 @@ private fun FaceDemo(incoming: String?) {
             timeline.pause()
             val delivery = FaceDelivery()
             while (true) withFrameNanos { nanos ->
+                val elapsed=SystemClock.elapsedRealtime()
+                voice.tick(elapsed);flushVoice();indicator.mode(voiceState.mode,elapsed);indicatorFrame=indicator.frame(elapsed)
                 val input = inputs
                 if (!input.motion) timeline.pause()
                 val now = timeline.tick(nanos)
                 val packet = remoteInput
                 val fresh = delivery.apply(animator, packet, SystemClock.elapsedRealtime(), now)
-                animator.localMood = if (fresh) null else input.mood
-                animator.awake = input.awake
-                animator.localTalk = { if (fresh) 0.0 else input.talk.toDouble() }
+                animator.overrideFace=VoiceFace.select(animator.touchGaze,voiceState.mode,packet,fresh,now)
+                animator.localMood = if (animator.overrideFace!=null||fresh) null else input.mood
+                animator.awake = voiceState.mode!=VoiceMode.asleep||input.awake
+                animator.localTalk = { if (fresh||animator.overrideFace!=null) 0.0 else input.talk.toDouble() }
                 if (!fresh && !input.wander) animator.receive(
                     FaceState(input.x.toDouble(), input.y.toDouble(), input.mood, input.talk.toDouble()), now)
                 frame.value = animator.step(now)
@@ -137,19 +155,42 @@ private fun FaceDemo(incoming: String?) {
                 fun gaze(x: Float, y: Float) = Gaze(
                     (x / size.width * 2 - 1).toDouble().coerceIn(-1.0, 1.0),
                     (y / size.height * 2 - 1).toDouble().coerceIn(-1.0, 1.0))
-                detectDragGestures(
-                    onDragStart = { animator.touchGaze = gaze(it.x, it.y) },
-                    onDragEnd = { animator.touchGaze = null },
-                    onDragCancel = { animator.touchGaze = null },
-                    onDrag = { change, _ ->
-                        change.consume()
-                        animator.touchGaze = gaze(change.position.x, change.position.y)
-                    },
-                )
+                awaitEachGesture {
+                    val press=awaitFirstDown(requireUnconsumed=false)
+                    animator.touchGaze=gaze(press.position.x,press.position.y)
+                    voice.down(SystemClock.elapsedRealtime(),press.position.x.toDouble()/density,press.position.y.toDouble()/density);flushVoice()
+                    try {
+                        var pressed=true
+                        while(pressed) {
+                            val event=awaitPointerEvent(PointerEventPass.Main)
+                            val change=event.changes.firstOrNull{it.id==press.id}
+                            if(change==null||event.changes.count{it.pressed}>1){voice.cancelGesture(SystemClock.elapsedRealtime());break}
+                            pressed=change.pressed
+                            if(pressed){animator.touchGaze=gaze(change.position.x,change.position.y);voice.move(SystemClock.elapsedRealtime(),change.position.x.toDouble()/density,change.position.y.toDouble()/density)}
+                            else voice.up(SystemClock.elapsedRealtime())
+                            change.consume();flushVoice()
+                        }
+                    } finally {animator.touchGaze=null;voice.cancelGesture(SystemClock.elapsedRealtime());flushVoice()}
+                }
             }) {
             drawIntoCanvas { renderer.draw(it.nativeCanvas, size.width, size.height, frame.value) }
         }
-        TextButton(onClick = { connectionPanel = true }, modifier = Modifier.align(Alignment.TopStart).safeDrawingPadding()) {
+        Canvas(Modifier.matchParentSize()) {
+            val densityPx=density
+            val insets=rootView.rootWindowInsets
+            val positions=if(Build.VERSION.SDK_INT>=31)listOf(RoundedCorner.POSITION_TOP_LEFT,RoundedCorner.POSITION_TOP_RIGHT,RoundedCorner.POSITION_BOTTOM_RIGHT,RoundedCorner.POSITION_BOTTOM_LEFT)else emptyList()
+            val radii=if(Build.VERSION.SDK_INT>=31)positions.map{insets?.getRoundedCorner(it)?.radius?.toFloat()?:cornerFallback*densityPx}else List(4){cornerFallback*densityPx}
+            // Keep every DisplayCutout access inside the API28 guard (minSdk26).
+            var safeLeft=0f;var safeTop=0f;var cutouts=emptyList<android.graphics.Rect>()
+            if(Build.VERSION.SDK_INT>=28) {
+                insets?.displayCutout?.let{safeLeft=it.safeInsetLeft.toFloat();safeTop=it.safeInsetTop.toFloat();cutouts=it.boundingRects}
+            }
+            val shape=ScreenShape(size.width,size.height,radii,safeLeft,safeTop)
+            drawIntoCanvas{borderRenderer.draw(it.nativeCanvas,shape,indicatorFrame,densityPx,cutouts)}
+        }
+        TextButton(onClick = { voicePanel=true },modifier=Modifier.align(Alignment.BottomEnd).safeDrawingPadding()) {Text("Offline simulation · ${voiceState.mode}")}
+        if(voicePanel)VoicePreview(voiceState,cornerFallback,{cornerFallback=it},{voice.toggle(SystemClock.elapsedRealtime());flushVoice()},{voice.sleep(SystemClock.elapsedRealtime());flushVoice()}){voicePanel=false}
+        TextButton(onClick = { voice.sleep(SystemClock.elapsedRealtime());flushVoice();connectionPanel = true }, modifier = Modifier.align(Alignment.BottomStart).safeDrawingPadding()) {
             Text("Connection", color = Color(0xFFB9B2CC))
         }
         if (connectionPanel) ConnectionPanel(link, incoming) { connectionPanel = false }
@@ -187,10 +228,10 @@ private fun FaceDemo(incoming: String?) {
     }
     DisposableEffect(lifecycle, animator) {
         val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_PAUSE) animator.touchGaze = null
+            if (event == Lifecycle.Event.ON_PAUSE) {animator.touchGaze = null;voice.pause(SystemClock.elapsedRealtime());flushVoice()}
         }
         lifecycle.addObserver(observer)
-        onDispose { lifecycle.removeObserver(observer); animator.touchGaze = null }
+        onDispose { lifecycle.removeObserver(observer); animator.touchGaze = null;voice.pause(SystemClock.elapsedRealtime());flushVoice() }
     }
 }
 

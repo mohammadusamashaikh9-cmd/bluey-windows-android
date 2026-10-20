@@ -61,6 +61,7 @@ public static class Wire
                 case "approve": Keys(p, "requestId", "clientPin"); Id(p, "requestId"); if (!Pin(Text(p, "clientPin"))) throw new ProtocolException("pin"); break;
                 case "confirm": Keys(p, "requestId"); Id(p, "requestId"); break;
                 case "ready": Keys(p, "hostId", "deviceId"); Id(p, "hostId"); Id(p, "deviceId"); break;
+                case "presentation": PresentationCodec.Validate(p); break;
                 case "face": Keys(p, "gazeX", "gazeY", "mood", "talk", "atMs"); Face(m); break;
                 case "ping": case "pong": Keys(p); break;
                 case "error": Keys(p, "code"); if (!new[] { "denied", "expired", "revoked", "protocol", "busy" }.Contains(Text(p, "code"))) throw new ProtocolException("error"); break;

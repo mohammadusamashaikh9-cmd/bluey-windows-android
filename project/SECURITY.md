@@ -96,9 +96,10 @@ device. OS compromise, malicious QR scanner/clipboard tools and physical access 
 an unlocked approving device are outside this bootstrap's protection. Use a trusted
 system scanner/private transfer and compare the full displayed host fingerprint.
 The custom URI scheme can be registered by other apps; manual paste into Bluey is
-the fallback. Local endpoint/connection metadata remains visible to the LAN. No
-F4+ or privileged commands are accepted. Physical Keystore, SChannel, NSD, firewall,
-Wi-Fi loss and latency acceptance are pending actual device tests.
+the fallback. Local endpoint/connection metadata remains visible to the LAN. No privileged commands are accepted. F4-A only adds the bounded presentation
+allowlist below. F3 functional Keystore/SChannel pairing, Wi-Fi recovery and saved
+restart reconnect are now developer-reported accepted; measured latency and
+advanced device compatibility remain unverified.
 
 Android remains targetSdk 36. Official [local network permission guidance](https://developer.android.com/privacy-and-security/local-network-permission)
 requires ACCESS_LOCAL_NETWORK for target 37+ on Android 17; it is not requested by
@@ -108,3 +109,26 @@ is enabled. Normal NSD/LAN use requires INTERNET; no location/camera/microphone
 permission is requested. [NSD](https://developer.android.com/develop/connectivity/wifi/use-nsd)
 and [Keystore](https://developer.android.com/privacy-and-security/keystore)
 use platform APIs. Revisit permission behavior when raising targetSdk.
+
+## F4-A offline consent boundary
+
+Microphone capture, cloud processing and Windows screen capture are three separate
+planned permissions, all OFF and ungrantable in F4-A. Android manifest remains LAN-only;
+no audio/capture library, recorder, provider client, token handler or API-key UI exists.
+The preview discloses that a future authorized live awake session may stream audio
+continuously even without a hold. A simulated wake never authorizes such collection.
+
+Future F4-B client-secret issuance must require an active authenticated F3 session,
+current explicit microphone/cloud authorization, bounded rate/expiry and revocation;
+Windows screen capture requires separate current authorization. Long-lived credentials
+belong in Windows protected storage, never Android settings or the protocol. Storage/UI
+is deferred until needed; no key required here. No minting endpoint is implemented.
+
+Current GA boundary reference: OpenAI Realtime client secrets,
+`POST /v1/realtime/client_secrets`, configurable `expires_after` and `session`.
+Official [generated SDK source](https://github.com/openai/openai-python/blob/main/src/openai/resources/realtime/client_secrets.py)
+was inspected2026-10-20 Asia/Karachi. Its docs state expiry controls new session creation,
+and an established session can outlive that expiry: future stop/revoke must close the
+session too. Direct developers.openai.com/platform.openai.com guide fetches failed in
+this cloud; no beta request shape or live API call was used. Recheck current GA docs
+before F4-B implementation. No secret is minted or stored by F4-A.
