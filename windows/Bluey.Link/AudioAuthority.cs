@@ -44,8 +44,9 @@ public sealed partial class LiveAuthority
             if(!sessions.TryGetValue(lease,out var active)||active!=s||s.Authorization!=auth||s.AudioId!=turn){CryptographicOperations.ZeroMemory(data);issue.Dispose();return;}
             if(!s.Cloud||!s.Microphone||s.Continuous||Provider!=VoiceProvider.GeminiFree||mono()>=s.Deadline||issue.IsCancellationRequested){s.Issue=null;Cancel(s,"expired");CryptographicOperations.ZeroMemory(data);issue.Dispose();return;}
         }
-        string? result=null;
-        try {result=await answers.Answer(data,issue.Token).WaitAsync(issue.Token);}catch(Exception){/* No provider errors, transcripts or audio in diagnostics. */}
+        string? result=null;AudioAnswerFailure? failure=null;
+        try {result=await answers.Answer(data,issue.Token).WaitAsync(issue.Token);}catch(AudioAnswerException e){failure=e.Reason;}
+        catch(Exception){/* No provider errors, transcripts or audio in diagnostics. */}
         finally {CryptographicOperations.ZeroMemory(data);}
         lock(gate) {
             if(!sessions.TryGetValue(lease,out var current)||current!=s||s.Authorization!=auth||s.AudioId!=turn){issue.Dispose();return;}
@@ -54,7 +55,7 @@ public sealed partial class LiveAuthority
             // Nonstreamed completed answer. No model text ever becomes a command.
             var text=result==null||result.Length>4096?"":string.Join(" ",result.Split((char[]?)null,StringSplitOptions.RemoveEmptyEntries));
             text=new string(text.Where(c=>!char.IsControl(c)&&!char.IsSurrogate(c)).Take(256).ToArray());
-            if(text.Length==0)Cancel(s,"issuer");
+            if(text.Length==0)Cancel(s,failure switch {AudioAnswerFailure.Quota=>"limit",AudioAnswerFailure.Blocked or AudioAnswerFailure.Credential=>"denied",AudioAnswerFailure.Timeout=>"expired",_=>"issuer"});
             else if(!s.Out.Writer.TryWrite(new("audioReply",new{authorizationId=auth,turnId=turn,text}))||!s.Out.Writer.TryWrite(new("audioDone",new{authorizationId=auth,turnId=turn})))Cancel(s,"limit");
             // Keep authority only to deliver/clear this completed reply; AudioUsed refuses a second request.
         }

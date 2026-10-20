@@ -1,4 +1,46 @@
-# Current amendment state — Gemini provider prerequisite blocked
+# Current F4-B completion — Gemini HTTP adapter
+
+2026-10-21 Asia/Karachi — continuing existing port/live-ai-voice / PR #6 from
+56bcbb573a50362e2abf88c8325978e171486836. No new PR or merge.
+
+D012 now distinguishes developer-reported independent public model/audio/WAV/Free
+Tier contract verification from still-unverified user account eligibility and real
+provider/device behavior. All six official Google pages remain proxy403 locally;
+agent inspected official REST cookbook and python-genai sources for HTTP shape.
+No real Gemini/OpenAI request, credential, microphone hardware or billing was used.
+
+Implemented GeminiAnswers through existing IAudioAnswers/CurrentUser DPAPI Gemini
+store: fixed gemini-3.8-flash HTTPS v1beta generateContent, x-goog-api-key header,
+short inline audio/wav from exact RIFF/WAVE PCM16 mono24k conversion, text-only
+single candidate/128 output tokens,20s timeout,330000-byte request/16384-byte response
+bounds. No redirects, retries, tools, grounding, speech or provider/model fallback.
+Strict response JSON/UTF-8/duplicates, safety, empty/tool/media output and status
+handling; sanitized bounded text only. Owned binary buffers cleared, no raw bodies/
+audio/transcripts/credentials logged or persisted. Existing stop codes map quota to
+limit (Android offers offline), safety/credentials to denied, timeout to expired,
+other failures to issuer. Existing F3/53 fixtures and animation code unchanged.
+
+Production defaults OfflineSimulation with no grants. Startup/key save/provider
+selection performs no cloud request. Current trusted phone/microphone/cloud consent,
+readable protected key and explicit per-phone Windows cloud/Free Tier confirmation
+are required. Project eligibility uncertainty must prevent authorization. UI Stop
+remains responsive during key checks; grant state is rechecked afterward. Public
+ContractVerified does not certify billing status; Google free-tier content terms
+require informed consent. Offline mode needs no key or microphone permission.
+
+Local observed .NET10.0.402 Link108 tests pass (61 retained+47 new fake-HTTP cases).
+Initial xUnit2009 analyzer rejected a substring Assert.True; changed to Assert.Contains,
+then tests passed. No assertion/suite disabled. Revised Windows/Android CI and matching
+artifacts pending. Physical/live API acceptance is unverified. Original Apple/Shared,
+FaceAnimator, VoiceController, ModeIndicator, Windows Core/overlay remain untouched.
+
+One next action after matching build validation: perform the documented offline
+physical retest with keys empty/provider OfflineSimulation and microphone denied.
+No billable or free cloud test is authorized by this development task.
+
+---
+
+# Historical amendment evidence — provider prerequisite before completion
 
 2026-10-20 UTC — existing `port/live-ai-voice`, PR #6 remains open/unmerged.
 The user-authorized Gemini amendment supersedes the previous active OpenAI UI.

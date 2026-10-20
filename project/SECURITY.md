@@ -195,21 +195,27 @@ directory. Gemini adds a separate DPAPI purpose entropy; OpenAI's accepted file
 format stays compatible. Set/Replace/Remove/status never returns a saved key to UI
 or phone. No permanent Gemini key or credential belongs in any LAN message.
 
-Provider contract/model/free-tier eligibility is currently UNVERIFIED because the
-four official ai.google.dev docs requests were denied by cloud network policy.
-There is **no Gemini HTTP adapter** in this revision; Gemini authorization fails
-closed through UnavailableAudioAnswers even if a key and checkboxes are configured.
-No zero-cost guarantee, model availability or provider behavior is inferred from
-fake tests. Narrow provider-neutral audio transfer/key/UI work is complete; the
-requested live amendment remains blocked on this prerequisite.
+The developer independently verified the public stable model/audio/WAV/free-tier
+contract against official Google references on2026-10-21 Asia/Karachi. Agent access
+to those pages remains proxy403; official Google cookbook/SDK HTTP serialization
+was independently inspected. D012 distinguishes these evidence sources. Neither
+published Free Tier support nor ContractVerified certifies an arbitrary project/key.
+Production now wires GeminiAnswers to the separate Gemini DPAPI store: fixed HTTPS
+model allowlist, x-goog-api-key header (never URL/LAN), WAV inline audio, text-only
+one-candidate/128-token config,20s timeout,330000-byte request/16384-byte response
+bounds, no redirects/cookies/retries/fallback. Owned audio/key/body buffers are zeroed.
+Duplicate/malformed JSON, invalid UTF-8, tools/audio parts, safety blocks and empty
+answers are rejected; raw provider errors are never surfaced/logged. Quota429 maps
+to existing limit stop and offers offline mode. Public contract is implemented;
+real provider, billing eligibility and physical behavior remain untested.
 
-A future verified adapter still requires the current nonrevoked TLS lease, current
+The adapter still requires the current nonrevoked TLS lease, current
 phone microphone/cloud consent, Windows Gemini selection and separate explicit
 Google Free Tier/non-billing-project confirmation before one completed hold-only
 question. Permission alone cannot authorize cloud processing. Continuous Gemini
-context is disabled. Initial hard transport bounds5s/240000 bytes; planned provider
+context is disabled. Initial hard transport bounds5s/240000 bytes; provider
 bounds128 output tokens/20s, no tools/grounding/audio generation/retries. Quota429
-must stop and offer offline; free eligibility uncertainty must prevent sending.
+stops and offer offline; free eligibility uncertainty must prevent sending.
 Google free-tier inputs may improve products under applicable terms; users must
 avoid sensitive conversations. Local code cannot attest an arbitrary project's
 billing status or revoke already submitted audio. No live test is authorized here.

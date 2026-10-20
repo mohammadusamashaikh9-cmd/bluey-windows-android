@@ -348,3 +348,50 @@ external documentation blocker, not evidence that the candidate model is absent.
 The previous OpenAI adapter remains source-preserved but production-disabled for
 this amendment; no paid fallback is permitted. A new SDK/plugin or hosted relay
 would add complexity without resolving this prerequisite and is rejected.
+
+### D012 completion / 2026-10-21 Asia/Karachi — verified public contract, gated account eligibility
+
+The developer supplied independent verification against the six official Google
+references: stable gemini-3.8-flash, audio input/text output, short inline WAV
+(audio/wav), standard generateContent and published Free Tier subject to eligibility/
+quotas. This resolves the previous implementation prerequisite; it does **not**
+verify any user's key/project, quota, terms acceptance or physical behavior.
+The agent retried those pages; the environment still denies them with proxy403.
+Agent-accessible official sources independently confirm the HTTP shape:
+Google cookbook Audio_REST.ipynb at550674681574d7aa24304b8fa9b31234e241ed7e
+(inline_data/generateContent), python-genai at4c1abccf258c9247218e66610790043893cd6950
+(x-goog-api-key, default Developer API v1beta route, camelCase serialization).
+Only documentation/source GETs were made; no model request or real key was used.
+
+Complete the existing IAudioAnswers boundary with a Windows-host Gemini HTTP
+adapter, not an SDK/framework. Fixed allowlist contains only gemini-3.8-flash;
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent.
+The v1beta REST route follows the official SDK/default cookbook; the selected
+model is stable. No Gemini Live, upload service, API-key query parameter, redirects,
+tools, grounding, speech generation or fallback. Completed PCM is wrapped in a44-byte
+RIFF/WAVE header: PCM1, mono,24kHz,16bit, byte rate48000/block alignment2. Inline
+JSON uses audio/wav, concise answer instructions, one text candidate and128 output
+tokens. Bound request330000 bytes and response16384 bytes,20-second cancellation/
+timeout through headers/body, no retries. Reject malformed/duplicate JSON, unexpected
+parts, safety blocks, empty answers and errors. Return only sanitized bounded text.
+Provider failure categories map to existing liveStop codes; quota uses limit with
+an explicit Android offline/no-fallback message, avoiding new protocol commands.
+
+Production starts OfflineSimulation with no authorization. Public ContractVerified
+means an implemented public contract only. Key saving/provider selection/host start
+makes no request. Gemini still requires a readable CurrentUser DPAPI key, current
+trusted TLS lease and Android consent plus explicit Windows cloud/Free Tier review
+for that exact phone. No arbitrary account is certified free by this application.
+One hold-only question per approval,5s input, existing frame/queue/session limits,
+revocation and stale-result checks remain. Existing OpenAI production disablement
+and original animation code stay intact. Automated HTTP/cancellation tests use
+synthetic audio and fake handlers only; real cloud/device acceptance remains pending.
+
+Public verification references supplied by the developer:
+[model](https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash),
+[generateContent audio](https://ai.google.dev/gemini-api/docs/generate-content/audio),
+[audio guide](https://ai.google.dev/gemini-api/docs/audio),
+[pricing](https://ai.google.dev/gemini-api/docs/pricing),
+[billing](https://ai.google.dev/gemini-api/docs/billing),
+[rate limits](https://ai.google.dev/gemini-api/docs/rate-limits).
+All six fetches were denied locally; public facts are developer-reported verification.

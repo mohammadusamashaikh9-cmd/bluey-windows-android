@@ -27,7 +27,7 @@ import androidx.core.content.ContextCompat
         Text("Gemini supports HOLD-ONLY in this port: mic starts after a 300 ms hold, at most5 seconds. Release submits one completed question. Continuous-awake context is unavailable; clips are never submitted automatically. Background stops recording.")
         var chirps by remember{mutableStateOf(live.chirps)}
         Row{Text("Local cartoon chirps (no cloud speech)",Modifier.weight(1f));Switch(chirps,onCheckedChange={chirps=it;live.chirps=it})}
-        Text("Windows chooses the provider and keeps its key. Gemini authorization is BLOCKED pending official model/audio/free-tier contract verification. Saving a key never tests the service. No credential is sent to Android. Start/Stop requires fresh consent; reconnection never submits a question.")
+        Text("First select GeminiFree on Windows, then Start here. Windows keeps its key. Windows must confirm this project is Free Tier without billing enabled, select your current phone and authorize one question. Public model support does not prove account eligibility. Saving a key never tests the service. No credential is sent to Android. Start/Stop requires fresh consent; reconnection never submits a question.")
         TextButton(enabled=enabled&&cloud&&permission,onClick={live.arm(cloud,false)}){Text("Start / request Windows authorization")}
         TextButton(onClick={live.stop("Stopped by user")}){Text("STOP / cancel live session")}
         Text(state.status)

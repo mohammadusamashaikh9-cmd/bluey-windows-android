@@ -43,6 +43,13 @@ class AudioCoordinatorTest {
         lan.message("liveGrant",Wire.payload("authorizationId" to UUID.randomUUID().toString(),"consentId" to consent));idle()
         assertFalse(live.ui.value.armed);assertEquals(0,factories);live.close()
     }
+    @Test fun quotaStopOffersOfflineWithoutRetryOrCapture() {
+        val context=RuntimeEnvironment.getApplication();Shadows.shadowOf(context).grantPermissions(Manifest.permission.RECORD_AUDIO)
+        val lan=Lan();var factories=0;val live=LiveCoordinator(context,lan,VoiceController(),{factories++;Capture()},{_,_,_->factories++;error("disabled")})
+        live.arm(true,false);idle();lan.message("liveStop",Wire.payload("code" to "limit"));idle()
+        assertFalse(live.ui.value.armed);assertTrue(live.ui.value.status.contains("quota exhausted"));assertTrue(live.ui.value.status.contains("Offline simulation"));assertEquals(0,factories)
+        val count=lan.sent.size;live.resume();advance(2000);assertEquals(count,lan.sent.size);live.close()
+    }
     private fun scenario(end:String) {
         val context=RuntimeEnvironment.getApplication();Shadows.shadowOf(context).grantPermissions(Manifest.permission.RECORD_AUDIO)
         val lan=Lan();val voice=VoiceController();val capture=Capture();var native=0;var sockets=0

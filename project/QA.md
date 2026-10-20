@@ -329,11 +329,16 @@ billable session; do not run it as part of this task:
 
 ## F4-B Gemini amendment — offline and future free-tier QA
 
-Current amendment is a **provider-blocked foundation**, not a live Gemini pass.
-No API key or microphone hardware is needed for automated tests. Synthetic PCM,
-fake audio-answer adapters, existing fake OpenAI HTTP/socket and actual .NET mTLS
-loopback are distinct evidence; no Gemini HTTP request/schema test has run because
-that adapter is not implemented pending official documentation access.
+The public Gemini HTTP contract is implemented; real API/physical acceptance is
+pending. Public model/audio/free-tier facts were independently verified by the
+developer; agent web access remains proxy403, accessible official Google source
+verifies HTTP serialization. This does not verify a user's billing project. No API
+key or microphone hardware is needed for tests. Synthetic PCM, fake Gemini HTTP/
+audio-answer adapters, existing fake OpenAI HTTP/socket and actual .NET mTLS loopback
+are distinct evidence. Tests cover WAV bytes/headers, exact model/header/request,
+text-only bounds, malformed UTF-8/JSON/duplicates, safety/empty/tool replies, quota,
+provider/network failures, missing key/wrong model, deterministic20s headers/body
+timeouts, cancellation, authorization/revocation and no retries/fallback.
 
 Offline physical sequence (no cloud authorization):
 
@@ -347,15 +352,15 @@ Offline physical sequence (no cloud authorization):
    release; verify blue asking→purple thinking→pink reply/local chirp→blue listening,
    Windows mock caption and cleanup. Sleep/background must cancel delayed captions.
 4. In Windows provider settings select GeminiFree, without entering a key. Verify
-   contract-blocked notice; attempted authorization remains denied. OpenAI selection
+   fixed model and Free Tier review copy; without a key/current consents, attempted
+   authorization remains denied and does not test connectivity. OpenAI selection
    returns to OfflineSimulation. No microphone capture/cloud request is expected.
 
-**Future live test — requires a separate explicit user authorization; do not run
-with this build:** first verify the exact candidate's current audio method, supported
-MIME, text response schema and Free Tier eligibility using the four official Google
-pages. Complete/review the bounded Windows adapter and fake HTTP quota/safety/timeout
-suite, then produce matching builds. If the candidate is unavailable/ineligible,
-stop and document; do not silently replace it. User checks AI Studio Free Tier and
+**Future live test — requires a separate explicit user authorization; no live test
+is authorized in this development task:** recheck the current model/terms and user
+project eligibility in official Google documentation/AI Studio. If the fixed model
+is unavailable/ineligible, stop; do not replace it or enable billing. User checks
+AI Studio Free Tier and
 that billing is not enabled, accepts Google content-use terms and separately grants
 cloud-audio consent. Configure only a Windows protected Gemini key, choose Gemini,
 start Android hold-only with while-in-use microphone permission, then authorize one

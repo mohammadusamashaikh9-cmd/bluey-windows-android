@@ -184,13 +184,13 @@ request IDs are independent. F4-A presentation remains the sole caption path. Ol
 apps reject unknown live commands; update both apps before live use. Manual refresh
 requires a fresh Start/current Windows approval; no automatic live reconnect loop.
 
-## F4-B Gemini audio-turn extension (D012; provider blocked)
+## F4-B Gemini audio-turn extension (D012)
 
 This is an additive v1 allowlist on the existing ready, pinned mTLS session.
 4096-byte newline frame limit, duplicate-key/UTF-8 validation, session/envelope
 sequence and120 messages/second limit remain unchanged. No Gemini credential is
-sent to Android. Production cannot grant audio until the official provider contract
-is verified; the tests inject synthetic audio-answer adapters only.
+sent to Android. Production grants audio only after current Windows/phone authorization and Free
+Tier confirmation. Automated tests use synthetic adapters and fake HTTP only.
 
 | Type / direction | Exact payload |
 | --- | --- |
@@ -202,9 +202,10 @@ is verified; the tests inject synthetic audio-answer adapters only.
 | audioReply / Windows→Android | authorizationId UUID, turnId UUID, text1..256 noncontrol BMP characters |
 | audioDone / Windows→Android | authorizationId UUID, turnId UUID |
 
-The internal PCM format is a transport contract, **not a verified Gemini MIME
-claim**. A future verified Windows adapter must package it into a supported audio
-container/MIME. At most240000 bytes/5 seconds mono24k PCM16 per turn. Chunks must
+The internal PCM format is the LAN transport contract. Windows wraps completed
+PCM in a44-byte RIFF/WAV PCM1 mono24kHz16bit container, MIME audio/wav, and submits
+only that authorized turn using the fixed generateContent model. No Gemini key or
+credential enters a LAN message. At most240000 bytes/5 seconds mono24k PCM16 per turn. Chunks must
 arrive exactly in order for the current turn and authorization; duplicates, reorder,
 wrong IDs, incomplete lengths, missing begin/end and unexpected direction fail.
 Capture/transfer begins only after the hold threshold and ends on release, with

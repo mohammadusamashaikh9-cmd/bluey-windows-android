@@ -44,3 +44,15 @@ No Google/OpenAI call/key/hardware capture; synthetic adapters only. Documentati
 contract prerequisite and Gemini HTTP implementation remain unresolved; gate partial.
 PR #6 updated in place, no new PR/merge. One next action: publish the saved Google
 and observed artifact-domain draft, then resume exact contract verification.
+
+## F4-B HTTP completion / 2026-10-21 Asia/Karachi
+
+Developer supplied independent public gemini-3.8-flash/audio/WAV/Free Tier contract
+verification, resolving implementation prerequisite while user-project eligibility
+remains unverified. Six official pages still local403; agent read official Google
+REST/SDK sources. Implemented bounded fixed-model GeminiAnswers on existing authority/
+DPAPI, enabled only behind current phone/Windows authorization and Free Tier review.
+No new trust/protocol architecture, dependencies or animation rewrite. Fake HTTP
+coverage47 cases plus retained61 Link tests pass locally (108 total); initial xUnit
+substring analyzer issue corrected. CI/artifacts pending, physical/live untested.
+No real provider request/key, hardware microphone or billing configuration used.
