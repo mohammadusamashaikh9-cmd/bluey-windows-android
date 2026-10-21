@@ -22,8 +22,8 @@ authority/TLS, Android coordinator/controller and native WPF caption checks.
 Offline preview now read-only OFF status plus an action opening existing opt-in
 settings; opening it grants nothing. Actual permissions/Stop remain in LivePanel.
 
-Local .NET10.0.402: Core27/Link124 pass,0 failed/skipped. CI build/lint/native smoke,
-matching artifacts and physical retest remain pending for this revised application.
+Local .NET10.0.402: Core27/Link124 pass,0 failed/skipped. Matching Windows/Android
+CI and development uploads pass below; physical retest remains unverified.
 Official new/thinking/error docs still policy403; supplied compatibility contract
 and accessible official Google SDK source are separately attributed in D012.
 No real Gemini/OpenAI call,credential,private audio or cloud test used by Codex.
@@ -32,6 +32,97 @@ Original Apple/Shared, animation engines/controllers and protected storage uncha
 One next action after matching CI artifacts: developer performs the single physical
 acceptance sequence in project/QA.md; any one-question cloud request requires the
 developer's separate current Free Tier review and explicit authorization.
+
+## Response-repair delivery evidence
+
+Both downloads are built/tested at **36287bcdcb95496c3da8f61973a51fc1e337913f**. Subsequent closeout edits
+change canonical documentation only. Existing [PR #6](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/6)
+remains open and unmerged. Original/animation/key-store paths are unchanged.
+
+| Target | Actual CI results | Matching artifacts |
+| --- | --- | --- |
+| [Windows 39674027367](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39674027367) | Windows2025/.NET10.0.402: Core27+Link124,0 failed/skipped; WPF0 warnings/errors;29 native checks/13 renders; self-contained unsigned win-x64 | [App + full SHA256SUMS.txt](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39674027367/artifacts/12381980060), [TRX/native evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39674027367/artifacts/12380199443) |
+| [Android 39674027307](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39674027307) | JDK17/Gradle8.13/SDK36:111 tests,0 failures/errors/skips; native bitmap tests; lint0 errors18 warnings; APK signature verified | [APK + SHA256SUMS.txt + public signer](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39674027307/artifacts/12380439015), [JUnit/lint/render evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39674027307/artifacts/12380314227) |
+
+Local .NET Core27/Link124 also pass. Final PR Windows39674033798 passes; earlier
+PR39673123298 failed one retained cancellation test because its20ms sleep raced
+async cleanup. The test now waits for provider entry and a terminal cleanup outcome,
+then asserts every byte wiped/no stale reply, bounded5s. No assertion or production
+cancellation behavior removed. Initial failing regression cases and intermediate
+CI are retained in SESSION-LOG. Android compiler also reports three warnings in
+unchanged test files: nullable alias string and two deprecated NSD host accesses.
+
+| Item | Observed SHA-256 |
+| --- | --- |
+| Windows EXE (CI) | `f5c1f178640efbeb6cc9d2e2355ed93e9ea3a80dfa153a5f92f6941ff6a58e5f` |
+| Windows DLL (CI) | `08e1207f1c4c9183805b10b11b1636bd17ee82eee854fab36d4f9c4fffd2a12c` |
+| Full Windows SHA256SUMS.txt (CI) | `f23ac6fc0f3fc8159445d2322b0020d98471c38829e46e3c4eaccc0946018f0c` |
+| Windows app ZIP (upload metadata) | `0cd20ec6e73aba43587180f9f845f3f6d926509ed12c74be5c210166f0a84b33` |
+| Android APK (CI) | `73276555f3d04d50b6732c8d150c4a3230a0cf0c300f59734bced34c6b2b2e02` |
+| Android app ZIP (upload metadata) | `e7bd9f0d5240267c7c2fb561a0f982af90c743ea4f99c630734b439ac0998e8d` |
+| Android public debug signer | `b30fe5e09b7e180211497aaeb11ffdb056e68ccbf5e3b4cf09d9c7dfd9ce5909` |
+
+The manifests and evidence are uploaded (14-day development artifacts); local
+archive downloads were policy403 at productionresultssa2/sa10.blob.core.windows.net.
+Hashes/test/native results above are actual CI/upload evidence, not local archive
+rehashes. Windows needs no separate desktop runtime; this is not an installer/release.
+Android is versionCode11/0.4.4-f4b-gemini-response. Its signer differs from the prior
+published c48278f165f2c5df743db2ffa3075bfe777f4d9cc4c17c627f50ac9c08c4a2bb.
+Compare installed signer before updating. A mismatch requires deliberate reinstall,
+which loses Android Keystore/F3 trust: revoke the old Windows phone entry and pair
+explicitly again. Preserve Windows DPAPI files; no automatic identity reset occurs.
+
+Security evidence: no real Gemini/OpenAI request, user credential, hardware audio
+capture or cloud test used by Codex/CI. Fake HTTP/synthetic PCM plus actual loopback
+TLS and composed cross-language/native caption tests are distinct from physical
+interoperability. Offline default, current per-phone cloud/Free Tier authorization,
+one-question limit, pinned mTLS, DPAPI/Keystore, revocation, bounded transport and
+no retry/fallback remain. Safe diagnostics retain8 code/time/size records, no private
+content. The three non503 physical outcomes, revised actual provider behavior,
+physical pink/caption/latency/audio/resource behavior and project eligibility remain
+unverified. A public API contract and passing tests do not certify free account use.
+
+One next action: the developer performs the [single physical acceptance sequence](../project/QA.md#f4-b-response-repair--one-physical-acceptance-sequence),
+including separate current Free Tier/one-request authorization if choosing the cloud
+step; record only safe Windows attempt/code/ms/counts and Android status. No automatic
+cloud test, second request, merge or F4-C is authorized.
+
+## Exact response-repair changed files
+
+- [android/app/build.gradle.kts](../android/app/build.gradle.kts)
+- [android/app/src/main/java/dev/bluey/port/MainActivity.kt](../android/app/src/main/java/dev/bluey/port/MainActivity.kt)
+- [android/app/src/main/java/dev/bluey/port/live/LiveCoordinator.kt](../android/app/src/main/java/dev/bluey/port/live/LiveCoordinator.kt)
+- [android/app/src/main/java/dev/bluey/port/live/LiveProtocol.kt](../android/app/src/main/java/dev/bluey/port/live/LiveProtocol.kt)
+- [android/app/src/main/java/dev/bluey/port/voice/VoicePreview.kt](../android/app/src/main/java/dev/bluey/port/voice/VoicePreview.kt)
+- [android/app/src/test/java/dev/bluey/port/link/ProtocolTest.kt](../android/app/src/test/java/dev/bluey/port/link/ProtocolTest.kt)
+- [android/app/src/test/java/dev/bluey/port/live/AudioCoordinatorTest.kt](../android/app/src/test/java/dev/bluey/port/live/AudioCoordinatorTest.kt)
+- [project/IMPLEMENTATION.md](../project/IMPLEMENTATION.md)
+- [project/PROTOCOL-DATA-SCHEMA.md](../project/PROTOCOL-DATA-SCHEMA.md)
+- [project/QA.md](../project/QA.md)
+- [project/SECURITY.md](../project/SECURITY.md)
+- [protocol/README.md](../protocol/README.md)
+- [protocol/f4b-cases.jsonl](../protocol/f4b-cases.jsonl)
+- [protocol/gemini-response-trace.json](../protocol/gemini-response-trace.json)
+- [tracking/CHECKPOINTS.md](../tracking/CHECKPOINTS.md)
+- [tracking/DECISIONS.md](../tracking/DECISIONS.md)
+- [tracking/HANDOFF.md](../tracking/HANDOFF.md)
+- [tracking/SESSION-LOG.md](../tracking/SESSION-LOG.md)
+- [tracking/STATUS.md](../tracking/STATUS.md)
+- [windows/Bluey.Link.Tests/AudioTests.cs](../windows/Bluey.Link.Tests/AudioTests.cs)
+- [windows/Bluey.Link.Tests/Bluey.Link.Tests.csproj](../windows/Bluey.Link.Tests/Bluey.Link.Tests.csproj)
+- [windows/Bluey.Link.Tests/GeminiTests.cs](../windows/Bluey.Link.Tests/GeminiTests.cs)
+- [windows/Bluey.Link.Tests/ProtocolTests.cs](../windows/Bluey.Link.Tests/ProtocolTests.cs)
+- [windows/Bluey.Link.Tests/TlsTests.cs](../windows/Bluey.Link.Tests/TlsTests.cs)
+- [windows/Bluey.Link/AudioAuthority.cs](../windows/Bluey.Link/AudioAuthority.cs)
+- [windows/Bluey.Link/AudioOutcome.cs](../windows/Bluey.Link/AudioOutcome.cs)
+- [windows/Bluey.Link/GeminiAnswers.cs](../windows/Bluey.Link/GeminiAnswers.cs)
+- [windows/Bluey.Link/LiveAuthority.cs](../windows/Bluey.Link/LiveAuthority.cs)
+- [windows/Bluey.Link/LiveProtocol.cs](../windows/Bluey.Link/LiveProtocol.cs)
+- [windows/Bluey.Windows/AI/AiWindow.cs](../windows/Bluey.Windows/AI/AiWindow.cs)
+- [windows/Bluey.Windows/Bluey.Windows.csproj](../windows/Bluey.Windows/Bluey.Windows.csproj)
+- [windows/Bluey.Windows/NativeSmoke.cs](../windows/Bluey.Windows/NativeSmoke.cs)
+- [windows/Bluey.Windows/VoicePresentation.cs](../windows/Bluey.Windows/VoicePresentation.cs)
+- [windows/README.md](../windows/README.md)
 
 # Previous F4-B HTTP-completion evidence (superseded by response repair)
 

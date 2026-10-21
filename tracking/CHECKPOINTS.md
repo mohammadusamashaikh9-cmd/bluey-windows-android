@@ -13,7 +13,7 @@ that someone has been assigned or performed tests.
 | F2 Windows transparent overlay | Implementation merged; functional smoke user-reported accepted, measured QA UNVERIFIED | Windows implementation + visual QA | [PR #3](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/3) squash-merged at `a80642ab2aa897e6f80baed081ce2beb3e9a6d3d`, GitHub verified. Prior [CI 39116112594](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39116112594) passed 27 pure tests, native build/publish, 9 HWND/render checks and 12 frames. Developer reports accepted functional smoke; no new physical logs/measurements supplied. Detailed desktop/DPI/capture/fidelity and frame/CPU/memory measurements remain separate and unverified. |
 | F3 secure device link | Implementation merged; functional QA developer-reported accepted | Protocol/security implementation + cross-device QA | PR #4 squash-merged at `32a38c045e6de87e9d79d44d1114a4f0c76d2b8d`, GitHub verified. Developer reports real mTLS, gaze, mood, touch precedence, Wi-Fi recovery, revocation and full Windows restart / explicit host start / saved authenticated reconnect without QR or identity replacement passed. Prior R3 CI evidence retained in SESSION-LOG. Measured latency/FPS/resources, multiple-device and advanced compatibility QA remain UNVERIFIED. |
 | F4-A offline voice foundation | Merged; functional physical QA developer-reported accepted, measured QA unverified | Native voice/presentation + privacy QA | D010; app `e0dcda03ca2168ada223bb9f01d7fb231a506202`. [Windows39335639475](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39335639475):27 core+35 link/native build/publish/16 checks/13 frames. [Android39335639487](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39335639487):70 tests/lint0 errors17 warnings/APK/41 frames. Bounded authenticated captions; OFF consents, no live audio/provider/token endpoint. Matching artifacts/checksums and signer warning in [STATUS](STATUS.md). PR #5 merged at7930efd; developer-reported functional acceptance, measured pacing/resources remain unverified. |
-| F4-B native live voice | Code/offline CI passed; physical/live API acceptance pending separate authorization | Native voice/security + device/API QA | App `5df67442c2cb5e8967a9caca8de3aba42e4a3099`; [Windows39455054721](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39455054721):27 core+45 link tests, native23, build/publish. [Android39455054729](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39455054729):89 tests/lint0 errors18 warnings/APK. D011 protected key/current-device authorization, native opt-in audio/text/chirps and caption pipeline. No paid/dev API call; [STATUS](STATUS.md) has final matching artifacts/hashes and limitations. |
+| F4-B native live voice | Response repair code/CI verified; physical/provider acceptance pending | Native voice/security + device/API QA | D012, app `36287bcdcb95496c3da8f61973a51fc1e337913f`. Windows39674027367:27+124 tests/29 native checks; Android39674027307:111 tests/lint0 errors18 warnings. Matching artifacts in [STATUS](STATUS.md). Developer reports prior requests reached Gemini but no visible reply; revised physical acceptance unverified. No real Codex API calls. |
 | F5 optional control/notes | Planned, optional | Scoped feature owner + safety/data QA | Application confirmation/stop or bounded recording/transcription/retention tests as selected; no execution |
 | F6 release/demo | Planned | Release owner + artifact/device QA | Reproducible builds, hashes, CI/device evidence and truthful demo/docs; no execution |
 
@@ -77,7 +77,17 @@ Seven local fake-HTTP cases reproduced request/classification gaps; eight author
 cases reproduced collapsed LAN status. Intentional regression commit58278fe Android
 CI39671465812:103 tests,one failure proving coalesced reply/done skips pink with
 chirps disabled. This does not identify physical provider response contents.
-Current repair local Core27/Link124 pass. New Android/native/lint/artifact CI pending;
+Current repair local Core27/Link124 pass. Final CI/artifacts pass below;
 shared synthetic trace covers reply and caption boundaries. D012 records budget,
 error policy, privacy and limited physical attribution. All F3/F4-A acceptance and
 unmeasured performance boundaries remain unchanged.
+
+
+Response repair final app 36287bcdcb95496c3da8f61973a51fc1e337913f: [Windows39674027367](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39674027367) passes
+Core27/Link124/WPF0 warnings-errors/29 native checks/self-contained x64;
+[Android39674027307](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39674027307) passes111 tests/lint0 errors18 warnings/APK signature.
+Matching artifacts/manifests uploaded; exact hashes/34 paths/signer in STATUS.
+Local downloads blocked at sa2/sa10, CI evidence only. Earlier PR test39673123298
+failed one scheduler-dependent20ms cleanup assertion; awaited entry/cleanup retains
+all byte/no-stale-reply assertions and passes final CI. Physical/provider repaired
+behavior and user project eligibility remain UNVERIFIED. No real Codex API call.

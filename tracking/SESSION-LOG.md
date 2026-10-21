@@ -854,3 +854,16 @@ entry and a bounded5s observed-buffer-cleanup wait, retaining all privacy/stale-
 assertions. No production cancellation weakening or assertion removal. New matching
 CI builds will supersede c23614f downloads. Local artifact downloads were policy403
 at sa16/sa15; earlier hashes are CI evidence only, not locally rehashed archives.
+
+
+Final delivery revision 36287bcdcb95496c3da8f61973a51fc1e337913f: Windows push39674027367 passes27 core/124 link,
+29 native checks/13 frames/WPF0 warnings-errors/self-contained x64; Android
+push39674027307 passes111 tests/lint0 errors18 warnings/signature and matching debug APK.
+Both artifacts/SHA manifests/evidence uploaded. STATUS records exact34 changed paths,
+hashes and new public signerb30fe5e09b7e180211497aaeb11ffdb056e68ccbf5e3b4cf09d9c7dfd9ce5909; differs from prior c48278f1…,
+so deliberate signer comparison/reinstall/re-pair may be needed. No identity silently
+replaced. Final PR Windows39674033798 also passes. Local downloads policy403 at
+sa2/sa10; final archive bytes not locally rehashed. No actual model request/key/audio
+capture occurred. Physical response root cause for three non503 requests remains
+unknown. No PR creation/merge/F4-C. Next: developer's single physical sequence in
+QA, with separate current authorization before any one Free Tier request.
