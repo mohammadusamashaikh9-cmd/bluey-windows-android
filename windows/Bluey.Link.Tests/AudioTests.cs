@@ -5,8 +5,9 @@ public sealed class AudioTests
 {
     private sealed class Answers : IAudioAnswers {
         public bool ContractVerified {get;set;}=true;public int Calls;public ReadOnlyMemory<byte> Borrowed;
+        public TaskCompletionSource Entered=new(TaskCreationOptions.RunContinuationsAsynchronously);
         public TaskCompletionSource<string>? Pending;public string Text="A completed synthetic answer.";
-        public Task<string> Answer(ReadOnlyMemory<byte> pcm,CancellationToken stop){Calls++;Borrowed=pcm;return Pending?.Task??Task.FromResult(Text);}
+        public Task<string> Answer(ReadOnlyMemory<byte> pcm,CancellationToken stop){Calls++;Borrowed=pcm;Entered.TrySetResult();return Pending?.Task??Task.FromResult(Text);}
     }
     private sealed class Setup {
         public long Time;public Answers Fake=new();public LiveAuthority Authority;public string Consent=Guid.NewGuid().ToString(),Turn=Guid.NewGuid().ToString(),Auth="";
@@ -21,6 +22,12 @@ public sealed class AudioTests
     }
     private static Message M(string t,object p)=>Wire.Decode(Wire.Encode(t,Guid.NewGuid().ToString(),0,p)[..^1]);
     private static async Task<LivePacket> Next(LiveAuthority a){using var c=new CancellationTokenSource(2000);return await a.Reader("tls").ReadAsync(c.Token);}
+    private static async Task WaitForCleanup(Setup x) {
+        // Await the observable cleanup, not a scheduler-dependent 20 ms grace period.
+        using var deadline=new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        // A terminal outcome is published after buffer clearing, including stale-result cancellation.
+        while(x.Authority.AudioOutcomes.Length==0)await Task.Delay(1,deadline.Token);
+    }
     [Fact] public void DefaultsAndUnverifiedContractFailClosedWithoutCallingAnyProvider() {
         var a=new LiveAuthority(new DeniedIssuer(),openAiEnabled:false);Assert.Equal(VoiceProvider.OfflineSimulation,a.Provider);Assert.False(a.GeminiAvailable);
         Assert.Throws<ProtocolException>(()=>a.SelectProvider(VoiceProvider.OpenAIRealtime));
@@ -55,9 +62,9 @@ public sealed class AudioTests
     }
     [Theory][InlineData(0)][InlineData(1)][InlineData(2)][InlineData(3)] public async Task CancelDisconnectConsentWithdrawalAndProviderChangeDropPendingReply(int mode) {
         var x=new Setup();x.Fake.Pending=new(TaskCreationOptions.RunContinuationsAsynchronously);x.Authorize();x.Begin();for(int i=0;i<5;i++)x.Chunk(i);x.End();
-        for(int i=0;i<100&&x.Fake.Calls==0;i++)await Task.Delay(2);Assert.Equal(1,x.Fake.Calls);
+        await x.Fake.Entered.Task.WaitAsync(TimeSpan.FromSeconds(5));Assert.Equal(1,x.Fake.Calls);
         if(mode==0)x.Send("audioCancel",new{authorizationId=x.Auth,turnId=x.Turn});if(mode==1)x.Authority.Close("tls");if(mode==2)x.ConsentTo(cloud:false);if(mode==3)x.Authority.SelectProvider(VoiceProvider.OfflineSimulation);
-        x.Fake.Pending.SetResult("Stale answer must never appear");await Task.Delay(20);
+        x.Fake.Pending.SetResult("Stale answer must never appear");await WaitForCleanup(x);
         if(mode!=1)while(x.Authority.Reader("tls").TryRead(out var packet))Assert.DoesNotContain(packet.Type,new[]{"audioReply","audioDone"});Assert.All(x.Fake.Borrowed.ToArray(),b=>Assert.Equal(0,b));
     }
     [Theory][InlineData("")][InlineData("\n\t")]
@@ -69,8 +76,8 @@ public sealed class AudioTests
     }
     [Fact] public async Task DeterministicRequestTimeoutCancelsWipesAndNeverRetries() {
         var x=new Setup();x.Fake.Pending=new(TaskCreationOptions.RunContinuationsAsynchronously);x.Authorize();x.Begin();for(int i=0;i<5;i++)x.Chunk(i);x.End();
-        for(int i=0;i<100&&x.Fake.Calls==0;i++)await Task.Delay(2);x.Time=20000;x.Authority.Expire();var timeout=await Next(x.Authority);Assert.Equal("liveStop",timeout.Type);Assert.Equal("timeout",Wire.Text(M(timeout.Type,timeout.Payload).Payload,"code"));
-        x.Fake.Pending.SetResult("late");await Task.Delay(20);Assert.All(x.Fake.Borrowed.ToArray(),b=>Assert.Equal(0,b));Assert.False(x.Authority.Peers.Single().Authorized);Assert.Equal(1,x.Fake.Calls);Assert.Equal("timeout",Assert.Single(x.Authority.AudioOutcomes).Code);
+        await x.Fake.Entered.Task.WaitAsync(TimeSpan.FromSeconds(5));x.Time=20000;x.Authority.Expire();var timeout=await Next(x.Authority);Assert.Equal("liveStop",timeout.Type);Assert.Equal("timeout",Wire.Text(M(timeout.Type,timeout.Payload).Payload,"code"));
+        x.Fake.Pending.SetResult("late");await WaitForCleanup(x);Assert.All(x.Fake.Borrowed.ToArray(),b=>Assert.Equal(0,b));Assert.False(x.Authority.Peers.Single().Authorized);Assert.Equal(1,x.Fake.Calls);Assert.Equal("timeout",Assert.Single(x.Authority.AudioOutcomes).Code);
     }
 
 }

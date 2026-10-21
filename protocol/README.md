@@ -81,8 +81,13 @@ must match current trusted TLS lease and consent. Existing40+27 fixtures retaine
 
 ### Gemini amendment (D012)
 
-The53 shared F4-B cases include bounded audio-turn fields under the unchanged4096-byte
+The66 shared F4-B cases include bounded audio-turn fields under the unchanged4096-byte
 cap; see canonical schema. Windows Gemini HTTP integration implements the developer-verified public contract
 and still requires separate current project Free Tier confirmation and device
 authorization. Fixtures prove codec behavior; fake HTTP proves serialization and
 failure handling. Neither proves user eligibility or real API/device acceptance.
+
+The response repair also uses `gemini-response-trace.json`: public synthetic text,
+HTTP response and presentation events verified across the C# adapter/authority,
+actual loopback TLS, Kotlin coordinator/controller and native WPF caption adapter.
+It contains no user audio or provider credentials and is not physical-device proof.

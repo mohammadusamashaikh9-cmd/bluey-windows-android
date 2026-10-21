@@ -842,3 +842,15 @@ Local .NET10.0.402 Core27/Link124 pass; revised CI/artifacts pending. No real AP
 private audio, animation rewrite, trust replacement or original source modifications.
 One next action after matching CI artifacts: developer physical acceptance sequence
 in QA; any cloud question needs separate current Free Tier review/authorization.
+
+
+CI follow-up: c23614f push Windows39673114275 passes27/124/29 native checks,
+Android dispatch39673125599 passes111 tests/lint0 errors18 warnings, matching artifacts
+uploaded. Separate PR Windows39673123298 failed the retained cancellation test
+CancelDisconnectConsentWithdrawalAndProviderChangeDropPendingReply(mode3): its
+fixed20ms delay raced the async buffer wipe on the loaded runner. Source places
+zeroing before stale-result metadata; replace test sleeps with awaited provider
+entry and a bounded5s observed-buffer-cleanup wait, retaining all privacy/stale-reply
+assertions. No production cancellation weakening or assertion removal. New matching
+CI builds will supersede c23614f downloads. Local artifact downloads were policy403
+at sa16/sa15; earlier hashes are CI evidence only, not locally rehashed archives.
