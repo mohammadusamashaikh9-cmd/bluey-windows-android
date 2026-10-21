@@ -81,6 +81,7 @@ public sealed class GeminiTests
     [InlineData("{\"candidates\":[{\"finishReason\":\"MAX_TOKENS\",\"content\":{\"parts\":[]}}]}")]
     [InlineData("{\"candidates\":[{\"finishReason\":\"MAX_TOKENS\",\"content\":{\"parts\":[{\"thought\":true,\"text\":\"synthetic reasoning\"}]}}]}")]
     [InlineData("{\"candidates\":[{\"finishReason\":\"MAX_TOKENS\",\"content\":{\"parts\":[{\"text\":\"   \"}]}}]}")]
+    [InlineData("{\"candidates\":[{\"finishReason\":\"MAX_TOKENS\",\"content\":{\"role\":\"model\"}}]}")]
     public async Task ExhaustedBudgetWithoutVisibleAnswerIsDistinctFromEmpty(string json) {
         var h=new Handler{Respond=(_,_)=>Task.FromResult(Json(json))};using var http=new HttpClient(h);
         var e=await Assert.ThrowsAsync<AudioAnswerException>(()=>new GeminiAnswers(new Key(),http).Answer(Pcm(),default));
@@ -107,6 +108,8 @@ public sealed class GeminiTests
     [Theory][InlineData("{}")][InlineData("{\"candidates\":[]}")]
     [InlineData("{\"candidates\":[{\"finishReason\":\"STOP\"}]}")]
     [InlineData("{\"candidates\":[{\"finishReason\":\"STOP\",\"content\":{\"parts\":[{\"text\":\"  \\n\"}]}}]}")]
+    [InlineData("{\"candidates\":[{\"finishReason\":\"STOP\",\"content\":{\"role\":\"model\"}}]}")]
+    [InlineData("{\"candidates\":[{\"finishReason\":\"STOP\",\"content\":{\"parts\":null}}]}")]
     public async Task EmptyAnswersDoNotTriggerAnotherRequest(string json) {
         var h=new Handler{Respond=(_,_)=>Task.FromResult(Json(json))};using var http=new HttpClient(h);await Failure(new(new Key(),http),AudioAnswerFailure.Empty);Assert.Equal(1,h.Calls);
     }

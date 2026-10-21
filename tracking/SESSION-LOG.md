@@ -838,7 +838,7 @@ Minimal repair adds512 combined tokens/low thinking/no candidateCount, distinct
 safe outcomes, bounded metadata,400ms cancellation-guarded reply dwell and a shared
 synthetic adapter→TLS→Kotlin→WPF caption trace. Offline preview uses read-only statuses
 and opens existing opt-in settings; no permissions or recording activated.
-Local .NET10.0.402 Core27/Link121 pass; revised CI/artifacts pending. No real API/key,
+Local .NET10.0.402 Core27/Link124 pass; revised CI/artifacts pending. No real API/key,
 private audio, animation rewrite, trust replacement or original source modifications.
 One next action after matching CI artifacts: developer physical acceptance sequence
 in QA; any cloud question needs separate current Free Tier review/authorization.

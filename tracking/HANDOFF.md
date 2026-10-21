@@ -14,7 +14,7 @@ Shared synthetic trace verifies both language boundaries and native WPF caption.
 Offline preview statuses are read-only and open existing opt-in panel without
 permissions/capture. Key stores, animations, F3 trust and explicit approvals remain.
 
-Local Core27/Link121 pass; revised CI/artifacts pending. No real API calls or keys.
+Local Core27/Link124 pass; revised CI/artifacts pending. No real API calls or keys.
 New native physical acceptance is unverified. Check STATUS for final CI/artifacts,
 signer continuity and precise diff. Prior debug signers may prevent in-place update;
 never silently erase an Android identity. Preserve Windows protected data.

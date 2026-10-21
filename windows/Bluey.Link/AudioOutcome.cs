@@ -15,6 +15,7 @@ public sealed record AudioOutcome(long Attempt,string Code,long ElapsedMs,int In
         "budget"=>"Gemini thinking/output budget exhausted (MAX_TOKENS), with no visible text.",
         "safety"=>"Gemini blocked the response for safety. No answer displayed.",
         "malformed"=>"Gemini response format was rejected. No answer displayed.",
+        "expired"=>"Windows question authorization expired. Authorize again explicitly.",
         "canceled"=>"Gemini turn canceled; any late result was discarded.",
         _=>"Gemini provider request failed. No answer displayed."
     };

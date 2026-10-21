@@ -77,7 +77,7 @@ Seven local fake-HTTP cases reproduced request/classification gaps; eight author
 cases reproduced collapsed LAN status. Intentional regression commit58278fe Android
 CI39671465812:103 tests,one failure proving coalesced reply/done skips pink with
 chirps disabled. This does not identify physical provider response contents.
-Current repair local Core27/Link121 pass. New Android/native/lint/artifact CI pending;
+Current repair local Core27/Link124 pass. New Android/native/lint/artifact CI pending;
 shared synthetic trace covers reply and caption boundaries. D012 records budget,
 error policy, privacy and limited physical attribution. All F3/F4-A acceptance and
 unmeasured performance boundaries remain unchanged.

@@ -435,3 +435,11 @@ pink. Retain400ms in the coordinator before completion (longer than the unchange
 foreground, generation and turn afterward. This is a reproduced presentation race,
 not proof that the user's provider returned text. Accessible Google SDK source
 reference for this repair: googleapis/python-genai d6af6cdd0dc0d7a0235a11c4c93e48be877970e6.
+
+
+The official SDK declares Content.parts optional. Three additional fake-HTTP
+regressions reproduced missing/null parts being mislabeled Malformed instead of
+Empty, or Budget when finishReason=MAX_TOKENS. Treat absent/null parts as no visible
+text while retaining strict type/duplicate/media validation. No physical response
+shape is inferred. The retained nonempty MAX_TOKENS behavior still returns bounded
+visible text; Budget specifically identifies exhaustion without visible text.

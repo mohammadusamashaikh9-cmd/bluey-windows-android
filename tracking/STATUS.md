@@ -22,7 +22,7 @@ authority/TLS, Android coordinator/controller and native WPF caption checks.
 Offline preview now read-only OFF status plus an action opening existing opt-in
 settings; opening it grants nothing. Actual permissions/Stop remain in LivePanel.
 
-Local .NET10.0.402: Core27/Link121 pass,0 failed/skipped. CI build/lint/native smoke,
+Local .NET10.0.402: Core27/Link124 pass,0 failed/skipped. CI build/lint/native smoke,
 matching artifacts and physical retest remain pending for this revised application.
 Official new/thinking/error docs still policy403; supplied compatibility contract
 and accessible official Google SDK source are separately attributed in D012.

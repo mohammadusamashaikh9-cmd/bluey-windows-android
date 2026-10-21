@@ -138,7 +138,8 @@ public sealed class GeminiAnswers : IAudioAnswers
             var noText=finish=="MAX_TOKENS"?AudioAnswerFailure.Budget:AudioAnswerFailure.Empty;
             if(!candidate.TryGetProperty("content",out var content))throw new AudioAnswerException(noText);
             if(content.TryGetProperty("role",out var role)&&role.GetString()!="model")throw new JsonException();
-            var parts=content.GetProperty("parts");if(parts.ValueKind!=JsonValueKind.Array||parts.GetArrayLength()>16)throw new JsonException();var text=new StringBuilder();
+            if(!content.TryGetProperty("parts",out var parts)||parts.ValueKind==JsonValueKind.Null)throw new AudioAnswerException(noText);
+            if(parts.ValueKind!=JsonValueKind.Array||parts.GetArrayLength()>16)throw new JsonException();var text=new StringBuilder();
             foreach(var part in parts.EnumerateArray()) {
                 if(part.TryGetProperty("functionCall",out _)||part.TryGetProperty("executableCode",out _)||part.TryGetProperty("codeExecutionResult",out _)||part.TryGetProperty("inlineData",out _)||part.TryGetProperty("fileData",out _))throw new JsonException();
                 if(part.TryGetProperty("thought",out var thought)&&thought.GetBoolean())continue;
