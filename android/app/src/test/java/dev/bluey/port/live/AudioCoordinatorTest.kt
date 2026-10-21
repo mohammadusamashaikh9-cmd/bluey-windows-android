@@ -30,6 +30,7 @@ class AudioCoordinatorTest {
     private fun idle(){Shadows.shadowOf(Looper.getMainLooper()).idle()}
     private fun advance(ms:Long){ShadowSystemClock.advanceBy(Duration.ofMillis(ms));idle()}
     @Test fun completedAnswerUsesExistingStatesCaptionAndOneTurnBudget(){scenario("reply")}
+    @Test fun coalescedReplyAndDoneKeepPinkVisibleWithoutAudioHardware(){scenario("coalesced")}
     @Test fun pauseDiscardsStaleCaptureAndReplies(){scenario("pause")}
     @Test fun sleepDiscardsStaleCaptureAndReplies(){scenario("sleep")}
     @Test fun disconnectDiscardsStaleCaptureAndReplies(){scenario("disconnect")}
@@ -69,9 +70,11 @@ class AudioCoordinatorTest {
         when(end){"pause"->live.pause();"sleep"->{voice.sleep(SystemClock.elapsedRealtime());live.observe()};"disconnect"->{lan.messages.trySend(null);idle()};"revoke"->{lan.message("liveStop",Wire.payload("code" to "stopped"));idle()}}
         val before=lan.sent.size;capture.callback!!(ByteArray(960));idle();assertEquals(before,lan.sent.size)
         val reply=Wire.payload("authorizationId" to auth,"turnId" to turn,"text" to "A completed synthetic answer.")
-        lan.message("audioReply",reply);idle()
-        if(end in setOf("reply","limit")){
+        lan.message("audioReply",reply);if(end=="coalesced")lan.message("audioDone",Wire.payload("authorizationId" to auth,"turnId" to turn));idle()
+        if(end in setOf("reply","limit","coalesced")){
             assertEquals(VoiceMode.speaking,voice.snapshot.mode);assertEquals("A completed synthetic answer.",voice.snapshot.caption)
+            assertEquals(0xFF9AD0,ModeIndicator.look(voice.snapshot.mode).rgb)
+            if(end=="coalesced"){advance(16);assertEquals(VoiceMode.speaking,voice.snapshot.mode);advance(384)}
             lan.message("audioReply",reply);idle();assertEquals("A completed synthetic answer.",voice.snapshot.caption)
             lan.message("audioDone",Wire.payload("authorizationId" to auth,"turnId" to turn));idle();assertEquals(VoiceMode.listening,voice.snapshot.mode)
             lan.message("audioDone",Wire.payload("authorizationId" to auth,"turnId" to turn));idle();assertEquals(VoiceMode.listening,voice.snapshot.mode)

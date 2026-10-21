@@ -395,3 +395,33 @@ Public verification references supplied by the developer:
 [billing](https://ai.google.dev/gemini-api/docs/billing),
 [rate limits](https://ai.google.dev/gemini-api/docs/rate-limits).
 All six fetches were denied locally; public facts are developer-reported verification.
+
+### D012 response repair / 2026-10-22 Asia/Karachi — bounded thinking and visible outcomes
+
+Developer-reported physical evidence: credential configuration, trusted phone,
+consent and one-question approval reached Gemini; AI Studio recorded five requests,
+two503s and input/output usage. No usable end-to-end reply is proven. The existing
+F2 demo bubble is not a provider result. Responses for the other three requests are
+unknown; token usage alone does not prove visible text or budget exhaustion.
+
+The supplied current Gemini3.8 contract requires omitting candidateCount and using
+thinkingConfig.thinkingLevel="low". Keep the fixed model and increase the combined
+thinking/answer ceiling from128 to512 tokens. This can consume up to four times the
+previous output allowance, but avoids starving a short visible answer; retain the
+256-character display cap, two-short-sentence instruction, one-question approval,
+5s audio and20s deadline. No retry, extra candidate or model/provider fallback.
+Public docs were attempted again (whats-new-gemini-3.8, thinking, api-errors) and
+remain policy403. Accessible official googleapis/python-genai types corroborate
+ThinkingConfig.thinking_level and the case-insensitive LOW enum; model-specific
+support is attributed to the developer-provided current contract. Account eligibility
+is still separately unverified; no credentials or model requests are used by Codex.
+
+Preserve distinct safe outcomes across the existing strict liveStop allowlist on
+both platforms, including503,429,400,credential,timeout,network,empty,budget,safety
+and malformed/provider failures. Keep only bounded local IDs, elapsed time, byte/
+character counts and outcome codes in Windows diagnostics, never private bodies,
+text, prompts, audio or credentials. Do not infer receipt from an answer queued to
+TLS. Synthetic cross-language traces and native caption checks will verify each
+presentation boundary; physical display success still requires a separate retest.
+The offline preview will use read-only OFF indicators and link to the existing
+opt-in panel; opening settings cannot grant consent or start capture.

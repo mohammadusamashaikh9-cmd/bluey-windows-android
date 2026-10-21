@@ -42,7 +42,8 @@ public sealed class GeminiTests
         Assert.Contains("Do not transcribe",root.GetProperty("systemInstruction").GetProperty("parts")[0].GetProperty("text").GetString());
         var parts=root.GetProperty("contents")[0].GetProperty("parts");Assert.Equal("audio/wav",parts[0].GetProperty("inlineData").GetProperty("mimeType").GetString());
         Assert.Equal(PcmWave.Encode(Pcm()),parts[0].GetProperty("inlineData").GetProperty("data").GetBytesFromBase64());
-        var config=root.GetProperty("generationConfig");Assert.Equal(128,config.GetProperty("maxOutputTokens").GetInt32());Assert.Equal(1,config.GetProperty("candidateCount").GetInt32());
+        var config=root.GetProperty("generationConfig");Assert.Equal(512,config.GetProperty("maxOutputTokens").GetInt32());Assert.False(config.TryGetProperty("candidateCount",out _));
+        Assert.Equal("low",config.GetProperty("thinkingConfig").GetProperty("thinkingLevel").GetString());
         Assert.Equal("TEXT",config.GetProperty("responseModalities")[0].GetString());Assert.Equal("text/plain",config.GetProperty("responseMimeType").GetString());Assert.Empty(root.GetProperty("tools").EnumerateArray());
         Assert.DoesNotContain("synthetic-gemini-key",Encoding.UTF8.GetString(h.Body!));Assert.All(key.Borrowed!,b=>Assert.Equal(0,b));
     }
@@ -68,6 +69,22 @@ public sealed class GeminiTests
     public async Task HttpFailuresNeverRetryFollowRedirectOrExposeBodies(int status,AudioAnswerFailure reason) {
         var h=new Handler{Respond=(_,_)=>Task.FromResult(Json("synthetic private provider body",(HttpStatusCode)status))};using var http=new HttpClient(h);
         await Failure(new(new Key(),http),reason);Assert.Equal(1,h.Calls);
+    }
+    [Theory][InlineData(503,"Unavailable")][InlineData(400,"Configuration")]
+    public async Task ConfigurationAndTemporaryFailuresHaveDistinctSafeCategories(int status,string expected) {
+        var h=new Handler{Respond=(_,_)=>Task.FromResult(Json("private synthetic body",(HttpStatusCode)status))};using var http=new HttpClient(h);
+        var e=await Assert.ThrowsAsync<AudioAnswerException>(()=>new GeminiAnswers(new Key(),http).Answer(Pcm(),default));
+        Assert.Equal(expected,e.Reason.ToString());Assert.DoesNotContain("private",e.ToString());Assert.Equal(1,h.Calls);
+    }
+    [Theory]
+    [InlineData("{\"candidates\":[{\"finishReason\":\"MAX_TOKENS\"}]}")]
+    [InlineData("{\"candidates\":[{\"finishReason\":\"MAX_TOKENS\",\"content\":{\"parts\":[]}}]}")]
+    [InlineData("{\"candidates\":[{\"finishReason\":\"MAX_TOKENS\",\"content\":{\"parts\":[{\"thought\":true,\"text\":\"synthetic reasoning\"}]}}]}")]
+    [InlineData("{\"candidates\":[{\"finishReason\":\"MAX_TOKENS\",\"content\":{\"parts\":[{\"text\":\"   \"}]}}]}")]
+    public async Task ExhaustedBudgetWithoutVisibleAnswerIsDistinctFromEmpty(string json) {
+        var h=new Handler{Respond=(_,_)=>Task.FromResult(Json(json))};using var http=new HttpClient(h);
+        var e=await Assert.ThrowsAsync<AudioAnswerException>(()=>new GeminiAnswers(new Key(),http).Answer(Pcm(),default));
+        Assert.Equal("Budget",e.Reason.ToString());Assert.Equal(1,h.Calls);
     }
     [Theory]
     [InlineData("{\"promptFeedback\":{\"blockReason\":\"SAFETY\"}}")]
