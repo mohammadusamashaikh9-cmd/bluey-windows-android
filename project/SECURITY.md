@@ -202,20 +202,29 @@ was independently inspected. D012 distinguishes these evidence sources. Neither
 published Free Tier support nor ContractVerified certifies an arbitrary project/key.
 Production now wires GeminiAnswers to the separate Gemini DPAPI store: fixed HTTPS
 model allowlist, x-goog-api-key header (never URL/LAN), WAV inline audio, text-only
-one-candidate/128-token config,20s timeout,330000-byte request/16384-byte response
+default single-response/512-token combined thinking/output config (low thinking),20s timeout,330000-byte request/16384-byte response
 bounds, no redirects/cookies/retries/fallback. Owned audio/key/body buffers are zeroed.
 Duplicate/malformed JSON, invalid UTF-8, tools/audio parts, safety blocks and empty
 answers are rejected; raw provider errors are never surfaced/logged. Quota429 maps
-to existing limit stop and offers offline mode. Public contract is implemented;
-real provider, billing eligibility and physical behavior remain untested.
+to the narrow quota stop and offers offline mode. Public contract is implemented;
+developer-reported provider requests failed to establish visible answers; billing eligibility and revised physical behavior remain unverified.
 
 The adapter still requires the current nonrevoked TLS lease, current
 phone microphone/cloud consent, Windows Gemini selection and separate explicit
 Google Free Tier/non-billing-project confirmation before one completed hold-only
 question. Permission alone cannot authorize cloud processing. Continuous Gemini
 context is disabled. Initial hard transport bounds5s/240000 bytes; provider
-bounds128 output tokens/20s, no tools/grounding/audio generation/retries. Quota429
+bounds512 combined thinking/output tokens (low thinking)/20s, no tools/grounding/audio generation/retries. Quota429
 stops and offers offline; free eligibility uncertainty must prevent sending.
 Google free-tier inputs may improve products under applicable terms; users must
 avoid sensitive conversations. Local code cannot attest an arbitrary project's
 billing status or revoke already submitted audio. No live test is authorized here.
+
+
+Response repair diagnostics retain at most8 local attempt records: local counter,
+sanitized outcome code, elapsed milliseconds, input-byte count and reply-character
+count. No peer/auth/turn IDs, prompt, private response body/text, audio, key or token
+is retained there. Windows says "queued" rather than claiming phone/display receipt.
+The Android actionable failure status terminates authorization without fabricating
+an answer. Distinct20s request timeout and60s authorization expiry remain bounded;
+no retries, extra grant, paid fallback or automatic resubmission is introduced.

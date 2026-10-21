@@ -824,3 +824,21 @@ request, key, hardware microphone, billing, new PR, merge or later milestone.
 Public-contract implementation complete; user eligibility and physical/cloud
 acceptance remain unverified. Next: one offline physical retest, provider offline,
 keys empty and microphone denied; any live test needs separate authorization.
+
+
+## F4-B response repair / 2026-10-22 Asia/Karachi
+
+Continued PR #6 at7c846a3; no new architecture/PR/milestone/merge. Developer physical
+evidence records five Gemini requests,two503s,token usage and no proven visible
+reply. Investigated without real provider calls. Seven fake-HTTP tests failed for
+128-token/missing low-thinking/503-400 collapse/empty MAX_TOKENS; eight authority
+cases failed for specific outcome loss. Baseline58278fe Android push CI39671465812
+ran103 tests,one expected failure: coalesced reply/done with chirps off skips pink.
+Minimal repair adds512 combined tokens/low thinking/no candidateCount, distinct
+safe outcomes, bounded metadata,400ms cancellation-guarded reply dwell and a shared
+synthetic adapter→TLS→Kotlin→WPF caption trace. Offline preview uses read-only statuses
+and opens existing opt-in settings; no permissions or recording activated.
+Local .NET10.0.402 Core27/Link121 pass; revised CI/artifacts pending. No real API/key,
+private audio, animation rewrite, trust replacement or original source modifications.
+One next action after matching CI artifacts: developer physical acceptance sequence
+in QA; any cloud question needs separate current Free Tier review/authorization.

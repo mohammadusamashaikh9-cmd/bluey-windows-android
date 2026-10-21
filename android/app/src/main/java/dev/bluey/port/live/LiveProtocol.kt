@@ -6,6 +6,24 @@ data class LiveLimits(val sessionSeconds:Int=300,val responses:Int=5,val audioSe
 }
 class LiveToken(val authorizationId:String,val requestId:String,val secret:String,val expiresAt:Long,val model:String,val limits:LiveLimits){override fun toString()="[client secret redacted]"}
 object LiveProtocol {
+    fun outcomeMessage(code:String)=when(code) {
+        "unavailable"->"Gemini temporarily unavailable (503). Try again later."
+        "quota"->"Gemini free-tier quota exhausted (429). Offline simulation is available; no paid fallback."
+        "configuration"->"Gemini configuration rejected (400). Update or review the request settings."
+        "credential"->"Gemini credential or permission rejected (401/403). Review Windows key/project access."
+        "timeout"->"Gemini request timed out."
+        "network"->"Gemini network request failed. Check connectivity before authorizing again."
+        "empty"->"Gemini response had no visible text; review thinking/output limits."
+        "budget"->"Gemini thinking/output budget exhausted (MAX_TOKENS), with no visible text."
+        "safety"->"Gemini blocked the response for safety. No answer displayed."
+        "malformed"->"Gemini response format was rejected. No answer displayed."
+        "provider"->"Gemini provider request failed. No answer displayed."
+        "limit"->"Live limit or Google quota exhausted — stopped. Offline simulation is available; no paid fallback."
+        "denied"->"Windows consent, credential or safety check rejected this request. Offline simulation is available."
+        "expired"->"Authorization expired — stopped; no automatic retry."
+        "issuer"->"Provider unavailable, invalid or empty answer — stopped; offline simulation is available."
+        else->"Windows ended live authorization: $code"
+    }
     val models=setOf("gpt-realtime-2.1-mini","gpt-realtime-2.1")
     private fun id(p:JsonObject,k:String){if(!Wire.uuid(Wire.text(p,k)))throw ProtocolException("live identity")}
     fun flag(p:JsonObject,k:String):Boolean {val v=p[k];if(!v.isJsonPrimitive||!v.asJsonPrimitive.isBoolean)throw ProtocolException("live consent");return v.asBoolean}
@@ -14,7 +32,7 @@ object LiveProtocol {
             "liveConsent"->{Wire.keys(p,"consentId","microphone","cloud","continuous");id(p,"consentId");flag(p,"microphone");flag(p,"cloud");flag(p,"continuous")}
             "liveRequest"->{Wire.keys(p,"authorizationId","consentId","requestId");id(p,"authorizationId");id(p,"consentId");id(p,"requestId")}
             "liveGrant"->{Wire.keys(p,"authorizationId","consentId");id(p,"authorizationId");id(p,"consentId")}
-            "liveStop"->{Wire.keys(p,"code");if(Wire.text(p,"code") !in setOf("stopped","denied","expired","limit","issuer","disconnected"))throw ProtocolException("live stop")}
+            "liveStop"->{Wire.keys(p,"code");if(Wire.text(p,"code") !in setOf("stopped","denied","expired","limit","issuer","disconnected","unavailable","quota","configuration","credential","timeout","network","empty","budget","safety","malformed","provider"))throw ProtocolException("live stop")}
             "liveToken"->{Wire.keys(p,"authorizationId","requestId","secret","expiresAt","model","sessionSeconds","responses","audioSeconds","maxTokens");id(p,"authorizationId");id(p,"requestId")
                 val secret=Wire.text(p,"secret",512);if(secret.length<16||secret.any{it.code !in 33..126})throw ProtocolException("live secret")
                 if(Wire.text(p,"model",64) !in models)throw ProtocolException("model");Wire.integer(p,"expiresAt");limits(p).validate(1)}

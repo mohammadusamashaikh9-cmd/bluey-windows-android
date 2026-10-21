@@ -69,8 +69,8 @@ public sealed class AudioTests
     }
     [Fact] public async Task DeterministicRequestTimeoutCancelsWipesAndNeverRetries() {
         var x=new Setup();x.Fake.Pending=new(TaskCreationOptions.RunContinuationsAsynchronously);x.Authorize();x.Begin();for(int i=0;i<5;i++)x.Chunk(i);x.End();
-        for(int i=0;i<100&&x.Fake.Calls==0;i++)await Task.Delay(2);x.Time=20000;x.Authority.Expire();Assert.Equal("liveStop",(await Next(x.Authority)).Type);
-        x.Fake.Pending.SetResult("late");await Task.Delay(20);Assert.All(x.Fake.Borrowed.ToArray(),b=>Assert.Equal(0,b));Assert.False(x.Authority.Peers.Single().Authorized);Assert.Equal(1,x.Fake.Calls);
+        for(int i=0;i<100&&x.Fake.Calls==0;i++)await Task.Delay(2);x.Time=20000;x.Authority.Expire();var timeout=await Next(x.Authority);Assert.Equal("liveStop",timeout.Type);Assert.Equal("timeout",Wire.Text(M(timeout.Type,timeout.Payload).Payload,"code"));
+        x.Fake.Pending.SetResult("late");await Task.Delay(20);Assert.All(x.Fake.Borrowed.ToArray(),b=>Assert.Equal(0,b));Assert.False(x.Authority.Peers.Single().Authorized);Assert.Equal(1,x.Fake.Calls);Assert.Equal("timeout",Assert.Single(x.Authority.AudioOutcomes).Code);
     }
 
 }

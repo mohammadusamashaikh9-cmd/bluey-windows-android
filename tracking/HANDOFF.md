@@ -1,29 +1,24 @@
 # Handoff
 
-F4-B Gemini HTTP completion continues PR #6 / port/live-ai-voice from56bcbb5.
-Do not create a PR or merge. D012 completion records developer-reported independent
-public contract verification and agent-inspected Google REST/SDK HTTP sources;
-Google pages remain locally policy403. User key/project Free Tier eligibility and
-real API/device behavior remain unverified, not inferred from published pricing.
+Current F4-B Gemini response repair, existing PR #6 / port/live-ai-voice. No merge.
+Start reviewed7c846a3; baseline regression commit58278fe reproduced request/outcome
+classification loss locally and Android coalesced reply/done pink-state loss in CI.
+Developer physical evidence: five Gemini calls,two503s,tokens used,no proven visible
+answer. Non503 contents and exact physical root cause remain unknown.
 
-GeminiAnswers now uses existing IAudioAnswers and separate Gemini DPAPI key. Exact
-bounded WAV/inline JSON, fixed model/header, text-only128 tokens,20s/330000-byte
-request/16384-byte response limits, strict failures and no retries/fallback. Existing
-authority, audio transfer, animations/captions remain. Offline startup default,
-explicit per-phone Windows/phone consents and Free Tier confirmation still gate use.
-STOP cancels work; key checks cannot revive a withdrawn UI authorization.
+D012: remove candidateCount, low thinking,512 combined tokens, preserve256-character
+short answers/one question/5s input/20s deadline. Distinct safe outcomes propagate
+through strict C#/Kotlin validators;8 local metadata records only.400ms minimum
+reply-state dwell includes original250ms transition and is cancellation guarded.
+Shared synthetic trace verifies both language boundaries and native WPF caption.
+Offline preview statuses are read-only and open existing opt-in panel without
+permissions/capture. Key stores, animations, F3 trust and explicit approvals remain.
 
-Local Link108 tests pass (47 new fake HTTP cases), no real credential/API/audio capture.
-App/artifact revision685a5e883ffcfdca784641d2d086a885409871cb.
-Windows39494775781 passes27+108 tests/26 native checks/WPF clean/self-contained;
-Android39494775790 passes102 tests/lint0 errors18 warnings/signature. STATUS records
-links, exact20 files/hashes/signers. Android manifest/JUnit downloaded and verified;
-Windows final download blocked at sa15, with actual CI hash/upload evidence only.
-New signer c48278f1… differs from previous39527af1…; compare installed signer, then
-use deliberate reinstall/re-pair if necessary. Preserve Windows DPAPI data.
-Later closeout commits only change canonical evidence/docs. Keep physical/performance/real API evidence
-separate. Read project/QA.md for offline sequence and separately authorized future
-Free Tier test; no live test is authorized now.
+Local Core27/Link121 pass; revised CI/artifacts pending. No real API calls or keys.
+New native physical acceptance is unverified. Check STATUS for final CI/artifacts,
+signer continuity and precise diff. Prior debug signers may prevent in-place update;
+never silently erase an Android identity. Preserve Windows protected data.
 
-One next action: developer offline physical retest, keys empty,
-provider OfflineSimulation, microphone denied; leave PR #6 unmerged.
+One next action after matching CI artifacts: developer runs the single physical
+sequence in project/QA.md. Any real request needs separate current user authorization
+and Free Tier/project review. Leave PR #6 unmerged; do not start F4-C.

@@ -96,10 +96,20 @@ GeminiAnswers now implements the public contract verified independently by the
 developer and cross-checked against accessible Google REST/SDK source (D012).
 Bounded PCM becomes RIFF/WAV mono24k PCM16, inline audio/wav on fixed HTTPS
 v1beta generateContent; header credentials stay on Windows. One text candidate,
-128 output tokens,20s overall timeout,330000-byte request/16384-byte response caps,
+512 combined thinking/output tokens (low thinking),20s overall timeout,330000-byte request/16384-byte response caps,
 strict JSON/safety/text checks and no redirects/retries. Existing authority gates
 control invocation, map sanitized failures to existing stop codes and discard late
 results. STOP remains available during key checks; authorization is rechecked on
 the UI thread afterward. No new backend, dependency, protocol message or capture
 pipeline. Fake HTTP tests replace the missing provider coverage; real API and user
 Free Tier eligibility remain untested and require separate authorization.
+
+
+F4-B response repair uses low thinking with512 combined thinking/output tokens,
+omits candidateCount and preserves short text/caption caps. The prior128-token
+allowance could starve a visible answer; physical response contents are unknown.
+Typed safe provider outcomes now survive authority and LAN validation to actionable
+Windows/Android status. Shared synthetic response/presentation traces cover fake
+HTTP, real TLS transport, Android controller and actual WPF caption application.
+Offline preview exposes read-only statuses and opens the existing opt-in settings;
+no consent, recording or provider action occurs merely by opening settings.

@@ -298,12 +298,16 @@ public sealed class TlsTests
         Assert.Equal(pin,Assert.Single(store.Peers).Pin);
     }
 
-    private sealed class SyntheticAnswers:IAudioAnswers {
-        public bool ContractVerified=>true;public int Calls;
-        public Task<string> Answer(ReadOnlyMemory<byte> pcm,CancellationToken stop){Calls++;return Task.FromResult("Synthetic completed answer.");}
+    private sealed class SyntheticGeminiHttp:System.Net.Http.HttpMessageHandler {
+        public int Calls;
+        protected override Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request,CancellationToken stop) {
+            Calls++;using var trace=System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"gemini-response-trace.json")));
+            return Task.FromResult(new System.Net.Http.HttpResponseMessage(System.Net.HttpStatusCode.OK){Content=new System.Net.Http.StringContent(trace.RootElement.GetProperty("provider").GetRawText(),System.Text.Encoding.UTF8,"application/json")});
+        }
     }
+    private sealed class SyntheticGeminiKey:IMasterKey {public byte[] Read()=>System.Text.Encoding.ASCII.GetBytes("synthetic-key-never-valid");}
     [Fact] public async Task ActualMutualTlsAudioRequiresReadyConsentApprovalAndCompletionThenRejectsRevocation() {
-        using var store=new MemoryStore();var fake=new SyntheticAnswers();var live=new LiveAuthority(new DeniedIssuer(),audioAnswers:fake,openAiEnabled:false);live.SelectProvider(VoiceProvider.GeminiFree);
+        using var store=new MemoryStore();var fake=new SyntheticGeminiHttp();using var http=new System.Net.Http.HttpClient(fake);var live=new LiveAuthority(new DeniedIssuer(),audioAnswers:new GeminiAnswers(new SyntheticGeminiKey(),http),openAiEnabled:false);live.SelectProvider(VoiceProvider.GeminiFree);
         await using var server=new LinkServer(store,live:live);server.Start(IPAddress.Loopback,0);using var cert=Identity.Create("audio-phone",false);
         var device=Guid.NewGuid().ToString();var consent=Guid.NewGuid().ToString();var turn=Guid.NewGuid().ToString();server.StartPairing();
         using(var unauth=await Connect(server,cert)){await unauth.Wire.Send("audioBegin",new{authorizationId=Guid.NewGuid().ToString(),turnId=turn,format=AudioProtocol.Format},default);await Denied(async()=>await unauth.Wire.Read(default));Assert.Equal(0,fake.Calls);}
@@ -316,6 +320,17 @@ public sealed class TlsTests
         for(int i=0;i<5;i++)await c.Wire.Send("audioChunk",new{authorizationId=auth,turnId=turn,index=i,data=Convert.ToBase64String(new byte[960])},default);
         Assert.Equal(0,fake.Calls);await c.Wire.Send("audioEnd",new{authorizationId=auth,turnId=turn,chunks=5,bytes=4800},default);
         Assert.Equal("audioReply",(await c.Wire.Read(default)).Type);Assert.Equal("audioDone",(await c.Wire.Read(default)).Type);Assert.Equal(1,fake.Calls);
+        using(var trace=System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"gemini-response-trace.json")))) {
+            foreach(var row in trace.RootElement.GetProperty("presentation").EnumerateArray()) {
+                await c.Wire.Send("presentation",row.GetProperty("payload"),default);
+                var kind=row.GetProperty("payload").GetProperty("event").GetString();
+                if(kind=="delta") {
+                    for(int i=0;i<100&&server.Presentation.Caption==null;i++)await Task.Delay(10);
+                    Assert.Equal(trace.RootElement.GetProperty("answer").GetString(),server.Presentation.Caption);
+                }
+            }
+            for(int i=0;i<100&&server.Presentation.Caption!=null;i++)await Task.Delay(10);Assert.Null(server.Presentation.Caption);
+        }
         server.Revoke(Identity.Fingerprint(cert));Assert.Empty(live.Peers);await Denied(async()=>{using var rejected=await Connect(server,cert);});Assert.Equal(1,fake.Calls);
     }
 

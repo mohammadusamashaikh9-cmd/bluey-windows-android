@@ -425,3 +425,13 @@ TLS. Synthetic cross-language traces and native caption checks will verify each
 presentation boundary; physical display success still requires a separate retest.
 The offline preview will use read-only OFF indicators and link to the existing
 opt-in panel; opening settings cannot grant consent or start capture.
+
+
+Response-path experiment: baseline58278fe Android CI39671465812 completed103 tests,
+with only coalescedReplyAndDoneKeepPinkVisibleWithoutAudioHardware failing. A reply
+and immediate done with chirps off reached listening before a frame could observe
+pink. Retain400ms in the coordinator before completion (longer than the unchanged
+250ms border transition), independent of audio hardware; recheck provider epoch,
+foreground, generation and turn afterward. This is a reproduced presentation race,
+not proof that the user's provider returned text. Accessible Google SDK source
+reference for this repair: googleapis/python-genai d6af6cdd0dc0d7a0235a11c4c93e48be877970e6.

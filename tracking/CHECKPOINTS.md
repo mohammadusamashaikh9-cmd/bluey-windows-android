@@ -67,3 +67,17 @@ request, key, hardware microphone, billing, new PR, merge or later milestone.
 Public-contract implementation complete; user eligibility and physical/cloud
 acceptance remain unverified. Next: one offline physical retest, provider offline,
 keys empty and microphone denied; any live test needs separate authorization.
+
+
+## F4-B response repair / 2026-10-22 Asia/Karachi
+
+Active, not physical-verified. Developer reports five Gemini requests,two503s and
+usage but no proven visible answer; the three other outcomes remain unknown.
+Seven local fake-HTTP cases reproduced request/classification gaps; eight authority
+cases reproduced collapsed LAN status. Intentional regression commit58278fe Android
+CI39671465812:103 tests,one failure proving coalesced reply/done skips pink with
+chirps disabled. This does not identify physical provider response contents.
+Current repair local Core27/Link121 pass. New Android/native/lint/artifact CI pending;
+shared synthetic trace covers reply and caption boundaries. D012 records budget,
+error policy, privacy and limited physical attribution. All F3/F4-A acceptance and
+unmeasured performance boundaries remain unchanged.

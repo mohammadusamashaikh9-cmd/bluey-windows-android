@@ -1,4 +1,39 @@
-# Current F4-B completion — Gemini HTTP adapter
+# Current F4-B response repair — PR #6
+
+2026-10-22 Asia/Karachi. Continue port/live-ai-voice from reviewed7c846a3;
+no new PR/merge/F4-C. Developer-reported physical requests reached Gemini but no
+visible answer is proven: five requests,two503s,nonzero input/output usage. The
+other three outcomes are unknown. F2 pointing demo text is not a Gemini reply.
+
+Confirmed source/test defects:503/400 and empty MAX_TOKENS outcomes were collapsed;
+request sent candidateCount with128 tokens/no low thinking. Seven local regression
+cases reproduced the request/classification gaps; eight authority cases reproduced
+loss of the specific failure on LAN. Baseline58278fe Android CI39671465812 ran103
+tests with one intentional failure: coalesced reply/done plus disabled chirps skips
+pink before a frame. This is not proof of physical provider text/response contents.
+
+Repair: fixed model, no candidateCount, low thinking,512 combined thinking/output
+tokens (up to4× prior allowance; still one question/5s/20s/256 display characters).
+Eleven narrow liveStop outcomes validated in both languages/66 shared fixtures;
+actionable status,8 safe local metadata records, no private text/body/audio/keys.
+400ms minimum local replying interval with unchanged250ms border transition and
+stale completion guards. Public synthetic trace spans real adapter fake HTTP,
+authority/TLS, Android coordinator/controller and native WPF caption checks.
+Offline preview now read-only OFF status plus an action opening existing opt-in
+settings; opening it grants nothing. Actual permissions/Stop remain in LivePanel.
+
+Local .NET10.0.402: Core27/Link121 pass,0 failed/skipped. CI build/lint/native smoke,
+matching artifacts and physical retest remain pending for this revised application.
+Official new/thinking/error docs still policy403; supplied compatibility contract
+and accessible official Google SDK source are separately attributed in D012.
+No real Gemini/OpenAI call,credential,private audio or cloud test used by Codex.
+Original Apple/Shared, animation engines/controllers and protected storage unchanged.
+
+One next action after matching CI artifacts: developer performs the single physical
+acceptance sequence in project/QA.md; any one-question cloud request requires the
+developer's separate current Free Tier review and explicit authorization.
+
+# Previous F4-B HTTP-completion evidence (superseded by response repair)
 
 2026-10-21 Asia/Karachi — continuing existing port/live-ai-voice / PR #6 from
 56bcbb573a50362e2abf88c8325978e171486836. No new PR or merge.

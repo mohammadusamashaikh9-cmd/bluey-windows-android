@@ -15,7 +15,7 @@ public static class LiveProtocol
         case "liveConsent": Wire.Keys(p,"consentId","microphone","cloud","continuous");Id(p,"consentId");Flag(p,"microphone");Flag(p,"cloud");Flag(p,"continuous");break;
         case "liveRequest": Wire.Keys(p,"authorizationId","consentId","requestId");Id(p,"authorizationId");Id(p,"consentId");Id(p,"requestId");break;
         case "liveGrant": Wire.Keys(p,"authorizationId","consentId");Id(p,"authorizationId");Id(p,"consentId");break;
-        case "liveStop": Wire.Keys(p,"code");if(!new[]{"stopped","denied","expired","limit","issuer","disconnected"}.Contains(Wire.Text(p,"code")))throw new ProtocolException("live stop");break;
+        case "liveStop": Wire.Keys(p,"code");if(!new[]{"stopped","denied","expired","limit","issuer","disconnected","unavailable","quota","configuration","credential","timeout","network","empty","budget","safety","malformed","provider"}.Contains(Wire.Text(p,"code")))throw new ProtocolException("live stop");break;
         case "liveToken":
             Wire.Keys(p,"authorizationId","requestId","secret","expiresAt","model","sessionSeconds","responses","audioSeconds","maxTokens");Id(p,"authorizationId");Id(p,"requestId");
             var secret=Wire.Text(p,"secret",512);if(secret.Length<16||secret.Any(c=>c<33||c>126))throw new ProtocolException("live secret");

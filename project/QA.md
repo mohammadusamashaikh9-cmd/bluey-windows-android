@@ -370,3 +370,38 @@ and quota metadata, and verify no second automatic request. Do not request billi
 upgrade, use sensitive content or treat the application as a zero-cost attestation.
 Physical audio quality/latency/resource usage, consent indicators, cap timing and
 real Gemini model/safety/quota behavior remain unverified until that authorized test.
+
+
+### F4-B response repair — one physical acceptance sequence
+
+Codex/CI use synthetic PCM and fake HTTP exclusively. No new real Gemini/OpenAI
+request is authorized by this code task. Previous physical evidence is developer-
+reported: five Gemini3.8 requests, two503 errors, nonzero input/output tokens,
+no proven visible answer. The F2 "pointing at this spot" bubble is demo text.
+Do not classify the remaining three responses without evidence.
+
+1. Install matching-commit artifacts, checking manifests and installed APK signer.
+   Different debug signer: deliberately reinstall/re-pair/revoke the old phone;
+   do not delete Windows protected data. Explicitly start host and reconnect.
+2. Leave provider OfflineSimulation: open Offline simulation. Verify the permission
+   rows read as statuses, the settings action opens "Gemini hold-only — opt-in"
+   without capture/consent, and an offline mock reply/bubble clears normally.
+3. **Only if the developer separately authorizes ONE real Free Tier request:** review
+   current project eligibility/billing/content-use consent, choose GeminiFree, Start
+   Android hold-only consent and authorize that exact phone once on Windows. Ask one
+   nonsensitive question≤5s. Expect thinking→pink reply→listening, the actual answer
+   once in Windows, then source reading-time cleanup. Do not press the F2 demo bubble.
+4. If no answer, record only Windows provider status (attempt/code/ms/byte and char
+   counts), Android live status and approximate UTC.503 means later manual retry;
+   budget/empty means no usable text. Do not share provider bodies, keys, QR strings,
+   transcripts or audio. No automatic second request is allowed. Stop after this
+   single attempt; sleep/background/withdrawal must discard late captions.
+
+Automated regressions must distinguish503/429/400/401/403,timeout/network,empty,
+MAX_TOKENS without visible text,safety and completed text. Success uses one shared
+synthetic trace across fake HTTP→authority→TLS→Android voice/presentation→native
+WPF caption; physical display, microphone quality, provider response compatibility,
+resource use and latency still require the above separately authorized observation.
+The budget increases128→512 combined thinking/output tokens (up to4× potential
+output allowance), with low thinking, one question and a256-character caption cap;
+this is not a cost guarantee or proof of Free Tier eligibility.

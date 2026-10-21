@@ -368,7 +368,7 @@ The phone never receives an extended deadline to compensate for that delay.
 Offline simulation defaults on; OpenAI production invocation is disabled. Provider
 settings manage separately named CurrentUser DPAPI Gemini/OpenAI credentials without
 redisplay or connectivity tests. Gemini uses only gemini-3.8-flash generateContent,
-short inline WAV and text replies; one5-second question/128 output tokens/20s per
+short inline WAV and text replies; one5-second question/512 combined thinking/output tokens (low thinking)/20s per
 approval. No tools, grounding, generated speech, retries or paid fallback. No API
 request occurs on startup, saving a key or provider selection. User-project Free Tier
 eligibility is unverified: do not authorize if uncertain or billing-enabled. Review

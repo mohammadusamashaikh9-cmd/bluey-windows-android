@@ -65,7 +65,7 @@ public sealed class GeminiTests
         await Failure(new(key,http),AudioAnswerFailure.Credential);Assert.Equal(0,h.Calls);if(key.Borrowed!=null)Assert.All(key.Borrowed,b=>Assert.Equal(0,b));
     }
     [Theory][InlineData(429,AudioAnswerFailure.Quota)][InlineData(401,AudioAnswerFailure.Credential)][InlineData(403,AudioAnswerFailure.Credential)]
-    [InlineData(400,AudioAnswerFailure.Provider)][InlineData(500,AudioAnswerFailure.Provider)][InlineData(503,AudioAnswerFailure.Provider)][InlineData(302,AudioAnswerFailure.Provider)]
+    [InlineData(400,AudioAnswerFailure.Configuration)][InlineData(500,AudioAnswerFailure.Provider)][InlineData(503,AudioAnswerFailure.Unavailable)][InlineData(302,AudioAnswerFailure.Provider)]
     public async Task HttpFailuresNeverRetryFollowRedirectOrExposeBodies(int status,AudioAnswerFailure reason) {
         var h=new Handler{Respond=(_,_)=>Task.FromResult(Json("synthetic private provider body",(HttpStatusCode)status))};using var http=new HttpClient(h);
         await Failure(new(new Key(),http),reason);Assert.Equal(1,h.Calls);
@@ -155,7 +155,7 @@ public sealed class GeminiTests
     }
     private static Message M(string type,object payload)=>Wire.Decode(Wire.Encode(type,Guid.NewGuid().ToString(),0,payload)[..^1]);
     private static async Task<LivePacket> Next(LiveAuthority authority){using var stop=new CancellationTokenSource(2000);return await authority.Reader("tls").ReadAsync(stop.Token);}
-    [Theory][InlineData(200,"audioReply")][InlineData(429,"limit")][InlineData(403,"denied")][InlineData(500,"issuer")]
+    [Theory][InlineData(200,"audioReply")][InlineData(429,"quota")][InlineData(403,"credential")][InlineData(500,"provider")][InlineData(503,"unavailable")][InlineData(400,"configuration")]
     public async Task ActualAdapterRunsOnlyAfterCurrentConsentFreeTierApprovalAndCompletedTurn(int status,string expected) {
         var key=new Key();var h=new Handler{Respond=(_,_)=>Task.FromResult(Json(status==200?Good:"synthetic private provider error",(HttpStatusCode)status))};using var http=new HttpClient(h);
         var authority=new LiveAuthority(new DeniedIssuer(),audioAnswers:new GeminiAnswers(key,http));Assert.Equal(VoiceProvider.OfflineSimulation,authority.Provider);Assert.Equal(0,h.Calls);
@@ -172,7 +172,50 @@ public sealed class GeminiTests
         authority.HandleAudio("tls",M("audioEnd",new{authorizationId=auth,turnId=turn,chunks=5,bytes=4800}));var packet=await Next(authority);
         if(status==200){Assert.Equal(expected,packet.Type);Assert.Equal("audioDone",(await Next(authority)).Type);}else{Assert.Equal("liveStop",packet.Type);Assert.Equal(expected,Wire.Text(M(packet.Type,packet.Payload).Payload,"code"));Assert.False(authority.Peers.Single().Authorized);}
         Assert.Equal(1,h.Calls);Assert.Equal(1,key.Reads);
+        var outcome=Assert.Single(authority.AudioOutcomes);Assert.Equal(status==200?"answer":expected,outcome.Code);
+        Assert.Equal(4800,outcome.InputBytes);Assert.InRange(outcome.ElapsedMs,0,60000);Assert.Equal(status==200?24:0,outcome.Characters);
+        Assert.DoesNotContain("friendly",outcome.ToString());Assert.DoesNotContain("synthetic",outcome.ToString());
         authority.HandleAudio("tls",M("audioBegin",new{authorizationId=auth,turnId=Guid.NewGuid().ToString(),format=AudioProtocol.Format}));Assert.Equal("liveStop",(await Next(authority)).Type);Assert.Equal(1,h.Calls);
+    }
+    [Theory][InlineData("{\"candidates\":[{\"finishReason\":\"MAX_TOKENS\"}]}","budget")]
+    [InlineData("{}","empty")][InlineData("{\"promptFeedback\":{\"blockReason\":\"SAFETY\"}}","safety")]
+    public async Task EmptyBudgetAndSafetyOutcomesSurviveAuthorityWithoutFabricatedReplies(string body,string code) {
+        var h=new Handler{Respond=(_,_)=>Task.FromResult(Json(body))};using var http=new HttpClient(h);
+        var a=new LiveAuthority(new DeniedIssuer(),audioAnswers:new GeminiAnswers(new Key(),http));
+        a.Open("tls","pin","device");a.SelectProvider(VoiceProvider.GeminiFree);while(a.Reader("tls").TryRead(out _)){}
+        var consent=Guid.NewGuid().ToString();var turn=Guid.NewGuid().ToString();
+        a.Handle("tls",M("liveConsent",new{consentId=consent,microphone=true,cloud=true,continuous=false}));
+        var auth=a.AuthorizeAudio("tls",consent,true);await Next(a);
+        a.HandleAudio("tls",M("audioBegin",new{authorizationId=auth,turnId=turn,format=AudioProtocol.Format}));
+        for(int n=0;n<5;n++)a.HandleAudio("tls",M("audioChunk",new{authorizationId=auth,turnId=turn,index=n,data=Convert.ToBase64String(new byte[960])}));
+        a.HandleAudio("tls",M("audioEnd",new{authorizationId=auth,turnId=turn,chunks=5,bytes=4800}));
+        var packet=await Next(a);Assert.Equal("liveStop",packet.Type);Assert.Equal(code,Wire.Text(M(packet.Type,packet.Payload).Payload,"code"));
+        Assert.False(a.Reader("tls").TryRead(out _));Assert.False(a.Peers.Single().Authorized);Assert.Equal(1,h.Calls);
+    }
+    [Fact] public async Task FakeHttpCompletedAnswerMatchesSharedAndroidPresentationTrace() {
+        using var fixture=JsonDocument.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"gemini-response-trace.json")));var trace=fixture.RootElement;
+        var h=new Handler{Respond=(_,_)=>Task.FromResult(Json(trace.GetProperty("provider").GetRawText()))};using var http=new HttpClient(h);
+        var a=new LiveAuthority(new DeniedIssuer(),audioAnswers:new GeminiAnswers(new Key(),http));a.Open("tls","pin","device");a.SelectProvider(VoiceProvider.GeminiFree);while(a.Reader("tls").TryRead(out _)){}
+        var consent=Guid.NewGuid().ToString();var turn=trace.GetProperty("ids")[2].GetString()!;
+        a.Handle("tls",M("liveConsent",new{consentId=consent,microphone=true,cloud=true,continuous=false}));var auth=a.AuthorizeAudio("tls",consent,true);await Next(a);
+        a.HandleAudio("tls",M("audioBegin",new{authorizationId=auth,turnId=turn,format=AudioProtocol.Format}));
+        for(int n=0;n<5;n++)a.HandleAudio("tls",M("audioChunk",new{authorizationId=auth,turnId=turn,index=n,data=Convert.ToBase64String(new byte[960])}));
+        a.HandleAudio("tls",M("audioEnd",new{authorizationId=auth,turnId=turn,chunks=5,bytes=4800}));
+        foreach(var expected in trace.GetProperty("hostPackets").EnumerateArray()) {
+            var packet=await Next(a);Assert.Equal(expected.GetProperty("type").GetString(),packet.Type);var payload=M(packet.Type,packet.Payload).Payload;
+            Assert.Equal(auth,Wire.Text(payload,"authorizationId"));Assert.Equal(turn,Wire.Text(payload,"turnId"));
+            if(packet.Type=="audioReply")Assert.Equal(expected.GetProperty("text").GetString(),Wire.Text(payload,"text",256));
+        }
+        Assert.Equal(1,h.Calls);Assert.False(a.Reader("tls").TryRead(out _));Assert.True(a.Peers.Single().Authorized);
+        var outcome=Assert.Single(a.AudioOutcomes);Assert.Equal("answer",outcome.Code);Assert.Equal(4800,outcome.InputBytes);Assert.Equal(trace.GetProperty("answer").GetString()!.Length,outcome.Characters);
+        Assert.DoesNotContain("synthetic",outcome.ToString());
+        // Kotlin's companion test asserts this exact trace is emitted by its real coordinator/controller.
+        var hub=new PresentationHub();int captions=0;string? previous=null;
+        foreach(var row in trace.GetProperty("presentation").EnumerateArray()) {
+            var now=row.GetProperty("at").GetInt64();hub.Apply("tls",M("presentation",row.GetProperty("payload")),now);var caption=hub.Sample(now).Caption;
+            if(caption!=null&&caption!=previous)captions++;previous=caption;
+        }
+        Assert.Equal(1,captions);Assert.Null(hub.Sample(6520).Caption);Assert.Equal(5800,CaptionSession.ReadMs(trace.GetProperty("answer").GetString()!));
     }
     [Fact] public async Task RevocationCancelsRealAdapterFakeHttpAndDiscardsCaption() {
         var entered=new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);var canceled=new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -182,6 +225,20 @@ public sealed class GeminiTests
         var auth=authority.AuthorizeAudio("tls",consent,true);await Next(authority);authority.HandleAudio("tls",M("audioBegin",new{authorizationId=auth,turnId=turn,format=AudioProtocol.Format}));
         for(int n=0;n<5;n++)authority.HandleAudio("tls",M("audioChunk",new{authorizationId=auth,turnId=turn,index=n,data=Convert.ToBase64String(new byte[960])}));
         authority.HandleAudio("tls",M("audioEnd",new{authorizationId=auth,turnId=turn,chunks=5,bytes=4800}));await entered.Task.WaitAsync(TimeSpan.FromSeconds(2));authority.Close("tls");await canceled.Task.WaitAsync(TimeSpan.FromSeconds(2));Assert.Empty(authority.Peers);Assert.Equal(1,h.Calls);
+    }
+    [Fact] public async Task OutcomeMetadataIsBoundedAcrossRepeatedExplicitApprovals() {
+        var h=new Handler{Respond=(_,_)=>Task.FromResult(Json("private synthetic provider detail",HttpStatusCode.ServiceUnavailable))};using var http=new HttpClient(h);
+        var a=new LiveAuthority(new DeniedIssuer(),audioAnswers:new GeminiAnswers(new Key(),http));a.Open("tls","pin","device");a.SelectProvider(VoiceProvider.GeminiFree);while(a.Reader("tls").TryRead(out _)){}
+        var consent=Guid.NewGuid().ToString();a.Handle("tls",M("liveConsent",new{consentId=consent,microphone=true,cloud=true,continuous=false}));
+        for(int i=0;i<12;i++) {
+            var auth=a.AuthorizeAudio("tls",consent,true);await Next(a);var turn=Guid.NewGuid().ToString();
+            a.HandleAudio("tls",M("audioBegin",new{authorizationId=auth,turnId=turn,format=AudioProtocol.Format}));
+            for(int n=0;n<5;n++)a.HandleAudio("tls",M("audioChunk",new{authorizationId=auth,turnId=turn,index=n,data=Convert.ToBase64String(new byte[960])}));
+            a.HandleAudio("tls",M("audioEnd",new{authorizationId=auth,turnId=turn,chunks=5,bytes=4800}));Assert.Equal("liveStop",(await Next(a)).Type);
+        }
+        Assert.Equal(12,h.Calls);Assert.Equal(8,a.AudioOutcomes.Length);Assert.Equal(5,a.AudioOutcomes[0].Attempt);Assert.Equal(12,a.AudioOutcomes[^1].Attempt);
+        Assert.All(a.AudioOutcomes,x=>{Assert.Equal("unavailable",x.Code);Assert.Equal(0,x.Characters);Assert.DoesNotContain("private",x.ToString());});
+        Assert.Contains("503",AudioOutcome.Message("unavailable"));Assert.Contains("no visible text",AudioOutcome.Message("budget"));
     }
     private sealed class UnknownContent:HttpContent {
         private readonly byte[] bytes;public UnknownContent(byte[] bytes){this.bytes=bytes;Headers.ContentType=new("application/json");}

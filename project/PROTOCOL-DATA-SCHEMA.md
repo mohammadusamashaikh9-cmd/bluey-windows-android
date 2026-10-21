@@ -220,4 +220,23 @@ in-place erasable managed memory; no audio is persisted/logged. Host owned binar
 buffers are zeroed. A completed audioReply represents one completed answer; existing
 VoiceController emits its presentation delta and local chirp, then audioDone completes
 the existing caption lifecycle. This is not provider response streaming or user
-transcription. Shared f4b fixtures now contain53 positive/negative framing cases.
+transcription. Shared f4b fixtures now contain66 positive/negative framing cases.
+
+
+### F4-B response repair (D012)
+
+`liveStop.code` additionally allowlists `unavailable`(503), `quota`(429),
+`configuration`(400), `credential`(401/403), `timeout`, `network`, `empty`, `budget`
+(MAX_TOKENS with no visible text), `safety`, `malformed`, `provider`. Existing stop
+codes remain valid. No provider body/status detail/text is allowed in stop payloads.
+Both validators and all66 shared cases agree; unknown codes/extra fields fail.
+Applications from before this extension fail closed on unknown codes; install the
+matching Windows/Android pair. The unchanged4096-byte limit/envelope guards apply.
+
+`gemini-response-trace.json` is public synthetic test data: C# fake HTTP produces
+its audioReply/audioDone; Android's real coordinator/controller must produce its
+exact presentation sequence; actual mTLS and WPF checks replay that sequence.
+It does not claim physical audio/provider interoperability. Android retains the
+pink reply state at least400ms, including the unchanged250ms transition, even when
+chirps are off/unavailable. Sleep/Stop/background/withdrawal invalidates that delayed
+completion. Caption cleanup remains source reading time (5800ms for this fixture).

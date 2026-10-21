@@ -78,6 +78,23 @@ internal static class NativeSmoke
             preview.Tick(.7);Check(previewArt.CurrentCaption=="This is an offline ","Offline preview starts with a caption delta");
             preview.Tick(1.3);Check(previewArt.CurrentCaption!.EndsWith("No audio or cloud is active."),"Offline preview streams complete bounded mock caption");
             preview.Tick(30);Check(previewArt.CurrentCaption==null && previewHost.Server==null,"Preview clears after source reading time without starting a listener");
+            // Same public synthetic trace verified against C# fake HTTP and Kotlin coordinator output.
+            using(var traceStream=typeof(NativeSmoke).Assembly.GetManifestResourceStream("GeminiResponseTrace")!)
+            using(var trace=JsonDocument.Parse(traceStream)) {
+                var hub=new Bluey.Link.PresentationHub();long at=0;var actualArt=new OverlayArt(e,v);
+                var adapter=new VoicePresentation(actualArt,()=>hub.Sample(at),e);int displayed=0;string? previous=null;
+                foreach(var row in trace.RootElement.GetProperty("presentation").EnumerateArray()) {
+                    at=row.GetProperty("at").GetInt64();
+                    var message=Bluey.Link.Wire.Decode(Bluey.Link.Wire.Encode("presentation",Guid.NewGuid().ToString(),0,row.GetProperty("payload"))[..^1]);
+                    hub.Apply("synthetic-tls",message,at);adapter.Tick(at/1000.0);
+                    if(actualArt.CurrentCaption!=null&&actualArt.CurrentCaption!=previous)displayed++;
+                    previous=actualArt.CurrentCaption;
+                    if(row.GetProperty("payload").GetProperty("event").GetString()=="delta")
+                        Check(actualArt.CurrentCaption==trace.RootElement.GetProperty("answer").GetString(),"Shared Gemini trace reaches actual WPF speech-bubble caption");
+                }
+                Check(displayed==1,"Completed synthetic answer displays exactly once in WPF adapter");
+                Check(actualArt.CurrentCaption==null,"Shared reply caption clears at source reading deadline");
+            }
             File.WriteAllText(Path.Combine(output, "native-smoke.json"), JsonSerializer.Serialize(new { passed = checks.Count, failed = 0, checks,
                 platform = Environment.OSVersion.ToString(), desktopAcceptance = "UNVERIFIED: physical click routing, focus, DPI changes, capture, fidelity, pacing, CPU" }, new JsonSerializerOptions { WriteIndented = true }));
             return 0;

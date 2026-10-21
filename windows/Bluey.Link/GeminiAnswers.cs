@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.Json;
 namespace Bluey.Link;
 
-public enum AudioAnswerFailure { Credential, Model, InvalidAudio, Quota, Blocked, Empty, Malformed, Provider, Network, Timeout }
+public enum AudioAnswerFailure { Credential, Model, InvalidAudio, Quota, Blocked, Empty, Malformed, Provider, Network, Timeout, Unavailable, Configuration, Budget }
 public sealed class AudioAnswerException(AudioAnswerFailure reason) : IOException("Gemini request stopped: "+reason)
 {
     public AudioAnswerFailure Reason { get; }=reason;
@@ -37,7 +37,7 @@ public static class PcmWave
 public sealed class GeminiAnswers : IAudioAnswers
 {
     public const string Model="gemini-3.8-flash";
-    public const int MaxRequestBytes=330000,MaxResponseBytes=16384,MaxOutputTokens=128;
+    public const int MaxRequestBytes=330000,MaxResponseBytes=16384,MaxOutputTokens=512;
     private readonly IMasterKey keys;private readonly HttpClient http;private readonly TimeProvider clock;
     private static readonly Uri Endpoint=new("https://generativelanguage.googleapis.com/v1beta/models/"+Model+":generateContent");
     public bool ContractVerified=>true;
@@ -105,14 +105,15 @@ public sealed class GeminiAnswers : IAudioAnswers
             json.WritePropertyName("contents");json.WriteStartArray();json.WriteStartObject();json.WriteString("role","user");json.WritePropertyName("parts");json.WriteStartArray();
             json.WriteStartObject();json.WritePropertyName("inlineData");json.WriteStartObject();json.WriteString("mimeType","audio/wav");json.WriteBase64String("data",wave);json.WriteEndObject();json.WriteEndObject();
             json.WriteStartObject();json.WriteString("text","Understand the spoken question and give a brief answer, rather than a transcription.");json.WriteEndObject();json.WriteEndArray();json.WriteEndObject();json.WriteEndArray();
-            json.WritePropertyName("generationConfig");json.WriteStartObject();json.WriteNumber("candidateCount",1);json.WriteNumber("maxOutputTokens",MaxOutputTokens);json.WriteString("responseMimeType","text/plain");
+            json.WritePropertyName("generationConfig");json.WriteStartObject();json.WriteNumber("maxOutputTokens",MaxOutputTokens);
+            json.WritePropertyName("thinkingConfig");json.WriteStartObject();json.WriteString("thinkingLevel","low");json.WriteEndObject();json.WriteString("responseMimeType","text/plain");
             json.WritePropertyName("responseModalities");json.WriteStartArray();json.WriteStringValue("TEXT");json.WriteEndArray();json.WriteEndObject();
             json.WritePropertyName("tools");json.WriteStartArray();json.WriteEndArray();json.WriteEndObject();
         }
         return checked((int)memory.Length);
     }
     private static AudioAnswerException StatusFailure(int status)=>new(status switch {
-        429=>AudioAnswerFailure.Quota,401 or 403=>AudioAnswerFailure.Credential,_=>AudioAnswerFailure.Provider
+        503=>AudioAnswerFailure.Unavailable,400=>AudioAnswerFailure.Configuration,429=>AudioAnswerFailure.Quota,401 or 403=>AudioAnswerFailure.Credential,_=>AudioAnswerFailure.Provider
     });
     private static string Parse(ReadOnlyMemory<byte> bytes)
     {
@@ -134,7 +135,8 @@ public sealed class GeminiAnswers : IAudioAnswers
             var finish=candidate.GetProperty("finishReason").GetString();
             if(finish is "SAFETY" or "RECITATION" or "BLOCKLIST" or "PROHIBITED_CONTENT" or "SPII" or "IMAGE_SAFETY")throw new AudioAnswerException(AudioAnswerFailure.Blocked);
             if(finish is not ("STOP" or "MAX_TOKENS"))throw new AudioAnswerException(AudioAnswerFailure.Provider);
-            if(!candidate.TryGetProperty("content",out var content))throw new AudioAnswerException(AudioAnswerFailure.Empty);
+            var noText=finish=="MAX_TOKENS"?AudioAnswerFailure.Budget:AudioAnswerFailure.Empty;
+            if(!candidate.TryGetProperty("content",out var content))throw new AudioAnswerException(noText);
             if(content.TryGetProperty("role",out var role)&&role.GetString()!="model")throw new JsonException();
             var parts=content.GetProperty("parts");if(parts.ValueKind!=JsonValueKind.Array||parts.GetArrayLength()>16)throw new JsonException();var text=new StringBuilder();
             foreach(var part in parts.EnumerateArray()) {
@@ -148,7 +150,7 @@ public sealed class GeminiAnswers : IAudioAnswers
                 if(char.IsControl(c)||char.IsSurrogate(c)||char.GetUnicodeCategory(c)==UnicodeCategory.Format)continue;
                 if(space&&clean.Length<256)clean.Append(' ');space=false;if(clean.Length==256)break;clean.Append(c);
             }
-            var result=clean.ToString().Trim();if(result.Length==0)throw new AudioAnswerException(AudioAnswerFailure.Empty);return result;
+            var result=clean.ToString().Trim();if(result.Length==0)throw new AudioAnswerException(noText);return result;
         }
         catch(AudioAnswerException){throw;}
         catch(Exception e)when(e is JsonException or InvalidOperationException or KeyNotFoundException or FormatException or DecoderFallbackException){throw new AudioAnswerException(AudioAnswerFailure.Malformed);}

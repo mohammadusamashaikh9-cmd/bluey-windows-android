@@ -194,7 +194,7 @@ private fun FaceDemo(incoming: String?) {
         TextButton(onClick = { live.stop("Offline simulation selected");flushVoice();voicePanel=true },modifier=Modifier.align(Alignment.BottomEnd).safeDrawingPadding()) {Text("Offline simulation")}
         TextButton(onClick={livePanel=true},modifier=Modifier.align(Alignment.BottomCenter).safeDrawingPadding()){Text("Live AI settings (opt-in)")}
         if(livePanel)LivePanel(live){livePanel=false}
-        if(voicePanel)VoicePreview(voiceState,cornerFallback,{cornerFallback=it},{voice.toggle(SystemClock.elapsedRealtime());flushVoice()},{voice.sleep(SystemClock.elapsedRealtime());flushVoice()}){voicePanel=false}
+        if(voicePanel)VoicePreview(voiceState,cornerFallback,{cornerFallback=it},{voice.toggle(SystemClock.elapsedRealtime());flushVoice()},{voice.sleep(SystemClock.elapsedRealtime());flushVoice()},openLive={voice.sleep(SystemClock.elapsedRealtime());flushVoice();voicePanel=false;livePanel=true}){voicePanel=false}
         TextButton(onClick = { voice.sleep(SystemClock.elapsedRealtime());flushVoice();connectionPanel = true }, modifier = Modifier.align(Alignment.BottomStart).safeDrawingPadding()) {
             Text("Connection", color = Color(0xFFB9B2CC))
         }

@@ -21,7 +21,7 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
     private val scope=CoroutineScope(SupervisorJob()+Dispatchers.Main.immediate);private val packets=Channel<Pair<Long,String>>(8)
     private val mutable=MutableStateFlow(LiveUi());val ui:StateFlow<LiveUi> = mutable
     private var consent:String?=null;private var authorization:String?=null;private var request:String?=null
-    private var audioMode=false;private var upload:AudioUpload?=null;private var audioDeadline=0L;private var audioReply=false;private var audioComplete=false
+    private var audioReplyAt=0L;private var audioMode=false;private var upload:AudioUpload?=null;private var audioDeadline=0L;private var audioReply=false;private var audioComplete=false
     private var continuous=false;var chirps=true;private var foreground=true;private var last=VoiceMode.asleep
     private var engine:RealtimeEngine?=null;private var capture:CaptureDevice?=null;private val chirp=LocalChirp(scope)
     private val captureEpoch=AtomicLong(0)
@@ -89,15 +89,17 @@ class LiveCoordinator(private val context:Context,private val port:LiveLan,priva
             }
             "audioReply"->{
                 if(!currentAudio(p)||audioReply||audioComplete||voice.snapshot.mode!=VoiceMode.thinking)return
-                audioReply=true;voice.accept(MockEvent(now(),pendingGen,pendingTurn,"delta",Wire.text(p,"text",256)),now());if(chirps)chirp.play()
+                audioReply=true;audioReplyAt=now();voice.accept(MockEvent(now(),pendingGen,pendingTurn,"delta",Wire.text(p,"text",256)),now());if(chirps)chirp.play()
                 mutable.update{it.copy(status="Completed answer received — local chirp; text is an answer, not a transcription")}
             }
+            // A coalesced reply/done must survive a frame even with chirps disabled/unavailable.
+            // 400 ms includes the original 250 ms border transition; cancellation checks follow it.
             "audioDone"->{
                 if(!currentAudio(p)||!audioReply||audioComplete)return;audioComplete=true
-                val epoch=providerEpoch;scope.launch{chirp.awaitQuiet();if(epoch==providerEpoch&&foreground&&voice.snapshot.generation==pendingGen&&voice.snapshot.turnId==pendingTurn){voice.accept(MockEvent(now(),pendingGen,pendingTurn,"done"),now());mutable.update{it.copy(status="Question complete — one-response budget used. Stop/Start and authorize again for another.")}}}
+                val epoch=providerEpoch;scope.launch{chirp.awaitQuiet();delay((audioReplyAt+400-now()).coerceAtLeast(0));if(epoch==providerEpoch&&foreground&&voice.snapshot.generation==pendingGen&&voice.snapshot.turnId==pendingTurn){voice.accept(MockEvent(now(),pendingGen,pendingTurn,"done"),now());mutable.update{it.copy(status="Question complete — one-response budget used. Stop/Start and authorize again for another.")}}}
             }
             "liveGrant"->{if(!allowOpenAi){stop("OpenAI is disabled in this free-tier build");return};if(Wire.text(p,"consentId")!=consent)return;authorization=Wire.text(p,"authorizationId");mutable.update{it.copy(authorized=true,status="Windows authorized — double tap to wake; OpenAI API use is billable")}}
-            "liveStop"->stop(when(Wire.text(p,"code")){"limit"->"Live limit or Google quota exhausted — stopped. Offline simulation is available; no paid fallback.";"denied"->"Windows consent, credential or safety check rejected this request. Offline simulation is available.";"expired"->"Authorization or provider request expired — stopped; no automatic retry.";"issuer"->"Provider unavailable, invalid or empty answer — stopped; offline simulation is available.";else->"Windows ended live authorization: "+Wire.text(p,"code")},notify=false)
+            "liveStop"->stop(LiveProtocol.outcomeMessage(Wire.text(p,"code")),notify=false)
             "liveToken"->{if(!allowOpenAi){stop("OpenAI is disabled in this free-tier build");return};val token=LiveProtocol.token(p)
                 if(token.authorizationId!=authorization||token.requestId!=request||voice.snapshot.mode!=VoiceMode.waking||voice.snapshot.generation!=pendingGen||voice.snapshot.turnId!=pendingTurn)return
                 request=null
