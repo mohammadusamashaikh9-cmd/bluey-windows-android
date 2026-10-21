@@ -5,8 +5,10 @@ remain [proposals](TRD.md).
 Source owners are in [PORTING-MAP](PORTING-MAP.md).
 
 F1 supplies the Android animator/renderer in `android/` (D007); F2 supplies the
-Windows overlay (D008). F3 adds the authenticated local face link (D009). Voice,
-capture/OCR, action and cloud components below remain future boundaries.
+Windows overlay (D008). F3 adds the authenticated local face link (D009). F4-A
+adds offline voice presentation; F4-B adds opt-in live voice/credential issuance.
+Capture/OCR, actions and notes below remain future boundaries unless explicitly
+identified as implemented in the checkpoint sections.
 
 ```mermaid
 flowchart LR
@@ -97,3 +99,15 @@ DeviceLink sends bounded presentation events on its existing authenticated IO pa
 C# Bluey.Link validates schema and per-session caption state. Bluey.Windows adapts
 snapshots to the existing bubble/engine controls. No socket or certificate work runs
 on rendering frames. Planned consent is immutable OFF; no provider/media layer.
+
+## F4-B native live path
+
+Bluey.Link LiveAuthority owns lease-bound cloud authorization, rate/session/TTL
+limits and asynchronous issuance; OpenAiIssuer uses fixed HTTPS with no redirects.
+Bluey.Windows AI owns CurrentUser DPAPI credentials and explicit configuration UI.
+Android LiveCoordinator adapts the existing VoiceController to RealtimeEngine,
+AudioRecord/streaming resampler/local AudioTrack chirps and one OkHttp WebSocket.
+Pure event/PCM reducers and injected LAN/capture/socket interfaces support offline
+integration tests; drawing never performs audio/socket/certificate work. Existing
+F3 trust/discovery and F4-A presentation/face pipelines remain authoritative.
+No backend, token HTTP server, capture/tool router, transcript store or second UI.

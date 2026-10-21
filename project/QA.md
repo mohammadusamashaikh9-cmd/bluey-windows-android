@@ -267,7 +267,13 @@ unchanged TLS identities, confirmed session after restart, conflict handling,
 IP-change recovery and intentional revocation/re-enrollment. No new physical R3
 pass or measured latency is inferred from builds/loopback/software-key tests.
 
-## F4-A physical offline demonstration (pending)
+<a id="f4-a-physical-offline-demonstration-pending"></a>
+
+## F4-A physical offline demonstration (functional acceptance reported)
+
+PR #5 merged at7930efd; the developer reports functional physical acceptance.
+Retained procedure below is historical QA guidance; FPS/resources/latency and
+advanced compatibility remain unmeasured. No agent-operated device test is inferred.
 
 Install matching-commit apps and verify SHA256SUMS first. Compare APK signer to the
 installed APK: CI debug signers are ephemeral. If update is rejected for a differing
@@ -286,3 +292,116 @@ Repeat disconnected to demonstrate local states. Drag/touch wins over voice; sle
 restores fresh remote gaze/mood. Compare cutouts, corners and landscape to visible
 screen and source previews; measure FPS/resources/latency separately. No mic/privacy
 indicator, external provider traffic or capture permission should appear.
+
+## F4-B offline and future billable QA
+
+All automated tests use fake issuers/HTTP handlers/Realtime transports/capture devices.
+No key or OpenAI endpoint connection is required. Retain F1–F4-A tests and references.
+Exercise consent denial, ready/trusted versus enrollment-only/revoked peers, stale
+mint replies, bounds/rates/expiry, exact GA serialization, audio little-endian/frame
+conversion and chunk invariance, anti-alias filtering, event ordering/duplicates,
+empty commit, response/session/audio limits, errors/cancel, explicit context modes,
+pause and late callbacks. Windows CI performs actual CurrentUser DPAPI set/replace/
+corrupt/remove checks. Software/fake passes do not prove phone hardware or live API.
+
+Future device test requires a separate explicit user decision authorizing a small
+billable session; do not run it as part of this task:
+
+1. Review current official model pricing/access/retention and project budgets/usage
+   notifications. Choose mini, hold-only,30 seconds,1 response,5 input seconds and
+   64 response tokens. Record the authorized test limits/cost decision; no secret in
+   logs/screenshots. Verify both matching artifacts/checksums/signer continuity.
+2. Install safely. Different debug signers require deliberate reinstall, which loses
+   Android trust/key and needs explicit re-pairing; preserve Windows DPAPI app data.
+   Start LAN host explicitly. Verify accepted F3 pairing/face/offline demo first.
+3. Configure key on Windows; confirm no provider request. Grant Android mic permission
+   and cloud consent via live UI, Start, then authorize the reviewed phone/mode on
+   Windows. Double tap wake; verify yellow→blue without mic in hold-only standby.
+4. Hold past300ms and speak briefly, release; verify mic stops, thinking→streamed text,
+   local chirp/pink border, authenticated Windows bubble, then source-timed cleanup.
+   Empty/short holds must not create responses. Usage metadata is not a billing invoice.
+5. Test sleep, Stop, pause/background, denied permission/cloud, Windows withdrawal,
+   Wi-Fi loss and revocation. Require no late wake/caption/capture/reconnect. Continuous
+   mode requires a distinct later opt-in/test authorization; it must never auto-enable.
+6. Remove key/withdraw grants, close sessions and compare actual OpenAI usage dashboard
+   after propagation. Record actual device/OS/audio route, latency, FPS/resources and
+   provider categories, never raw audio/transcripts/keys/tokens. Report failures honestly.
+
+## F4-B Gemini amendment — offline and future free-tier QA
+
+The public Gemini HTTP contract is implemented; real API/physical acceptance is
+pending. Public model/audio/free-tier facts were independently verified by the
+developer; agent web access remains proxy403, accessible official Google source
+verifies HTTP serialization. This does not verify a user's billing project. No API
+key or microphone hardware is needed for tests. Synthetic PCM, fake Gemini HTTP/
+audio-answer adapters, existing fake OpenAI HTTP/socket and actual .NET mTLS loopback
+are distinct evidence. Tests cover WAV bytes/headers, exact model/header/request,
+text-only bounds, malformed UTF-8/JSON/duplicates, safety/empty/tool replies, quota,
+provider/network failures, missing key/wrong model, deterministic20s headers/body
+timeouts, cancellation, authorization/revocation and no retries/fallback.
+
+Offline physical sequence (no cloud authorization):
+
+1. Compare the supplied APK's public signer with the installed app. Update only if
+   matching; otherwise deliberately uninstall/reinstall (loses Android Keystore/trust),
+   revoke the old phone on Windows and explicitly pair again. Preserve Windows data.
+2. Install the matching-commit Windows folder; explicitly start the secure host and
+   reconnect the trusted phone. Leave provider OfflineSimulation, both keys empty
+   and Android microphone permission denied. Confirm gaze/moods/touch precedence.
+3. Run the existing offline voice demonstration: double-tap wake, hold≥300ms,
+   release; verify blue asking→purple thinking→pink reply/local chirp→blue listening,
+   Windows mock caption and cleanup. Sleep/background must cancel delayed captions.
+4. In Windows provider settings select GeminiFree, without entering a key. Verify
+   fixed model and Free Tier review copy; without a key/current consents, attempted
+   authorization remains denied and does not test connectivity. OpenAI selection
+   returns to OfflineSimulation. No microphone capture/cloud request is expected.
+
+**Future live test — requires a separate explicit user authorization; no live test
+is authorized in this development task:** recheck the current model/terms and user
+project eligibility in official Google documentation/AI Studio. If the fixed model
+is unavailable/ineligible, stop; do not replace it or enable billing. User checks
+AI Studio Free Tier and
+that billing is not enabled, accepts Google content-use terms and separately grants
+cloud-audio consent. Configure only a Windows protected Gemini key, choose Gemini,
+start Android hold-only with while-in-use microphone permission, then authorize one
+phone/question on Windows. Ask one nonsensitive question≤5 seconds; verify completed
+answer/border/chirp/Windows bubble. Stop immediately, inspect only sanitized status
+and quota metadata, and verify no second automatic request. Do not request billing
+upgrade, use sensitive content or treat the application as a zero-cost attestation.
+Physical audio quality/latency/resource usage, consent indicators, cap timing and
+real Gemini model/safety/quota behavior remain unverified until that authorized test.
+
+
+### F4-B response repair — one physical acceptance sequence
+
+Codex/CI use synthetic PCM and fake HTTP exclusively. No new real Gemini/OpenAI
+request is authorized by this code task. Previous physical evidence is developer-
+reported: five Gemini3.8 requests, two503 errors, nonzero input/output tokens,
+no proven visible answer. The F2 "pointing at this spot" bubble is demo text.
+Do not classify the remaining three responses without evidence.
+
+1. Install matching-commit artifacts, checking manifests and installed APK signer.
+   Different debug signer: deliberately reinstall/re-pair/revoke the old phone;
+   do not delete Windows protected data. Explicitly start host and reconnect.
+2. Leave provider OfflineSimulation: open Offline simulation. Verify the permission
+   rows read as statuses, the settings action opens "Gemini hold-only — opt-in"
+   without capture/consent, and an offline mock reply/bubble clears normally.
+3. **Only if the developer separately authorizes ONE real Free Tier request:** review
+   current project eligibility/billing/content-use consent, choose GeminiFree, Start
+   Android hold-only consent and authorize that exact phone once on Windows. Ask one
+   nonsensitive question≤5s. Expect thinking→pink reply→listening, the actual answer
+   once in Windows, then source reading-time cleanup. Do not press the F2 demo bubble.
+4. If no answer, record only Windows provider status (attempt/code/ms/byte and char
+   counts), Android live status and approximate UTC.503 means later manual retry;
+   budget/empty means no usable text. Do not share provider bodies, keys, QR strings,
+   transcripts or audio. No automatic second request is allowed. Stop after this
+   single attempt; sleep/background/withdrawal must discard late captions.
+
+Automated regressions must distinguish503/429/400/401/403,timeout/network,empty,
+MAX_TOKENS without visible text,safety and completed text. Success uses one shared
+synthetic trace across fake HTTP→authority→TLS→Android voice/presentation→native
+WPF caption; physical display, microphone quality, provider response compatibility,
+resource use and latency still require the above separately authorized observation.
+The budget increases128→512 combined thinking/output tokens (up to4× potential
+output allowance), with low thinking, one question and a256-character caption cap;
+this is not a cost guarantee or proof of Free Tier eligibility.

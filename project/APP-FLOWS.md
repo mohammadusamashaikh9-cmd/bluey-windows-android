@@ -89,3 +89,28 @@ approved F3 connection. Connection transitions/pause/sleep cancel the current mo
 turn; future connection never replays offline events. Windows existing controls offer
 an Offline voice caption preview without starting a listener. Sleep does not revoke
 trusted peers. Live continuous awake audio is a future separately consented flow.
+
+## F4-B explicit live flow
+
+Offline simulation stays independent. On Android open Live AI settings, explicitly
+enable live and cloud processing, request OS microphone permission (capture stays
+OFF), choose hold-only or separately informed continuous-awake, then Start. Windows
+must already have an explicitly started authenticated host. Windows Live AI settings
+shows the exact consenting device/pin/mode; configure protected key, model/local
+limits, review pricing/budgets and explicitly authorize that selected session.
+
+Only then double tap the face to wake. A short-lived credential establishes fixed
+OpenAI WSS; session.created→session.update→validated session.updated gates readiness.
+Hold-only mic starts at the accepted300ms hold; release stops/drains capture and
+commits only >=100ms of buffered audio. A committed acknowledgment precedes explicit
+response.create. Empty input returns listening without a response. Continuous mode
+streams all awake audio, responds only to asks and has the same total-input limit.
+Real text deltas drive pink speaking/local chirp and existing Windows captions.
+Transcription is disabled; assistant text is labeled AI reply, not user transcript.
+
+Sleep/Stop, consent withdrawal, provider failure, pause/background, LAN loss/revoke
+close work and return asleep with no automatic restart/reconnect. Start and current
+Windows authorization must be repeated. A fresh credential is acquired on that new
+explicit flow; there is no indefinite token refresh loop or transcript replay.
+Elapsed time and provider-reported usage metadata remain visible in memory after
+stop; new Start resets the session counters. No audio/transcript file persistence.

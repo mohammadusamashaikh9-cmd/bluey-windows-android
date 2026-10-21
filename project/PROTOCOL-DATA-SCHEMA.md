@@ -155,3 +155,88 @@ session cannot clear a replacement owner. Disconnect/revocation clears captions.
 Interrupted streams expire15s after the last delta; complete captions use the source
 `clamp(1.2 + words*0.32, 2.8, 12) + 3` seconds. No privileged message is enabled.
 An older F3 host fails closed on the new type; update both apps before this demo.
+
+## F4-B live authorization extension (D011)
+
+Protocol v1 retains exact4096-byte newline frames and replay/session/sequence rules.
+Only these typed messages are added after authenticated ready:
+
+| Type/direction | Exact payload |
+| --- | --- |
+| liveConsent phone→host | consentId UUID; microphone/cloud/continuous booleans |
+| liveGrant host→phone | authorizationId UUID; consentId UUID |
+| liveRequest phone→host | authorizationId, consentId, requestId UUIDs |
+| liveToken host→phone | authorizationId/requestId UUIDs; secret printable ASCII16–512; expiresAt Unix seconds; model allowlist; remaining sessionSeconds1–600; responses1–20; audioSeconds1–120; maxTokens16–1024 |
+| liveStop either | code enum stopped/denied/expired/limit/issuer/disconnected |
+
+Consent is a declaration from an authenticated phone, not desktop authorization.
+Windows explicitly approves its current TLS lease/pin/consent. Changed consent,
+reconnect, stop and revocation invalidate approval. One phone is authorized at a
+time, two mints maximum per grant with30-second spacing; mint deadline10 seconds.
+Provider expiry must be future and at most60 seconds away (requested TTL30).
+No master key, arbitrary provider URL, audio, tool or capture payload is accepted.
+Live queues are bounded: phone LAN32, host live8; credential replies are memory-only.
+`protocol/f4b-cases.jsonl` adds28 shared fixtures; old40+27 remain unchanged.
+
+Audio goes directly from phone to fixed OpenAI WSS, never across LAN or to Windows.
+Provider event IDs/response IDs, local gesture generation/turn UUID and LAN envelope/
+request IDs are independent. F4-A presentation remains the sole caption path. Older
+apps reject unknown live commands; update both apps before live use. Manual refresh
+requires a fresh Start/current Windows approval; no automatic live reconnect loop.
+
+## F4-B Gemini audio-turn extension (D012)
+
+This is an additive v1 allowlist on the existing ready, pinned mTLS session.
+4096-byte newline frame limit, duplicate-key/UTF-8 validation, session/envelope
+sequence and120 messages/second limit remain unchanged. No Gemini credential is
+sent to Android. Production grants audio only after current Windows/phone authorization and Free
+Tier confirmation. Automated tests use synthetic adapters and fake HTTP only.
+
+| Type / direction | Exact payload |
+| --- | --- |
+| audioGrant / Windows→Android | authorizationId UUID, consentId UUID, provider=`GeminiFree`, sessionSeconds1..60 |
+| audioBegin / Android→Windows | authorizationId UUID, turnId UUID, format=`pcm_s16le_24000_mono` |
+| audioChunk / Android→Windows | authorizationId UUID, turnId UUID, index0..249, data canonical base64 of exactly960 bytes |
+| audioEnd / Android→Windows | authorizationId UUID, turnId UUID, chunks5..250, bytes=chunks×960 |
+| audioCancel / Android→Windows | authorizationId UUID, turnId UUID |
+| audioReply / Windows→Android | authorizationId UUID, turnId UUID, text1..256 noncontrol BMP characters |
+| audioDone / Windows→Android | authorizationId UUID, turnId UUID |
+
+The internal PCM format is the LAN transport contract. Windows wraps completed
+PCM in a44-byte RIFF/WAV PCM1 mono24kHz16bit container, MIME audio/wav, and submits
+only that authorized turn using the fixed generateContent model. No Gemini key or
+credential enters a LAN message. At most240000 bytes/5 seconds mono24k PCM16 per turn. Chunks must
+arrive exactly in order for the current turn and authorization; duplicates, reorder,
+wrong IDs, incomplete lengths, missing begin/end and unexpected direction fail.
+Capture/transfer begins only after the hold threshold and ends on release, with
+5-second Android capture cap,8-second assembly deadline,20-second answer deadline,
+60-second desktop authorization and one submitted response per approval. The native
+callback sends one20ms frame; existing32-slot LAN and8-slot response queues bound
+backpressure. Overflow cancels, never retries. No separate server or frame increase.
+
+Cancel/Stop/sleep/background/consent change/disconnect/revocation wipes host assembly
+and invalidates pending replies. Queued base64 strings are transient, not guaranteed
+in-place erasable managed memory; no audio is persisted/logged. Host owned binary
+buffers are zeroed. A completed audioReply represents one completed answer; existing
+VoiceController emits its presentation delta and local chirp, then audioDone completes
+the existing caption lifecycle. This is not provider response streaming or user
+transcription. Shared f4b fixtures now contain66 positive/negative framing cases.
+
+
+### F4-B response repair (D012)
+
+`liveStop.code` additionally allowlists `unavailable`(503), `quota`(429),
+`configuration`(400), `credential`(401/403), `timeout`, `network`, `empty`, `budget`
+(MAX_TOKENS with no visible text), `safety`, `malformed`, `provider`. Existing stop
+codes remain valid. No provider body/status detail/text is allowed in stop payloads.
+Both validators and all66 shared cases agree; unknown codes/extra fields fail.
+Applications from before this extension fail closed on unknown codes; install the
+matching Windows/Android pair. The unchanged4096-byte limit/envelope guards apply.
+
+`gemini-response-trace.json` is public synthetic test data: C# fake HTTP produces
+its audioReply/audioDone; Android's real coordinator/controller must produce its
+exact presentation sequence; actual mTLS and WPF checks replay that sequence.
+It does not claim physical audio/provider interoperability. Android retains the
+pink reply state at least400ms, including the unchanged250ms transition, even when
+chirps are off/unavailable. Sleep/Stop/background/withdrawal invalidates that delayed
+completion. Caption cleanup remains source reading time (5800ms for this fixture).

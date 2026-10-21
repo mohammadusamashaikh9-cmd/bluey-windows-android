@@ -15,7 +15,7 @@ class OfflineProvider:MockProvider {
         MockEvent(at+1600,generation,turnId,"done"))
 }
 // All input is monotonic milliseconds; no Android, sockets, coroutine jobs, audio or implicit clock.
-class VoiceController(private val provider:MockProvider=OfflineProvider(),private val id:()->String={UUID.randomUUID().toString()}) {
+class VoiceController(private var provider:MockProvider=OfflineProvider(),private val id:()->String={UUID.randomUUID().toString()}) {
     companion object {
         const val HOLD_MS=300L;const val DOUBLE_MS=300L
         val legal=mapOf(
@@ -23,9 +23,11 @@ class VoiceController(private val provider:MockProvider=OfflineProvider(),privat
             VoiceMode.waking to setOf(VoiceMode.listening,VoiceMode.asking,VoiceMode.thinking,VoiceMode.asleep),
             VoiceMode.listening to setOf(VoiceMode.asking,VoiceMode.asleep),
             VoiceMode.asking to setOf(VoiceMode.thinking,VoiceMode.listening,VoiceMode.asleep),
-            VoiceMode.thinking to setOf(VoiceMode.speaking,VoiceMode.asleep),
+            VoiceMode.thinking to setOf(VoiceMode.speaking,VoiceMode.listening,VoiceMode.asleep),
             VoiceMode.speaking to setOf(VoiceMode.listening,VoiceMode.asking,VoiceMode.asleep))
     }
+    private var externalReady=false
+    fun configureLive(next:MockProvider?,at:Long){sleep(at);externalReady=next!=null;provider=next?:OfflineProvider()}
     private var now=0L;private var mode=VoiceMode.asleep;private var generation=0L
     private var turn=id();private var caption="";private var down:Long?=null
     private var lastTap:Long?=null;private var second=false;private var moved=false
@@ -51,6 +53,8 @@ class VoiceController(private val provider:MockProvider=OfflineProvider(),privat
         require(at>=now);now=at
         if(event.generation!=generation||event.turnId!=turn||mode==VoiceMode.asleep||event.due>at)return
         when(event.kind) {
+            "error"->sleep(at)
+            "empty"->if(mode==VoiceMode.thinking){transition(VoiceMode.listening)}
             "ready"->if(mode==VoiceMode.waking) {
                 if(askWhenReady){askWhenReady=false;startReply()}
                 else transition(if(holding)VoiceMode.asking else VoiceMode.listening)
@@ -71,7 +75,7 @@ class VoiceController(private val provider:MockProvider=OfflineProvider(),privat
     }
     private fun wake() {
         generation++;turn=id();caption="";transition(VoiceMode.waking)
-        scheduled.add(MockEvent(now+600,generation,turn,"ready"))
+        if(!externalReady)scheduled.add(MockEvent(now+600,generation,turn,"ready"))
     }
     fun toggle(at:Long){tick(at);if(mode==VoiceMode.asleep){clearGesture();wake()}else sleep(at)}
     fun sleep(at:Long) {

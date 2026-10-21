@@ -101,12 +101,12 @@ class FaceRendererTest {
             if (i in listOf(1, 5, 9, 18, 36, 60)) save(render(renderer, f), "happy-transition-$i")
         }
     }
-    @Test fun manifestHasOnlyF3LanPermissionsAndFontsKeepTheirNotices() {
+    @Test fun manifestHasOnlyLanAndOptInLiveMicPermissionsAndFontNotices() {
         val app = RuntimeEnvironment.getApplication()
         val info = app.packageManager.getPackageInfo(app.packageName, android.content.pm.PackageManager.GET_PERMISSIONS)
         // AndroidX may add its app-scoped signature receiver permission, but the
-        // F3 adds only LAN and optional Android 16 opt-in Nearby permission.
-        assertEquals(setOf("android.permission.INTERNET", "android.permission.NEARBY_WIFI_DEVICES"),
+        // F4-B adds only the explicitly requested live microphone permission.
+        assertEquals(setOf("android.permission.INTERNET", "android.permission.NEARBY_WIFI_DEVICES", "android.permission.RECORD_AUDIO"),
             info.requestedPermissions.orEmpty().filter { it.startsWith("android.permission.") }.toSet())
         for (name in listOf("OFL-Fredoka.txt", "OFL-IBMPlex.txt")) {
             assertTrue(app.assets.open(name).bufferedReader().use { it.readText() }.contains("SIL OPEN FONT LICENSE"))

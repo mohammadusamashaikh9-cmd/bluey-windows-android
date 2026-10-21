@@ -37,9 +37,11 @@ class IndicatorRenderTest {
             File(dir,"voice-face-$mode-$orientation.png").outputStream().use{assertTrue(composite.compress(Bitmap.CompressFormat.PNG,100,it))}
         }
     }
-    @Test fun installedManifestHasNoCaptureOrAudioPermission() {
+    @Test fun installedManifestHasOnlyExplicitLiveAudioAndLanPermissions() {
         val app=RuntimeEnvironment.getApplication();val info=app.packageManager.getPackageInfo(app.packageName,android.content.pm.PackageManager.GET_PERMISSIONS)
-        assertEquals(setOf("android.permission.INTERNET","android.permission.NEARBY_WIFI_DEVICES"),info.requestedPermissions.orEmpty().filter{it.startsWith("android.permission.")}.toSet())
+        org.robolectric.Shadows.shadowOf(app).denyPermissions(android.Manifest.permission.RECORD_AUDIO)
+        assertEquals(android.content.pm.PackageManager.PERMISSION_DENIED,androidx.core.content.ContextCompat.checkSelfPermission(app,android.Manifest.permission.RECORD_AUDIO))
+        assertEquals(setOf("android.permission.INTERNET","android.permission.NEARBY_WIFI_DEVICES","android.permission.RECORD_AUDIO"),info.requestedPermissions.orEmpty().filter{it.startsWith("android.permission.")}.toSet())
     }
 
 }

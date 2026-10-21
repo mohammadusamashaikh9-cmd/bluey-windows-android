@@ -18,7 +18,7 @@ internal sealed class ControlsWindow : Window
     private readonly Dictionary<int, Action> hotkeys = [];
     private nint hwnd;
     private double lastStatus;
-    internal ControlsWindow(CursorEngine engine, OverlayWindow overlay, VisualState visuals, Action? openConnection = null, Action? voicePreview = null)
+    internal ControlsWindow(CursorEngine engine, OverlayWindow overlay, VisualState visuals, Action? openConnection = null, Action? voicePreview = null, Action? liveSettings = null)
     {
         this.engine = engine; this.overlay = overlay; this.visuals = visuals;
         Title = "Bluey — offline Windows demo"; Width = 430; Height = 700; MinWidth = 350; MinHeight = 420;
@@ -56,6 +56,7 @@ internal sealed class ControlsWindow : Window
         Button(demos, "Visual burst", visuals.DemoBurst);
         Button(demos, "Talk output (Ctrl+Alt+T)", () => engine.TalkUntil = engine.Now + 3);
         if (openConnection != null) Button(demos, "Secure device connection", openConnection);
+        if(liveSettings!=null)Button(demos,"Live AI settings (off by default)",liveSettings);
         if (voicePreview != null) Button(demos, "Offline voice caption preview", voicePreview);
         panel.Children.Add(new TextBlock { Text = "Offline voice simulation: no audio or cloud. Planned permissions — microphone: OFF; cloud processing: OFF; screen capture: OFF. Future live awake sessions may stream audio continuously, even without holding. No API key needed here.", TextWrapping = TextWrapping.Wrap, Margin = new(0, 12, 0, 0) });
         Button(demos, "Exit", Close);

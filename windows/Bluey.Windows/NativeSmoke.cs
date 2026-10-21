@@ -33,6 +33,21 @@ internal static class NativeSmoke
                 Check(rejected,"Corrupted protected trust fails closed without identity replacement");
                 first.Certificate.Dispose();second.Certificate.Dispose();third.Certificate.Dispose();
             } finally { if(Directory.Exists(trustDirectory))Directory.Delete(trustDirectory,true); }
+            var keyDirectory=Path.Combine(Path.GetTempPath(),"bluey-ai-check-"+Guid.NewGuid());
+            try {
+                var key=new AI.ProtectedApiKey(keyDirectory);var firstKey=System.Text.Encoding.UTF8.GetBytes("offline-test-master-placeholder");
+                Check(key.Status=="Not configured","Live master key starts unconfigured");key.Set(firstKey,false);
+                var read=key.Read();Check(read.SequenceEqual(firstKey)&&key.Status.StartsWith("Configured"),"Actual CurrentUser DPAPI key roundtrip without redisplay");System.Security.Cryptography.CryptographicOperations.ZeroMemory(read);
+                var encrypted=File.ReadAllBytes(Path.Combine(keyDirectory,"openai.dpapi"));Check(!System.Text.Encoding.UTF8.GetString(encrypted).Contains("offline-test-master"),"Credential file contains DPAPI ciphertext only");
+                var replaced=false;try{key.Set(firstKey,false);}catch(IOException){replaced=true;}Check(replaced,"Configured key requires explicit Replace");
+                var secondKey=System.Text.Encoding.UTF8.GetBytes("offline-replacement-placeholder");key.Set(secondKey,true);read=key.Read();Check(read.SequenceEqual(secondKey),"Protected key replacement is atomic and readable");System.Security.Cryptography.CryptographicOperations.ZeroMemory(read);
+                var gemini=new AI.ProtectedApiKey(keyDirectory,"gemini");Check(gemini.Status=="Not configured","Gemini credential is independent from configured OpenAI key");gemini.Set(firstKey,false);
+                read=key.Read();Check(read.SequenceEqual(secondKey),"Setting Gemini does not overwrite OpenAI");System.Security.Cryptography.CryptographicOperations.ZeroMemory(read);
+                gemini.Remove();read=key.Read();Check(gemini.Status=="Not configured"&&read.SequenceEqual(secondKey),"Removing Gemini leaves OpenAI protected credential intact");System.Security.Cryptography.CryptographicOperations.ZeroMemory(read);
+                encrypted=File.ReadAllBytes(Path.Combine(keyDirectory,"openai.dpapi"));encrypted[0]^=255;File.WriteAllBytes(Path.Combine(keyDirectory,"openai.dpapi"),encrypted);Check(key.Status.StartsWith("Unavailable"),"Corrupted master key fails closed without regeneration");
+                key.Remove();Check(key.Status=="Not configured"&&!File.Exists(Path.Combine(keyDirectory,"openai.dpapi")),"Explicit key Remove removes protected credential");
+                System.Security.Cryptography.CryptographicOperations.ZeroMemory(firstKey);System.Security.Cryptography.CryptographicOperations.ZeroMemory(secondKey);
+            }finally{if(Directory.Exists(keyDirectory))Directory.Delete(keyDirectory,true);}
             var e = new CursorEngine(new(), () => 0, () => .5); var v = new VisualState(e, () => .5);
             window = new(e, v); var before = Native.GetForegroundWindow(); window.Show();
             window.Dispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
@@ -63,6 +78,23 @@ internal static class NativeSmoke
             preview.Tick(.7);Check(previewArt.CurrentCaption=="This is an offline ","Offline preview starts with a caption delta");
             preview.Tick(1.3);Check(previewArt.CurrentCaption!.EndsWith("No audio or cloud is active."),"Offline preview streams complete bounded mock caption");
             preview.Tick(30);Check(previewArt.CurrentCaption==null && previewHost.Server==null,"Preview clears after source reading time without starting a listener");
+            // Same public synthetic trace verified against C# fake HTTP and Kotlin coordinator output.
+            using(var traceStream=typeof(NativeSmoke).Assembly.GetManifestResourceStream("GeminiResponseTrace")!)
+            using(var trace=JsonDocument.Parse(traceStream)) {
+                var hub=new Bluey.Link.PresentationHub();long at=0;var actualArt=new OverlayArt(e,v);
+                var adapter=new VoicePresentation(actualArt,()=>hub.Sample(at),e);int displayed=0;string? previous=null;
+                foreach(var row in trace.RootElement.GetProperty("presentation").EnumerateArray()) {
+                    at=row.GetProperty("at").GetInt64();
+                    var message=Bluey.Link.Wire.Decode(Bluey.Link.Wire.Encode("presentation",Guid.NewGuid().ToString(),0,row.GetProperty("payload"))[..^1]);
+                    hub.Apply("synthetic-tls",message,at);adapter.Tick(at/1000.0);
+                    if(actualArt.CurrentCaption!=null&&actualArt.CurrentCaption!=previous)displayed++;
+                    previous=actualArt.CurrentCaption;
+                    if(row.GetProperty("payload").GetProperty("event").GetString()=="delta")
+                        Check(actualArt.CurrentCaption==trace.RootElement.GetProperty("answer").GetString(),"Shared Gemini trace reaches actual WPF speech-bubble caption");
+                }
+                Check(displayed==1,"Completed synthetic answer displays exactly once in WPF adapter");
+                Check(actualArt.CurrentCaption==null,"Shared reply caption clears at source reading deadline");
+            }
             File.WriteAllText(Path.Combine(output, "native-smoke.json"), JsonSerializer.Serialize(new { passed = checks.Count, failed = 0, checks,
                 platform = Environment.OSVersion.ToString(), desktopAcceptance = "UNVERIFIED: physical click routing, focus, DPI changes, capture, fidelity, pacing, CPU" }, new JsonSerializerOptions { WriteIndented = true }));
             return 0;

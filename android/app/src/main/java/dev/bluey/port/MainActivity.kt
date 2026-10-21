@@ -40,6 +40,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import dev.bluey.port.animation.*
 import dev.bluey.port.render.FaceRenderer
 import dev.bluey.port.voice.*
+import dev.bluey.port.live.*
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -107,15 +108,17 @@ private fun FaceDemo(incoming: String?) {
         FaceRenderer(Typeface.createFromAsset(context.assets, "Fredoka.ttf"))
     }
     val frame = remember { mutableStateOf(animator.step()) }
-    val voice=remember{VoiceController()};var voiceState by remember{mutableStateOf(voice.snapshot)}
+    val voice=remember{VoiceController()};val live=remember(context,link,voice){LiveCoordinator(context,link,voice)}
+    var livePanel by remember{mutableStateOf(false)}
+    var voiceState by remember{mutableStateOf(voice.snapshot)}
     val indicator=remember{IndicatorAnimation()}
     var indicatorFrame by remember{mutableStateOf(indicator.frame(0))}
     val borderRenderer=remember(context){ModeIndicatorRenderer(Typeface.createFromAsset(context.assets,"Fredoka.ttf"))}
     val rootView=LocalView.current
     var voicePanel by remember{mutableStateOf(false)}
     var cornerFallback by rememberSaveable{mutableFloatStateOf(55f)}
-    fun flushVoice(){voiceState=voice.snapshot;voice.drain().forEach(link::present)}
-    LaunchedEffect(connection.connected){voice.connectionChanged(SystemClock.elapsedRealtime());flushVoice()}
+    fun flushVoice(){live.observe();voiceState=voice.snapshot;voice.drain().forEach(link::present)}
+    LaunchedEffect(connection.connected){if(!connection.connected)live.stop("LAN disconnected");voice.connectionChanged(SystemClock.elapsedRealtime());flushVoice()}
     var panel by rememberSaveable { mutableStateOf(false) }
     var selectedMood by rememberSaveable { mutableStateOf(Mood.listening.name) }
     var gazeX by rememberSaveable { mutableFloatStateOf(0f) }
@@ -188,13 +191,15 @@ private fun FaceDemo(incoming: String?) {
             val shape=ScreenShape(size.width,size.height,radii,safeLeft,safeTop)
             drawIntoCanvas{borderRenderer.draw(it.nativeCanvas,shape,indicatorFrame,densityPx,cutouts)}
         }
-        TextButton(onClick = { voicePanel=true },modifier=Modifier.align(Alignment.BottomEnd).safeDrawingPadding()) {Text("Offline simulation · ${voiceState.mode}")}
-        if(voicePanel)VoicePreview(voiceState,cornerFallback,{cornerFallback=it},{voice.toggle(SystemClock.elapsedRealtime());flushVoice()},{voice.sleep(SystemClock.elapsedRealtime());flushVoice()}){voicePanel=false}
+        TextButton(onClick = { live.stop("Offline simulation selected");flushVoice();voicePanel=true },modifier=Modifier.align(Alignment.BottomEnd).safeDrawingPadding()) {Text("Offline simulation")}
+        TextButton(onClick={livePanel=true},modifier=Modifier.align(Alignment.BottomCenter).safeDrawingPadding()){Text("Live AI settings (opt-in)")}
+        if(livePanel)LivePanel(live){livePanel=false}
+        if(voicePanel)VoicePreview(voiceState,cornerFallback,{cornerFallback=it},{voice.toggle(SystemClock.elapsedRealtime());flushVoice()},{voice.sleep(SystemClock.elapsedRealtime());flushVoice()},openLive={voice.sleep(SystemClock.elapsedRealtime());flushVoice();voicePanel=false;livePanel=true}){voicePanel=false}
         TextButton(onClick = { voice.sleep(SystemClock.elapsedRealtime());flushVoice();connectionPanel = true }, modifier = Modifier.align(Alignment.BottomStart).safeDrawingPadding()) {
             Text("Connection", color = Color(0xFFB9B2CC))
         }
         if (connectionPanel) ConnectionPanel(link, incoming) { connectionPanel = false }
-        TextButton(onClick = { panel = !panel }, modifier = Modifier.align(Alignment.TopEnd).safeDrawingPadding()) {
+        TextButton(onClick = { if(!panel){live.stop("Offline face demo selected");flushVoice()};panel = !panel }, modifier = Modifier.align(Alignment.TopEnd).safeDrawingPadding()) {
             Text(if (panel) "Hide demo" else "Demo", color = Color(0xFFB9B2CC))
         }
         if (panel) Surface(
@@ -228,10 +233,11 @@ private fun FaceDemo(incoming: String?) {
     }
     DisposableEffect(lifecycle, animator) {
         val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_PAUSE) {animator.touchGaze = null;voice.pause(SystemClock.elapsedRealtime());flushVoice()}
+            if(event==Lifecycle.Event.ON_RESUME)live.resume()
+            if (event == Lifecycle.Event.ON_PAUSE) {live.pause();animator.touchGaze = null;voice.pause(SystemClock.elapsedRealtime());flushVoice()}
         }
         lifecycle.addObserver(observer)
-        onDispose { lifecycle.removeObserver(observer); animator.touchGaze = null;voice.pause(SystemClock.elapsedRealtime());flushVoice() }
+        onDispose { lifecycle.removeObserver(observer); live.close();animator.touchGaze = null;voice.pause(SystemClock.elapsedRealtime());flushVoice() }
     }
 }
 

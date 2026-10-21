@@ -1,0 +1,117 @@
+{
+  "note": "Public synthetic audio/text only. C# fake HTTP emits hostPackets; Kotlin real coordinator/controller must emit presentation; WPF consumes that same trace. Not physical proof.",
+  "ids": [
+    "30000000-0000-0000-0000-000000000001",
+    "30000000-0000-0000-0000-000000000002",
+    "30000000-0000-0000-0000-000000000003"
+  ],
+  "answer": "A completed synthetic answer.",
+  "provider": {
+    "candidates": [
+      {
+        "finishReason": "STOP",
+        "content": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "A completed synthetic answer."
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "hostPackets": [
+    {
+      "type": "audioReply",
+      "text": "A completed synthetic answer."
+    },
+    {
+      "type": "audioDone"
+    }
+  ],
+  "presentation": [
+    {
+      "at": 0,
+      "payload": {
+        "turnId": "30000000-0000-0000-0000-000000000002",
+        "state": "waking",
+        "event": "state",
+        "text": ""
+      }
+    },
+    {
+      "at": 0,
+      "payload": {
+        "turnId": "30000000-0000-0000-0000-000000000002",
+        "state": "listening",
+        "event": "state",
+        "text": ""
+      }
+    },
+    {
+      "at": 300,
+      "payload": {
+        "turnId": "30000000-0000-0000-0000-000000000003",
+        "state": "asking",
+        "event": "state",
+        "text": ""
+      }
+    },
+    {
+      "at": 300,
+      "payload": {
+        "turnId": "30000000-0000-0000-0000-000000000003",
+        "state": "thinking",
+        "event": "state",
+        "text": ""
+      }
+    },
+    {
+      "at": 320,
+      "payload": {
+        "turnId": "30000000-0000-0000-0000-000000000003",
+        "state": "speaking",
+        "event": "state",
+        "text": ""
+      }
+    },
+    {
+      "at": 320,
+      "payload": {
+        "turnId": "30000000-0000-0000-0000-000000000003",
+        "state": "speaking",
+        "event": "delta",
+        "text": "A completed synthetic answer."
+      }
+    },
+    {
+      "at": 720,
+      "payload": {
+        "turnId": "30000000-0000-0000-0000-000000000003",
+        "state": "speaking",
+        "event": "done",
+        "text": ""
+      }
+    },
+    {
+      "at": 720,
+      "payload": {
+        "turnId": "30000000-0000-0000-0000-000000000003",
+        "state": "listening",
+        "event": "state",
+        "text": ""
+      }
+    },
+    {
+      "at": 6520,
+      "payload": {
+        "turnId": "30000000-0000-0000-0000-000000000003",
+        "state": "listening",
+        "event": "clear",
+        "text": ""
+      }
+    }
+  ],
+  "readMs": 5800
+}

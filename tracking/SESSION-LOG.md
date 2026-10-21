@@ -720,3 +720,150 @@ Canonical STATUS/HANDOFF/CHECKPOINTS list actual evidence and one physical demo 
 F4-A [PR #5](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/5) opened into main and attached to the task.
 Branch remains port/ai-voice-foundation; no merge. Later closeout changes only
 canonical documents; both supplied apps remain the tested e0dcda03 commit.
+
+## 2026-10-20 UTC — F4-B native live implementation
+
+Verified main/PR #5 merged at7930efd1bca650ed0358bfc56201950083ea530c; developer
+reports F4-A physical functional acceptance. Created port/live-ai-voice; original
+Apple/Shared, motion/face renderer and indicator math unchanged. D011 precedes code.
+Native live defaults OFF, explicit phone/desktop consent and protected credentials.
+No paid calls/real keys in dev or CI. Official current SDK-generated OpenAPI docs
+verify GA endpoint/TTL/model IDs/WSS/events; direct guides/pricing proxy403. Narrow
+doc-domain draft saved requiring review/save/publish; no API domain or secrets added.
+
+Local link42/42 tests pass including actual TLS token gating/revocation with fake
+issuer and fake HTTP GA contract. Windows first CI39449251522 and second39449838285
+pass build/test/native DPAPI checks. First Android39449251755 found reducer syntax;
+corrected readable reducer. Second39449838450 ran82 tests,81 passed/1 failed: retained
+F1 manifest allowlist expected only LAN, now requires intentional live RECORD_AUDIO.
+Updated that assertion to exact LAN+mic only while retaining font/license checks;
+new offline/capture/provider tests passed, no test removed/disabled. Final evidence pending.
+
+F4-B pre-closeout CI at a65cab7 passed Windows27+44 tests/23 native checks and
+Android87 tests/lint0 errors18 warnings. Lifecycle code review then found canceled
+hold-only gestures left capture active while listening. Added capture-generation
+invalidation, cancel/clear on asking→listening and a fake-native regression proving
+late frames are dropped without commit. Matching final builds rerun for that repair.
+No real capture/provider request occurred.
+
+Android0216f7c ran89 tests with88 passes/1 fixture failure: the microphone-interruption
+fixture fired the old capture error after release/drain, now correctly rejected by
+capture-generation gating. Moved that interruption to the active asking phase;
+kept explicit stale-error and abandoned-drain tests. No implementation assertion
+was weakened and no test was disabled. Final matching builds rerun.
+
+Timed minimum-duration test reproduced a real bug: a30-second Windows approval
+with one-second request delay returned liveStop because remaining29 seconds was
+validated against configuration minimum30. Separated token remaining-time range
+1–600 from UI30–600; new shared fixture and actual delayed fake-issuer regression
+verify29-second metadata and original deadline expiry. No paid request involved.
+
+## 2026-10-20 UTC — F4-B final automated evidence
+
+App/artifacts5df67442c2cb5e8967a9caca8de3aba42e4a3099: Windows39455054721 passes27 core+45 link,
+WPF build0 warnings/errors, self-contained publish,23 native DPAPI/HWND checks/13
+frames. Android39455054729 passes89 tests, zero failures/errors/skips,
+lint0 errors18 warnings, apksigner/debug APK/evidence uploaded. Shared40+27+28 corpus.
+Local final link45/45; minimum30s delayed-request red/green reproduced and repaired.
+Actual native hardware microphone/OpenAI API not exercised; all issuers/HTTP/Realtime/
+capture adapters fake in tests. No secrets added to cloud/Git/logs/artifacts.
+
+Final APKa3cc890747f9f9e685d578608b608cd980e0574f72d372b8a115dd4cc9037290; signer14a5c577e03ba05a977e38960cd31181b4b5c5bc6bf416ffc65b64242fcfc992 differs from delivered F4-A. Final downloads
+blocked by cloud policy (Androidsa10/Windowssa15), hashes/results from actual CI;
+superseded a65 Android and2f4 Windows downloads were independently inspected, not
+claimed as final artifact rehashes. STATUS records all exact hashes/links, source
+boundaries, consent/cost limits and one developer decision before any billable test.
+
+F4-B [PR #6](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/6) opened into main. No merge. Later closeout
+edits are canonical tracking only; both supplied apps remain the tested5df67442 commit.
+
+## 2026-10-20 UTC — F4-B Gemini amendment (partial, documentation blocked)
+
+Continued PR #6 at dc5d6d9 on the same branch with a clean starting tree. Four
+official Google docs GETs denied by restricted cloud proxy; additive ai.google.dev
+draft saved, requires publication. Recorded D012 before implementation. Did not
+guess provider/model/free eligibility. Implemented independent bounded audio
+protocol/authority/coordinator, protected Gemini key isolation, Free Tier/privacy UI
+and disabled production OpenAI. Synthetic answer/capture tests and actual loopback
+mTLS tests preserve old suites. Core27/Link61 pass locally; WPF cross-build clean.
+No Gemini HTTP adapter or fake HTTP provider tests until contract verification.
+No API keys, billing, real API/cloud tests, hardware capture, source animation rewrite,
+new PR or merge. CI/artifacts and physical acceptance remain distinct evidence.
+
+Final amendment evidence: app5a8978a86e9dea18cb38be0c6a87b5daf176ae82;
+Windows39463744341 succeeds Core27/Link61/native26/WPF0 warnings-errors/self-contained;
+Android39463749191 succeeds101 tests/lint0 errors18 warnings/signature/debug APK.
+Matching app artifacts/manifests uploaded; actual hashes/public signer/links and
+exact35 paths in STATUS. Downloads blocked by policy at sa1/sa9; additive draft
+saved, requires publication. Android signer39527af1… differs from previous14a5c577…,
+so deliberate reinstall/re-pairing may be required; no automatic trust deletion.
+No Google/OpenAI call/key/hardware capture; synthetic adapters only. Documentation
+contract prerequisite and Gemini HTTP implementation remain unresolved; gate partial.
+PR #6 updated in place, no new PR/merge. One next action: publish the saved Google
+and observed artifact-domain draft, then resume exact contract verification.
+
+## F4-B HTTP completion / 2026-10-21 Asia/Karachi
+
+Developer supplied independent public gemini-3.8-flash/audio/WAV/Free Tier contract
+verification, resolving implementation prerequisite while user-project eligibility
+remains unverified. Six official pages still local403; agent read official Google
+REST/SDK sources. Implemented bounded fixed-model GeminiAnswers on existing authority/
+DPAPI, enabled only behind current phone/Windows authorization and Free Tier review.
+No new trust/protocol architecture, dependencies or animation rewrite. Fake HTTP
+coverage47 cases plus retained61 Link tests pass locally (108 total); initial xUnit
+substring analyzer issue corrected. CI/artifacts pending, physical/live untested.
+No real provider request/key, hardware microphone or billing configuration used.
+
+Completion evidence: implementation685a5e883ffcfdca784641d2d086a885409871cb.
+Windows CI39494775781 passes Core27/Link108/native26/WPF clean/self-contained x64;
+Android CI39494775790 passes102 tests/lint0 errors18 warnings/debug APK signature.
+Matching artifacts/checksums uploaded; Android manifest and JUnit downloaded/verified.
+Windows archive download blocked at sa15, CI evidence only. Exact hashes/artifacts/
+20 changed paths and signer-change reinstall guidance in STATUS. No real provider
+request, key, hardware microphone, billing, new PR, merge or later milestone.
+Public-contract implementation complete; user eligibility and physical/cloud
+acceptance remain unverified. Next: one offline physical retest, provider offline,
+keys empty and microphone denied; any live test needs separate authorization.
+
+
+## F4-B response repair / 2026-10-22 Asia/Karachi
+
+Continued PR #6 at7c846a3; no new architecture/PR/milestone/merge. Developer physical
+evidence records five Gemini requests,two503s,token usage and no proven visible
+reply. Investigated without real provider calls. Seven fake-HTTP tests failed for
+128-token/missing low-thinking/503-400 collapse/empty MAX_TOKENS; eight authority
+cases failed for specific outcome loss. Baseline58278fe Android push CI39671465812
+ran103 tests,one expected failure: coalesced reply/done with chirps off skips pink.
+Minimal repair adds512 combined tokens/low thinking/no candidateCount, distinct
+safe outcomes, bounded metadata,400ms cancellation-guarded reply dwell and a shared
+synthetic adapter→TLS→Kotlin→WPF caption trace. Offline preview uses read-only statuses
+and opens existing opt-in settings; no permissions or recording activated.
+Local .NET10.0.402 Core27/Link124 pass; revised CI/artifacts pending. No real API/key,
+private audio, animation rewrite, trust replacement or original source modifications.
+One next action after matching CI artifacts: developer physical acceptance sequence
+in QA; any cloud question needs separate current Free Tier review/authorization.
+
+
+CI follow-up: c23614f push Windows39673114275 passes27/124/29 native checks,
+Android dispatch39673125599 passes111 tests/lint0 errors18 warnings, matching artifacts
+uploaded. Separate PR Windows39673123298 failed the retained cancellation test
+CancelDisconnectConsentWithdrawalAndProviderChangeDropPendingReply(mode3): its
+fixed20ms delay raced the async buffer wipe on the loaded runner. Source places
+zeroing before stale-result metadata; replace test sleeps with awaited provider
+entry and a bounded5s observed-buffer-cleanup wait, retaining all privacy/stale-reply
+assertions. No production cancellation weakening or assertion removal. New matching
+CI builds will supersede c23614f downloads. Local artifact downloads were policy403
+at sa16/sa15; earlier hashes are CI evidence only, not locally rehashed archives.
+
+
+Final delivery revision 36287bcdcb95496c3da8f61973a51fc1e337913f: Windows push39674027367 passes27 core/124 link,
+29 native checks/13 frames/WPF0 warnings-errors/self-contained x64; Android
+push39674027307 passes111 tests/lint0 errors18 warnings/signature and matching debug APK.
+Both artifacts/SHA manifests/evidence uploaded. STATUS records exact34 changed paths,
+hashes and new public signerb30fe5e09b7e180211497aaeb11ffdb056e68ccbf5e3b4cf09d9c7dfd9ce5909; differs from prior c48278f1…,
+so deliberate signer comparison/reinstall/re-pair may be needed. No identity silently
+replaced. Final PR Windows39674033798 also passes. Local downloads policy403 at
+sa2/sa10; final archive bytes not locally rehashed. No actual model request/key/audio
+capture occurred. Physical response root cause for three non503 requests remains
+unknown. No PR creation/merge/F4-C. Next: developer's single physical sequence in
+QA, with separate current authorization before any one Free Tier request.

@@ -81,6 +81,8 @@ object Wire {
                 "enroll" -> { keys(p,"deviceId","name","secret"); id(p,"deviceId"); text(p,"name",64); if (!text(p,"secret",43).matches(Regex("[A-Za-z0-9_-]{43}"))) throw ProtocolException("secret") }
                 "approve" -> { keys(p,"requestId","clientPin"); id(p,"requestId"); if (!pin(text(p,"clientPin"))) throw ProtocolException("pin") }
                 "confirm" -> { keys(p,"requestId"); id(p,"requestId") }
+                "audioGrant","audioBegin","audioChunk","audioEnd","audioCancel","audioReply","audioDone" -> dev.bluey.port.live.AudioProtocol.validate(m.type,p)
+                "liveConsent","liveRequest","liveGrant","liveToken","liveStop" -> dev.bluey.port.live.LiveProtocol.validate(m.type,p)
                 "presentation" -> PresentationCodec.validate(p)
                 "face" -> { keys(p,"gazeX","gazeY","mood","talk","atMs"); face(m) }
                 "ping", "pong" -> keys(p)

@@ -67,10 +67,20 @@ class DeviceLink(context:Context) {
     private val mutable=MutableStateFlow(LinkUi());val ui:StateFlow<LinkUi> = mutable
     private val latest=MutableStateFlow<RemoteFace?>(null);val face:StateFlow<RemoteFace?> = latest
     @Volatile private var socket:Socket?=null
-    @Volatile private var presentationSink:Channel<PresentationEvent>?=null
+    @Volatile private var presentationSink:Channel<LanOutgoing>?=null
+    private data class LanOutgoing(val type:String,val payload:com.google.gson.JsonObject)
+    val liveMessages=Channel<Message?>(8)
+    fun sendLive(type:String,payload:com.google.gson.JsonObject):Boolean {
+        if(type !in setOf("liveConsent","liveRequest","liveStop","audioBegin","audioChunk","audioEnd","audioCancel"))return false
+        if(type.startsWith("audio"))dev.bluey.port.live.AudioProtocol.validate(type,payload) else dev.bluey.port.live.LiveProtocol.validate(type,payload)
+        val sink=presentationSink?:return false
+        if(sink.trySend(LanOutgoing(type,payload)).isSuccess)return true
+        sink.close(java.io.IOException("live backpressure"));return false
+    }
+    private fun clearLive(){while(liveMessages.tryReceive().isSuccess){};liveMessages.trySend(null)}
     fun present(event:PresentationEvent) {
         val sink=presentationSink?:return // Offline events never queue for reconnection.
-        if(sink.trySend(event).isFailure)sink.close(java.io.IOException("presentation backpressure"))
+        if(sink.trySend(LanOutgoing("presentation",PresentationCodec.payload(event))).isFailure)sink.close(java.io.IOException("presentation backpressure"))
     }
     @Volatile private var foreground=false
     @Volatile private var desired=true
@@ -236,9 +246,9 @@ class DeviceLink(context:Context) {
         keys.save(host);currentHost=host;invitation=null;enrollmentAttempt=null;endpointHint=null
         attempt.phase(LinkStage.SESSION_CONFIRMED)
         mutable.update{snapshot->snapshot.copy(connected=true,trusted=host,status="${attempt.id}: Session confirmed — authenticated Windows face connected")}
-        val presentations=Channel<PresentationEvent>(32);presentationSink=presentations
+        val presentations=Channel<LanOutgoing>(32);presentationSink=presentations
         val sender=launch(Dispatchers.IO) {
-            try {for(event in presentations)wire.send("presentation",PresentationCodec.payload(event))}
+            try {for(event in presentations)wire.send(event.type,event.payload)}
             finally {tls.close()} // A failed/full bounded queue closes this session; never replay it.
         }
         // Timeout closes the socket even if the platform's blocking write is backpressured.
@@ -250,10 +260,11 @@ class DeviceLink(context:Context) {
                 val message=wire.read()
                 when(message.type) {
                     "face"->{val f=Wire.face(message);val now=SystemClock.elapsedRealtime();wire.incoming.fresh(f,now);latest.value=RemoteFace(f,now,message.id)}
+                    "liveGrant","liveToken","liveStop","audioGrant","audioReply","audioDone"->if(!liveMessages.trySend(message).isSuccess)throw ProtocolException("live receive queue")
                     "pong"->Unit
                     else->throw ProtocolException("session command")
                 }
             }
-        } finally {presentationSink=null;presentations.cancel();sender.cancel();heartbeat.cancel();tls.close()}
+        } finally {presentationSink=null;clearLive();presentations.cancel();sender.cancel();heartbeat.cancel();tls.close()}
     }
 }

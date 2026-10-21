@@ -37,6 +37,25 @@ public sealed class TlsTests
     {
         var e=await Record.ExceptionAsync(operation);Assert.True(e is AuthenticationException or IOException,$"Expected TLS/authentication denial, got {e?.GetType().Name??"success"}");
     }
+    private sealed class LoopbackIssuer:IClientSecretIssuer {public int Calls;public Task<ClientCredential> Mint(string model,LiveLimits limits,CancellationToken stop){Calls++;return Task.FromResult(new ClientCredential("offline-loopback-client-placeholder",DateTimeOffset.UtcNow.ToUnixTimeSeconds()+30));}}
+    [Fact] public async Task ActualMutualTlsGatesLiveIssuanceAndRevokedSessionCannotMint()
+    {
+        using var store=new MemoryStore();var issuer=new LoopbackIssuer();var live=new LiveAuthority(issuer,openAiEnabled:true);await using var server=new LinkServer(store,live:live);server.Start(IPAddress.Loopback,0);
+        using var cert=Identity.Create("live-phone",false);var device=Guid.NewGuid().ToString();var consent=Guid.NewGuid().ToString();server.StartPairing();
+        using(var u=await Connect(server,cert)){await u.Wire.Send("liveConsent",new{consentId=consent,microphone=true,cloud=true,continuous=false},default);await Denied(async()=>await u.Wire.Read(default));Assert.Equal(0,issuer.Calls);}
+        server.StopPairing();store.Add(new(device,"phone",Identity.Fingerprint(cert)));
+        using(var c=await Connect(server,cert)) {
+            await c.Wire.Send("connect",new{hostId=server.HostId,deviceId=device},default);Assert.Equal("ready",(await c.Wire.Read(default)).Type);
+            await c.Wire.Send("liveConsent",new{consentId=consent,microphone=true,cloud=true,continuous=false},default);
+            for(int n=0;n<100&&!live.Peers.Any(p=>p.ConsentId==consent);n++)await Task.Delay(10);
+            Assert.Equal(0,issuer.Calls);var peer=Assert.Single(live.Peers);
+            var auth=live.Authorize(peer.Lease,consent,LiveProtocol.Models[0],new());Assert.Equal("liveGrant",(await c.Wire.Read(default)).Type);
+            await c.Wire.Send("liveRequest",new{authorizationId=auth,consentId=consent,requestId=Guid.NewGuid().ToString()},default);
+            Assert.Equal("liveToken",(await c.Wire.Read(default)).Type);Assert.Equal(1,issuer.Calls);
+            server.Revoke(Identity.Fingerprint(cert));Assert.Empty(live.Peers);
+        }
+        await Denied(async()=>{using var c=await Connect(server,cert);});Assert.Equal(1,issuer.Calls);
+    }
     [Fact] public async Task PresentationRequiresReadyAndIsClearedWhenAuthenticatedSessionEnds()
     {
         using var store=new MemoryStore();await using var server=new LinkServer(store);server.Start(IPAddress.Loopback,0);
@@ -277,6 +296,42 @@ public sealed class TlsTests
         server.Decide(pin,true,request);Assert.Equal("approve",(await client.Wire.Read(default)).Type);
         await client.Wire.Send("confirm",new{requestId=request},default);Assert.Equal("ready",(await client.Wire.Read(default)).Type);
         Assert.Equal(pin,Assert.Single(store.Peers).Pin);
+    }
+
+    private sealed class SyntheticGeminiHttp:System.Net.Http.HttpMessageHandler {
+        public int Calls;
+        protected override Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request,CancellationToken stop) {
+            Calls++;using var trace=System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"gemini-response-trace.json")));
+            return Task.FromResult(new System.Net.Http.HttpResponseMessage(System.Net.HttpStatusCode.OK){Content=new System.Net.Http.StringContent(trace.RootElement.GetProperty("provider").GetRawText(),System.Text.Encoding.UTF8,"application/json")});
+        }
+    }
+    private sealed class SyntheticGeminiKey:IMasterKey {public byte[] Read()=>System.Text.Encoding.ASCII.GetBytes("synthetic-key-never-valid");}
+    [Fact] public async Task ActualMutualTlsAudioRequiresReadyConsentApprovalAndCompletionThenRejectsRevocation() {
+        using var store=new MemoryStore();var fake=new SyntheticGeminiHttp();using var http=new System.Net.Http.HttpClient(fake);var live=new LiveAuthority(new DeniedIssuer(),audioAnswers:new GeminiAnswers(new SyntheticGeminiKey(),http),openAiEnabled:false);live.SelectProvider(VoiceProvider.GeminiFree);
+        await using var server=new LinkServer(store,live:live);server.Start(IPAddress.Loopback,0);using var cert=Identity.Create("audio-phone",false);
+        var device=Guid.NewGuid().ToString();var consent=Guid.NewGuid().ToString();var turn=Guid.NewGuid().ToString();server.StartPairing();
+        using(var unauth=await Connect(server,cert)){await unauth.Wire.Send("audioBegin",new{authorizationId=Guid.NewGuid().ToString(),turnId=turn,format=AudioProtocol.Format},default);await Denied(async()=>await unauth.Wire.Read(default));Assert.Equal(0,fake.Calls);}
+        server.StopPairing();store.Add(new(device,"audio phone",Identity.Fingerprint(cert)));using var c=await Connect(server,cert);
+        await c.Wire.Send("connect",new{hostId=server.HostId,deviceId=device},default);Assert.Equal("ready",(await c.Wire.Read(default)).Type);
+        await c.Wire.Send("liveConsent",new{consentId=consent,microphone=true,cloud=true,continuous=false},default);
+        for(int i=0;i<100&&!live.Peers.Any(p=>p.ConsentId==consent);i++)await Task.Delay(10);
+        Assert.Equal(0,fake.Calls);var peer=Assert.Single(live.Peers);var auth=live.AuthorizeAudio(peer.Lease,consent,true);Assert.Equal("audioGrant",(await c.Wire.Read(default)).Type);
+        await c.Wire.Send("audioBegin",new{authorizationId=auth,turnId=turn,format=AudioProtocol.Format},default);
+        for(int i=0;i<5;i++)await c.Wire.Send("audioChunk",new{authorizationId=auth,turnId=turn,index=i,data=Convert.ToBase64String(new byte[960])},default);
+        Assert.Equal(0,fake.Calls);await c.Wire.Send("audioEnd",new{authorizationId=auth,turnId=turn,chunks=5,bytes=4800},default);
+        Assert.Equal("audioReply",(await c.Wire.Read(default)).Type);Assert.Equal("audioDone",(await c.Wire.Read(default)).Type);Assert.Equal(1,fake.Calls);
+        using(var trace=System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"gemini-response-trace.json")))) {
+            foreach(var row in trace.RootElement.GetProperty("presentation").EnumerateArray()) {
+                await c.Wire.Send("presentation",row.GetProperty("payload"),default);
+                var kind=row.GetProperty("payload").GetProperty("event").GetString();
+                if(kind=="delta") {
+                    for(int i=0;i<100&&server.Presentation.Caption==null;i++)await Task.Delay(10);
+                    Assert.Equal(trace.RootElement.GetProperty("answer").GetString(),server.Presentation.Caption);
+                }
+            }
+            for(int i=0;i<100&&server.Presentation.Caption!=null;i++)await Task.Delay(10);Assert.Null(server.Presentation.Caption);
+        }
+        server.Revoke(Identity.Fingerprint(cert));Assert.Empty(live.Peers);await Denied(async()=>{using var rejected=await Connect(server,cert);});Assert.Equal(1,fake.Calls);
     }
 
 }

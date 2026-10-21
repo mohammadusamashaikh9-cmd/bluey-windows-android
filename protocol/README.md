@@ -70,3 +70,24 @@ and27 shared `f4a-cases.jsonl` fixtures supplement the unchanged40 original fixt
 No token/audio/tool/capture command is enabled. Both apps must be updated; old
 F3 hosts reject the extension. The queue is32/session, total caption2048 UTF-16
 units, each delta256, with existing4096-byte framing and sequence/rate checks.
+
+## F4-B live authorization
+
+28 additional f4b-cases fixtures are tested by both languages. Types, directions,
+limits and revocation are specified in [canonical schema](../project/PROTOCOL-DATA-SCHEMA.md#f4-b-live-authorization-extension-d011).
+Only short-lived client secrets cross the authenticated LAN; no master key/audio/
+transcripts/tools/capture. Consent declarations alone cannot mint: desktop authorization
+must match current trusted TLS lease and consent. Existing40+27 fixtures retained.
+
+### Gemini amendment (D012)
+
+The66 shared F4-B cases include bounded audio-turn fields under the unchanged4096-byte
+cap; see canonical schema. Windows Gemini HTTP integration implements the developer-verified public contract
+and still requires separate current project Free Tier confirmation and device
+authorization. Fixtures prove codec behavior; fake HTTP proves serialization and
+failure handling. Neither proves user eligibility or real API/device acceptance.
+
+The response repair also uses `gemini-response-trace.json`: public synthetic text,
+HTTP response and presentation events verified across the C# adapter/authority,
+actual loopback TLS, Kotlin coordinator/controller and native WPF caption adapter.
+It contains no user audio or provider credentials and is not physical-device proof.

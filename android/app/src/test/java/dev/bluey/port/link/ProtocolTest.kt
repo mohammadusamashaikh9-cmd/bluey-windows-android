@@ -50,6 +50,27 @@ class ProtocolTest {
             }
         }
     }
+    @Test fun liveFixturesDecodeIdentically() {
+        val lines=javaClass.getResourceAsStream("/f4b-cases.jsonl")!!.bufferedReader().readLines()
+        assertEquals(66,lines.size)
+        for(line in lines) {
+            val fixture=JsonParser.parseString(line).asJsonObject;val frames=Frames();val decoded=mutableListOf<Message>()
+            val accepted=try {
+                fixture["chunks"].asJsonArray.forEach{part->frames.feed(Base64.getDecoder().decode(part.asString)).forEach{decoded.add(Wire.decode(it))}}
+                frames.end();true
+            }catch(_:ProtocolException){false}
+            assertEquals(fixture["name"].asString,fixture["valid"].asBoolean,accepted)
+            if(accepted) {
+                val expected=fixture["expected"].asJsonArray
+                assertEquals(expected.size(),decoded.size)
+                decoded.forEachIndexed{i,m->val e=expected[i].asJsonObject
+                    assertEquals(e["type"].asString,m.type);assertEquals(e["id"].asString,m.id)
+                    assertEquals(e["session"].asString,m.session);assertEquals(e["seq"].asLong,m.seq)
+                    assertEquals(e["payload"],m.payload)
+                }
+            }
+        }
+    }
     private fun message(seq:Long,id:String=UUID.randomUUID().toString(),sid:String=session)=Wire.decode(Wire.encode("ping",sid,seq,Wire.payload(),id).dropLast(1).toByteArray())
     private fun fails(action:()->Unit){try{action();fail("Expected protocol rejection")}catch(_:ProtocolException){}}
     @Test fun exactSequencesDuplicateIdsSessionsAndFreshness() {

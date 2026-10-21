@@ -1,7 +1,7 @@
 name: Windows overlay
 on:
   push:
-    branches: [main, port/windows-overlay, port/secure-device-link, port/ai-voice-foundation]
+    branches: [main, port/windows-overlay, port/secure-device-link, port/ai-voice-foundation, port/live-ai-voice]
     paths: ['windows/**', 'Shared/Fonts/**', 'protocol/**', '.github/workflows/windows.yml']
   pull_request:
     branches: [main]

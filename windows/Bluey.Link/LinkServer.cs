@@ -20,6 +20,7 @@ public sealed class LinkServer : IAsyncDisposable
     private readonly ConcurrentDictionary<string, CancellationTokenSource> sessions = new();
     private TcpListener? listener; private Task? accepting; private int taskId;
     private LinkFace? latest; private Enrollment? pending;
+    public LiveAuthority Live {get;}
     public Invitation Invitation { get; }
     public PresentationHub Presentations {get;}=new();
     public PresentationSnapshot Presentation=>Presentations.Sample(clock.ElapsedMilliseconds);
@@ -30,7 +31,7 @@ public sealed class LinkServer : IAsyncDisposable
     public IReadOnlyList<Peer> Peers => store.Peers;
     public int Connections => sessions.Count;
     public int Port => listener?.LocalEndpoint is IPEndPoint endpoint?endpoint.Port:throw new InvalidOperationException("Secure host not started");
-    public LinkServer(ITrustStore store, ConnectionDiagnostics? diagnostics=null) { this.store = store; Diagnostics=diagnostics??new(); Invitation = new(() => clock.ElapsedMilliseconds); }
+    public LinkServer(ITrustStore store, ConnectionDiagnostics? diagnostics=null,LiveAuthority? live=null) { Live=live??new(new DeniedIssuer()); this.store = store; Diagnostics=diagnostics??new(); Invitation = new(() => clock.ElapsedMilliseconds); }
     public void Start(IPAddress address,int port=DefaultPort)
     {
         if (listener != null) throw new InvalidOperationException("already started");
@@ -42,7 +43,7 @@ public sealed class LinkServer : IAsyncDisposable
     public void StopPairing() { Invitation.Stop(); Pending?.Decision.TrySetResult(false); }
     public void Decide(string pin, bool approved, string requestId) { var p = Pending; if (p?.Pin == pin && p.RequestId==requestId) p.Decision.TrySetResult(approved); }
     public void Revoke(string pin) { lock(trustGate) {
-        store.Remove(pin); if(Pending is {} p && p.Pin==pin) { try {p.Stop.Cancel();} catch(ObjectDisposedException) { } }
+        store.Remove(pin);foreach(var livePeer in Live.Peers.Where(p=>p.Pin==pin))Live.Close(livePeer.Lease); if(Pending is {} p && p.Pin==pin) { try {p.Stop.Cancel();} catch(ObjectDisposedException) { } }
         if (sessions.TryGetValue(pin, out var session)) { try { session.Cancel(); } catch(ObjectDisposedException) { } }
     } }
     // O(1), no serialization, crypto, storage, socket work or waiting on the animation thread.
@@ -154,10 +155,12 @@ public sealed class LinkServer : IAsyncDisposable
                 if (peer == null) throw new AuthenticationException();
                 if (sessions.TryGetValue(pin, out var old)) old.Cancel(); sessions[pin] = stop;
                 await wire.Send("ready", new { hostId = HostId, deviceId = peer.DeviceId }, stop.Token);Stage(ConnectionStage.SessionReady);
+                Live.Open(attempt,pin,peer.DeviceId);
+                var liveWriter=SendLive(wire,attempt,stop.Token);
                 var writer = SendFaces(wire, pin, stop.Token);
                 var reader = ReadHeartbeats(wire, pin, stop.Token,attempt);
-                await Task.WhenAny(writer, reader); stop.Cancel();
-                await Task.WhenAll(writer, reader);
+                await Task.WhenAny(writer, reader,liveWriter); stop.Cancel();
+                await Task.WhenAll(writer, reader,liveWriter);
             }
         }
         catch (Exception e) when (e is IOException or AuthenticationException or OperationCanceledException or TimeoutException or SocketException or InvalidOperationException or System.Security.Cryptography.CryptographicException)
@@ -179,7 +182,7 @@ public sealed class LinkServer : IAsyncDisposable
         }
         finally
         {
-            stop.Cancel(); client.Dispose();Presentations.Release(attempt);Diagnostics.Record(attempt,ConnectionStage.SessionClosed,port,failure);
+            stop.Cancel(); client.Dispose();Live.Close(attempt);Presentations.Release(attempt);Diagnostics.Record(attempt,ConnectionStage.SessionClosed,port,failure);
             if (request != null) Interlocked.CompareExchange(ref pending, null, request);
             if (pin != null) ((ICollection<KeyValuePair<string,CancellationTokenSource>>)sessions).Remove(new(pin, stop));
             slots.Release();
@@ -191,10 +194,16 @@ public sealed class LinkServer : IAsyncDisposable
         {
             var m = await wire.Read(stop);
             if (!store.Peers.Any(p => p.Pin == pin)) throw new ProtocolException("untrusted/command");
-            if(m.Type=="presentation")Presentations.Apply(lease,m,clock.ElapsedMilliseconds);
+            if(m.Type is "audioBegin" or "audioChunk" or "audioEnd" or "audioCancel")Live.HandleAudio(lease,m);
+            else if(m.Type is "liveConsent" or "liveRequest" or "liveStop")Live.Handle(lease,m);
+            else if(m.Type=="presentation")Presentations.Apply(lease,m,clock.ElapsedMilliseconds);
             else if(m.Type=="ping")await wire.Send("pong", new { }, stop);
             else throw new ProtocolException("command");
         }
+    }
+    private async Task SendLive(WireConnection wire,string lease,CancellationToken stop)
+    {
+        await foreach(var message in Live.Reader(lease).ReadAllAsync(stop))await wire.Send(message.Type,message.Payload,stop);
     }
     private async Task SendFaces(WireConnection wire, string pin, CancellationToken stop)
     {
@@ -202,6 +211,7 @@ public sealed class LinkServer : IAsyncDisposable
         using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(16));
         while (await timer.WaitForNextTickAsync(stop))
         {
+            Live.Expire();
             var face = Volatile.Read(ref latest); var now = clock.ElapsedMilliseconds;
             if (!store.Peers.Any(p => p.Pin == pin)) throw new AuthenticationException();
             if (face == null || now - face.AtMs > 2500 || !FaceFilter.Significant(last, face, sentAt, now)) continue;

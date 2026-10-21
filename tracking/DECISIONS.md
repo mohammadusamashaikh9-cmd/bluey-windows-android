@@ -266,3 +266,180 @@ session plus explicit current mic/cloud authorization, request/expiry/rate bound
 and cancellation/revocation; screen consent independent. No token endpoint or fake
 credential exists in F4-A. Follow current official GA client_secrets documentation
 in F4-B, not upstream beta token shapes/model constants. No live/billable request.
+
+## D011 / 2026-10-20 UTC — opt-in native live text voice
+
+F4-A PR #5 merged at `7930efd1bca650ed0358bfc56201950083ea530c`, verified through
+GitHub and origin/main. Its physical functional acceptance is developer-reported;
+measured fidelity/performance remains separate. F4-B keeps the accepted controller,
+indicator, face spring math, F3 TLS/trust and F4-A presentation path.
+
+Windows owns a separate CurrentUser DPAPI master-key store and explicit, in-memory,
+one-phone authorization bound to the current TLS lease, pin and Android consent ID.
+Configuring a key or starting the LAN host never calls OpenAI. Android must explicitly
+start live mode with OS microphone permission and cloud consent, then Windows must
+review/authorize that exact active phone. Each authorization allows at most two
+30-second client-secret requests, separated by 30 seconds, one active live phone,
+and a bounded session deadline. Stop/revoke/disconnect cancels mint work and signals
+closure. Delivered secrets cannot be reliably revoked by this local host: cooperative
+phone closure and TTL are not a hard provider/billing cap. No tools/media on LAN.
+
+Use GA `POST /v1/realtime/client_secrets`, nested realtime session config, text-only
+output, PCM16 little-endian mono24kHz input, manual commit/response with VAD disabled,
+no transcription/tracing/tools. Default model gpt-realtime-2.1-mini; Windows permits
+gpt-realtime-2.1 as an explicit higher-cost option. Current official generated SDK
+OpenAPI documentation verifies these model IDs, TTL10–7200 seconds and session shapes.
+Direct official web guides/pricing are currently cloud-policy blocked; documentation
+access draft saved, no pricing numbers/access entitlement inferred. Recheck official
+pricing and account availability before any separately authorized billable test.
+
+Android uses one pinned OkHttp4.12 WebSocket dependency because public Android APIs
+at min26 do not supply a suitable WebSocket client. No relay or second UI framework.
+Native AudioRecord starts only during authorized foreground live activity; streaming
+conversion emits bounded20ms PCM frames. Hold-only capture defaults on; separate
+informed continuous-awake opt-in matches source context but consumes more audio.
+Manual asks only, text deltas with local synthesized chirps, no generated cloud speech.
+Offline provider remains independent and never initializes microphone/network provider.
+
+Default local safeguards:300s session,5 responses,60s total input audio,256 output
+tokens/response, bounded queues and no automatic live reconnect. Windows can lower/
+raise within hard local ranges (600s/20/120s/1024 maxima). Explicit user wake can
+request the remaining refresh; sleep/background/disconnect stops capture/provider
+and invalidates callbacks. Provider response IDs, local gesture generations and LAN
+request/envelope IDs remain separate. Usage is memory-only metadata, not billing proof.
+No raw audio/transcripts logged or persisted. No API requests or real keys in dev/CI.
+
+D011 timing clarification: UI-configured session duration is30–600 seconds from
+Windows authorization. Live-token sessionSeconds is remaining time,1–600, so a
+30-second approval remains usable after transport/user delay without extension.
+A deterministic one-second-delay regression first reproduced the rejection, then
+verified29-second metadata and expiry at the original deadline.
+
+## D012 / 2026-10-20 UTC — Gemini amendment, host-side bounded audio turns
+
+The authorized amendment selects OfflineSimulation (default), GeminiFree (explicit
+Windows selection) and dormant optional OpenAIRealtime. Gemini must keep its own
+CurrentUser DPAPI credential; no Gemini credential travels to Android. Reuse D009
+TLS and D011 current lease/consent/desktop authorization rather than creating a
+second trust system. Hold-only PCM16LE mono24kHz turns are capped at5 seconds,
+240000 bytes,250 960-byte chunks, individually under the unchanged4096-byte frame
+cap. Only an authorized completed turn can reach a host-side audio-answer adapter.
+Cancellation/disconnect/revocation clear buffers and invalidate delayed results.
+No continuous Gemini recording, automatic retries, reconnect requests, provider
+fallback, tools, grounding or generated speech. Replies are completed text, not
+pretended provider streaming. Existing VoiceController/animation code remains intact.
+
+GeminiFree requires a separately reviewed Free Tier/non-billing-project confirmation
+and informed Google cloud-audio consent; arbitrary credentials cannot prove zero
+cost. Quota exhaustion ends authorization and offers offline simulation. Google
+free-tier content may be used to improve products; avoid sensitive conversations.
+Initial budget is one answer,5 seconds input,128 output tokens,20-second request
+and60-second local authorization. Delivery/revocation cannot undo submitted audio.
+
+**Historical prerequisite at the2026-10-20 checkpoint (resolved by completion below):** all four user-provided official Google
+pages returned proxy403 on2026-10-20. An additive ai.google.dev environment draft
+was saved, requires publication. Neither gemini-3.8-flash availability/free-tier
+audio eligibility nor current request/response contract is verified. Do not guess,
+silently choose another model or implement/enable a provider-specific HTTP adapter
+before verification. Implement/test provider-independent bounded transfer and key/
+consent isolation meanwhile; production Gemini authorization fails closed until a
+verified adapter exists. Test adapters use synthetic bytes/text only. This is an
+external documentation blocker, not evidence that the candidate model is absent.
+The previous OpenAI adapter remains source-preserved but production-disabled for
+this amendment; no paid fallback is permitted. A new SDK/plugin or hosted relay
+would add complexity without resolving this prerequisite and is rejected.
+
+### D012 completion / 2026-10-21 Asia/Karachi — verified public contract, gated account eligibility
+
+The developer supplied independent verification against the six official Google
+references: stable gemini-3.8-flash, audio input/text output, short inline WAV
+(audio/wav), standard generateContent and published Free Tier subject to eligibility/
+quotas. This resolves the previous implementation prerequisite; it does **not**
+verify any user's key/project, quota, terms acceptance or physical behavior.
+The agent retried those pages; the environment still denies them with proxy403.
+Agent-accessible official sources independently confirm the HTTP shape:
+Google cookbook Audio_REST.ipynb at550674681574d7aa24304b8fa9b31234e241ed7e
+(inline_data/generateContent), python-genai at4c1abccf258c9247218e66610790043893cd6950
+(x-goog-api-key, default Developer API v1beta route, camelCase serialization).
+Only documentation/source GETs were made; no model request or real key was used.
+
+Complete the existing IAudioAnswers boundary with a Windows-host Gemini HTTP
+adapter, not an SDK/framework. Fixed allowlist contains only gemini-3.8-flash;
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent.
+The v1beta REST route follows the official SDK/default cookbook; the selected
+model is stable. No Gemini Live, upload service, API-key query parameter, redirects,
+tools, grounding, speech generation or fallback. Completed PCM is wrapped in a44-byte
+RIFF/WAVE header: PCM1, mono,24kHz,16bit, byte rate48000/block alignment2. Inline
+JSON uses audio/wav, concise answer instructions, one text candidate and128 output
+tokens. Bound request330000 bytes and response16384 bytes,20-second cancellation/
+timeout through headers/body, no retries. Reject malformed/duplicate JSON, unexpected
+parts, safety blocks, empty answers and errors. Return only sanitized bounded text.
+Provider failure categories map to existing liveStop codes; quota uses limit with
+an explicit Android offline/no-fallback message, avoiding new protocol commands.
+
+Production starts OfflineSimulation with no authorization. Public ContractVerified
+means an implemented public contract only. Key saving/provider selection/host start
+makes no request. Gemini still requires a readable CurrentUser DPAPI key, current
+trusted TLS lease and Android consent plus explicit Windows cloud/Free Tier review
+for that exact phone. No arbitrary account is certified free by this application.
+One hold-only question per approval,5s input, existing frame/queue/session limits,
+revocation and stale-result checks remain. Existing OpenAI production disablement
+and original animation code stay intact. Automated HTTP/cancellation tests use
+synthetic audio and fake handlers only; real cloud/device acceptance remains pending.
+
+Public verification references supplied by the developer:
+[model](https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash),
+[generateContent audio](https://ai.google.dev/gemini-api/docs/generate-content/audio),
+[audio guide](https://ai.google.dev/gemini-api/docs/audio),
+[pricing](https://ai.google.dev/gemini-api/docs/pricing),
+[billing](https://ai.google.dev/gemini-api/docs/billing),
+[rate limits](https://ai.google.dev/gemini-api/docs/rate-limits).
+All six fetches were denied locally; public facts are developer-reported verification.
+
+### D012 response repair / 2026-10-22 Asia/Karachi — bounded thinking and visible outcomes
+
+Developer-reported physical evidence: credential configuration, trusted phone,
+consent and one-question approval reached Gemini; AI Studio recorded five requests,
+two503s and input/output usage. No usable end-to-end reply is proven. The existing
+F2 demo bubble is not a provider result. Responses for the other three requests are
+unknown; token usage alone does not prove visible text or budget exhaustion.
+
+The supplied current Gemini3.8 contract requires omitting candidateCount and using
+thinkingConfig.thinkingLevel="low". Keep the fixed model and increase the combined
+thinking/answer ceiling from128 to512 tokens. This can consume up to four times the
+previous output allowance, but avoids starving a short visible answer; retain the
+256-character display cap, two-short-sentence instruction, one-question approval,
+5s audio and20s deadline. No retry, extra candidate or model/provider fallback.
+Public docs were attempted again (whats-new-gemini-3.8, thinking, api-errors) and
+remain policy403. Accessible official googleapis/python-genai types corroborate
+ThinkingConfig.thinking_level and the case-insensitive LOW enum; model-specific
+support is attributed to the developer-provided current contract. Account eligibility
+is still separately unverified; no credentials or model requests are used by Codex.
+
+Preserve distinct safe outcomes across the existing strict liveStop allowlist on
+both platforms, including503,429,400,credential,timeout,network,empty,budget,safety
+and malformed/provider failures. Keep only bounded local IDs, elapsed time, byte/
+character counts and outcome codes in Windows diagnostics, never private bodies,
+text, prompts, audio or credentials. Do not infer receipt from an answer queued to
+TLS. Synthetic cross-language traces and native caption checks will verify each
+presentation boundary; physical display success still requires a separate retest.
+The offline preview will use read-only OFF indicators and link to the existing
+opt-in panel; opening settings cannot grant consent or start capture.
+
+
+Response-path experiment: baseline58278fe Android CI39671465812 completed103 tests,
+with only coalescedReplyAndDoneKeepPinkVisibleWithoutAudioHardware failing. A reply
+and immediate done with chirps off reached listening before a frame could observe
+pink. Retain400ms in the coordinator before completion (longer than the unchanged
+250ms border transition), independent of audio hardware; recheck provider epoch,
+foreground, generation and turn afterward. This is a reproduced presentation race,
+not proof that the user's provider returned text. Accessible Google SDK source
+reference for this repair: googleapis/python-genai d6af6cdd0dc0d7a0235a11c4c93e48be877970e6.
+
+
+The official SDK declares Content.parts optional. Three additional fake-HTTP
+regressions reproduced missing/null parts being mislabeled Malformed instead of
+Empty, or Budget when finishReason=MAX_TOKENS. Treat absent/null parts as no visible
+text while retaining strict type/duplicate/media validation. No physical response
+shape is inferred. The retained nonempty MAX_TOKENS behavior still returns bounded
+visible text; Budget specifically identifies exhaustion without visible text.

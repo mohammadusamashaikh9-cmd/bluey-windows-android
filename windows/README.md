@@ -2,8 +2,9 @@
 
 Unofficial source-based port of Riley's Bluey. Windows 11 x64; C#/.NET 10 and WPF.
 Original Apple sources are retained unchanged. F3 adds an explicitly started
-authenticated local TLS host; F4-A adds offline voice presentation. No microphone,
-cloud API, capture, OCR or input automation is implemented. The visual burst does not click anything.
+authenticated local TLS host; F4-A adds offline presentation. F4-B adds opt-in
+Android live voice and Windows protected credential issuance. Live AI defaults OFF;
+no screen capture, OCR or input automation is implemented. The visual burst does not click anything.
 
 ## Run the development artifact (no developer SDK)
 
@@ -326,3 +327,56 @@ The old Show speech / Clear speech controls remain available for F2 comparison.
 CI evidence includes a Windows voice-preview frame and Android border/face composites,
 with regression tests for restoring the original remote face after local interaction.
 Use the [physical QA sequence](../project/QA.md#f4-a-physical-offline-demonstration-pending).
+
+## F4-B live AI configuration (OFF by default)
+
+Controls → Live AI settings. Set a key once using the password field (saved values
+are never displayed). Replace/Remove stop all live authorizations first. Storage is
+CurrentUser DPAPI with an owner-only directory ACL under LocalAppData/Bluey/AI.
+Missing/corrupt/inaccessible keys fail closed; no auto regeneration. File removal
+revokes local availability, not SSD snapshots/backups or a key already stolen.
+
+Saving a key, opening controls and starting the LAN host make no OpenAI request.
+Android must Start with cloud consent/OS mic permission, then Windows displays the
+current trusted device/pin and hold-only/continuous preference. Review current
+OpenAI pricing and budgets; explicitly authorize that selected device/session.
+Only its subsequent wake can request a30-second client secret. Default mini model,
+text-only output/local chirps,300s/5 responses/60s input/256 response-token safeguards.
+The full gpt-realtime-2.1 option is explicit. No auto live reconnect. Stop, sleep,
+background, LAN loss/revocation withdraw current live consent. No capture or tools.
+
+Client secrets can be reused until expiry, and sessions can outlive expiry. Local
+limits/cooperative phone closure do not guarantee a hard financial cap or malicious
+client revocation. Use separate OpenAI Platform project/organization budgets and
+usage notifications; they are alerts/controls with their own limits, not a local
+proof of spend. No paid API request is authorized for CI/development.
+
+Hold-only touch cancellation stops capture and clears uncommitted audio without
+requesting a response; continuous-awake context retains its separately opted-in policy.
+Provider text completion waits for the local chirp to finish before returning the
+phone to listening; sleep/Stop invalidates that delayed completion.
+Late capture errors/drain completions are generation-bound and cannot stop a
+replacement live session or commit an abandoned question.
+Offline tests distinguish an active microphone interruption from a late error
+after a stopped capture; neither can reactivate an abandoned turn.
+The configured session minimum is30 seconds, counted from Windows authorization;
+the token carries only remaining time (possibly below30 after network/user delay).
+The phone never receives an extended deadline to compensate for that delay.
+
+## Current PR #6 Gemini amendment
+
+Offline simulation defaults on; OpenAI production invocation is disabled. Provider
+settings manage separately named CurrentUser DPAPI Gemini/OpenAI credentials without
+redisplay or connectivity tests. Gemini uses only gemini-3.8-flash generateContent,
+short inline WAV and text replies; one5-second question/512 combined thinking/output tokens (low thinking)/20s per
+approval. No tools, grounding, generated speech, retries or paid fallback. No API
+request occurs on startup, saving a key or provider selection. User-project Free Tier
+eligibility is unverified: do not authorize if uncertain or billing-enabled. Review
+Google content-use terms; avoid sensitive conversations. Configure Gemini key only
+on Windows, select GeminiFree BEFORE starting Android consent, then select the exact
+current phone and check cloud/Free Tier confirmations before authorizing ONE question.
+Stop/sleep/disconnect/revoke/background cancels work; another question needs fresh
+Start/approval. Never treat local limits as an attestation of zero cost.
+No API key is needed for offline QA; keep keys empty, microphone denied and provider
+OfflineSimulation. See project/QA.md for the offline physical retest and a separate
+future free-tier test requiring explicit user authorization. No live test ran in CI.

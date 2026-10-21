@@ -71,3 +71,45 @@ face override precedence, strict authenticated presentation events, Windows capt
 and planned OFF consents are this checkpoint. F4-B live provider/audio/token issuance,
 key configuration and all capture/privileged tools remain unimplemented. Acceptance
 requires matching app CI plus separately recorded physical gesture/fidelity QA.
+
+## F4-B live slice
+
+Protected desktop key UI, narrow authenticated live consent/grant/request/token/stop,
+foreground Android capture/resampling/WSS, GA text events and local chirps are included.
+Offline F4-A remains available. Fake integration/real loopback TLS/DPAPI checks precede
+physical or paid acceptance. No cloud session is executed in development/CI. Screen
+capture/OCR/pointing, tools, notes, hosted relay and background services remain excluded.
+
+### F4-B Gemini amendment / D012
+
+Provider-neutral implementation uses AudioProtocol/AudioTurn and a partial
+AudioAuthority on the existing LiveAuthority; no second authorization/trust system.
+Android AudioUpload and the existing LiveCoordinator reuse native capture, gestures,
+caption events and chirps. Existing32-slot F3 outbox streams bounded numbered chunks;
+Windows assembles one authorized turn and zeroes it on completion/cancel/timeout.
+Windows UI supports provider selection plus separate protected Gemini/OpenAI key
+operations, Free Tier and cloud review; Gemini requires explicit current Windows
+authorization and OpenAI production invocation is disabled. Existing offline simulation
+and original F1/F2/F3/F4-A code paths stay available.
+
+GeminiAnswers now implements the public contract verified independently by the
+developer and cross-checked against accessible Google REST/SDK source (D012).
+Bounded PCM becomes RIFF/WAV mono24k PCM16, inline audio/wav on fixed HTTPS
+v1beta generateContent; header credentials stay on Windows. One text candidate,
+512 combined thinking/output tokens (low thinking),20s overall timeout,330000-byte request/16384-byte response caps,
+strict JSON/safety/text checks and no redirects/retries. Existing authority gates
+control invocation, map sanitized failures to existing stop codes and discard late
+results. STOP remains available during key checks; authorization is rechecked on
+the UI thread afterward. No new backend, dependency, protocol message or capture
+pipeline. Fake HTTP tests replace the missing provider coverage; real API and user
+Free Tier eligibility remain untested and require separate authorization.
+
+
+F4-B response repair uses low thinking with512 combined thinking/output tokens,
+omits candidateCount and preserves short text/caption caps. The prior128-token
+allowance could starve a visible answer; physical response contents are unknown.
+Typed safe provider outcomes now survive authority and LAN validation to actionable
+Windows/Android status. Shared synthetic response/presentation traces cover fake
+HTTP, real TLS transport, Android controller and actual WPF caption application.
+Offline preview exposes read-only statuses and opens the existing opt-in settings;
+no consent, recording or provider action occurs merely by opening settings.

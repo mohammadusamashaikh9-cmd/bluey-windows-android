@@ -70,3 +70,13 @@ implementation choices, not proven cross-platform performance requirements.
 | RootView.syncFace / FaceView | voice/VoiceFace + existing FaceAnimator data override | Touch > local voice > fresh remote > demo; original springs preserved |
 | RealtimeHost.updateCaption/captionDone | Bluey.Link/Presentation + Bluey.Windows/VoicePresentation | Strict TLS-only presentation; source reading time; existing vector bubble/fade |
 | GooglyLink caption/state reference | PresentationCodec / shared f4a-cases | Versioned exact fields; no legacy generalized commands/token/media |
+
+## F4-B concrete mapping
+
+| Swift owner | Native owner | Deliberate boundary |
+| --- | --- | --- |
+| RealtimeHost.mintToken/session | Bluey.Link OpenAiIssuer/LiveAuthority + Windows AI UI | GA text-only, current lease/consent approval, protected key, bounded TTL/mints |
+| LiveVoice.connect/handle | Android RealtimeEngine/OpenAiSocket/LiveCoordinator | Session-updated gate, separate provider/local/LAN IDs, no tools/automatic reconnect |
+| LiveVoice.startAudio/converter | AndroidCapture/Pcm24k | Public AudioRecord; foreground only; bounded PCM frames/anti-alias filter |
+| LiveVoice.chirp | Chirp/LocalChirp | Local generated AudioTrack phrase; no cloud audio output |
+| RootView hold/double tap + ModeIndicator | Existing VoiceController + unchanged indicator | Native provider inputs only; sleep/pause invalidation retained |
