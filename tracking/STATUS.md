@@ -19,14 +19,134 @@ annotations. Google image/structured pages policy403; current official Google SD
 source verifies inline multipart/JSON schema shape; actual fixed-model multimodal
 behavior and arbitrary account eligibility remain unverified. D013 records limits.
 
-Local actual results: Screen29, Link140 tests pass; WPF/net10 Windows22000 build
-0 warnings/errors. Core/Windows native/Android CI and development artifacts pending.
+Final tested application revision: **6f471fa9a8144d1802cc1550c5244e3960c90f8a**. Local and actual Windows
+CI: Core27, Screen31, Link141 pass (199 total, zero failures/skips), WPF/net10
+Windows22000 build0 warnings/errors. Windows native35 checks pass; Android111
+tests pass with lint0 errors/18 retained warnings. Matching artifacts verified below.
 No real provider call/key/personal screenshot or OS input action was used. F4-B's
 five reported API attempts/two503s/no proven genuine visible answer stay pending.
 
-One next action after CI: developer runs the offline stages of the combined F4-B/
+One next action: developer runs the offline stages of the combined F4-B/
 F4-C QA sequence, recording the OCR identity blocker separately from capture/UIA/
 pointing; no cloud test occurs without separately current explicit authorization.
+
+## F4-C delivery evidence
+
+[PR #7](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/7)
+is stacked against `port/live-ai-voice`. Both PRs remain open/unmerged; PR6 head
+still4b380294e883e669d29000cd844962db88439e58. Documentation closeout after the
+application revision above changes tracking only, not the tested binaries.
+
+| Evidence | Actual result / download |
+| --- | --- |
+| Windows push CI | [39833445133](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39833445133): Core27/Screen31/Link141; native35; clean WPF; self-contained win-x64 |
+| Windows app + SHA256SUMS | [artifact12449837151](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39833445133/artifacts/12449837151); no separately installed desktop runtime required |
+| Windows TRX/native evidence | [artifact12449337862](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39833445133/artifacts/12449337862); 13 retained WPF frames +1 clearly public synthetic screen fixture; no real screenshot |
+| Android dispatch CI | [39833445930](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39833445930):111 tests,zero failed/errors/skips; lint0 errors/18 warnings; verified debug signature |
+| Matching regression APK + SHA256SUMS + signer | [artifact12450176553](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39833445930/artifacts/12450176553) |
+| Android JUnit/lint/bitmap evidence | [artifact12450012143](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39833445930/artifacts/12450012143) |
+| Additional stacked PR checks | Windows39833455671 and Android39833455629 also pass at this application revision |
+
+Downloaded both app/evidence archives. Recomputed all413 Windows manifest entries
+and the APK entry successfully; inspected actual TRX totals, native JSON and the
+public ALPHA BETA/Save reference image. Windows native stderr is empty. Artifacts
+retain14 days from2026-10-22; authenticated GitHub download may be required.
+
+| File | SHA-256 |
+| --- | --- |
+| Windows artifact ZIP (GitHub upload digest) | `5d92d002e1bb7a69ecc66315cec12995261959bdae069110c1cbf697510cd210` |
+| Bluey.Windows.exe | `4d9893b60bd56f753da20450ce7bd2780fffcd33cedb0b384ad85babcb8b8c38` |
+| Bluey.Windows.dll | `0627488dc8d3752e81d32db1c35f327820ef9c61b654bd67a7982a7b82c970b7` |
+| Windows SHA256SUMS.txt | `50a592357d71987cf914249d7270566edd3fea266126b0cc9f5dee100f809d26` |
+| Android app-debug.apk | `4f7babbea811f8818193aad4ddf41c1f839528753ad5a1b3f102124b4ce2de23` |
+| Android SHA256SUMS.txt | `dc32b8cfabfd4ea5bab8e23b3be630bbf0757b7f6cc48cb9c712aaa508efbfa7` |
+
+New APK public signer SHA256:
+`4e6a46301206873067494a9615fb2ffe959c2622ce3df81f4a2f8b8f1f7f7789`,
+different from the F4-B delivered b30fe5e0… signer. Android app/protocol source is
+unchanged: retain the installed accepted F4-B APK for the offline screen test.
+If deliberately replacing it, compare signers first; a mismatch requires conscious
+uninstall/reinstall, loses Android Keystore identity/trust and needs F3 re-pairing
+plus revocation of the old phone. Never erase Windows protected keys/trust files.
+
+Native evidence is precise: actual Windows11 runner JPEG encode/decode/blank-image
+rejection and read-only UIA public-button/password-exclusion checks passed. The
+unpackaged OCR guard reports `UnavailableIdentity`; **no OCR recognition pass**.
+WGC desktop capture was deliberately NOT EXECUTED in CI. Real capture consent,
+protected/HDR content, exclusion, DPI changes, actual pointing/focus/fidelity,
+FPS/resource usage and optional fixed-model multimodal replies remain UNVERIFIED.
+Microsoft-supported package identity deployment remains the native OCR blocker;
+no install/registration or unsupported workaround was added. Multi-monitor targets,
+automatic redaction and input automation are not implemented.
+
+Fake HTTP/synthetic audio and pixels cover one combined WAV+JPEG request, strict
+answer/target schema, separate screen consent/current F3 one-question authorization,
+invalid target suppression, cancellation and no retry. Actual mutual TLS revocation
+clears media and rejects a late fake reply. No new LAN message/frame size, credential
+path, real provider request, key, paid call or personal capture was used. Source
+comparison preserves1100/.72 JPEG, L400/W600/C140 and450ms/5000 UIA budgets,
+0–1000/y-down geometry and existing1s flight allowance+2.2s hold/5s quiet-home;
+primary DIP conversion and edge clamping are explicit platform adaptations.
+
+Static closeout:17 canonical/Windows Markdown files,218 local links/anchors resolved
+(including explicit legacy HTML anchors); protocol JSONL parses; git diff --check.
+Original Mac/iOS/Shared/assets, Android app, Bluey.Core motion and OverlayArt unchanged
+against4b38029. Initial local API/compiler errors corrected during implementation;
+all final local/CI tests pass. An initial link-check false positive on an existing
+HTML anchor was resolved by recognizing explicit anchors, without changing that link.
+
+Exact48 changed paths against the F4-B base:
+
+```text
+.github/workflows/android.yml
+.github/workflows/windows.yml
+project/APP-FLOWS.md
+project/ARCHITECTURE.md
+project/IMPLEMENTATION.md
+project/PORTING-MAP.md
+project/PRD.md
+project/PROTOCOL-DATA-SCHEMA.md
+project/QA.md
+project/SECURITY.md
+project/TRD.md
+tracking/CHECKPOINTS.md
+tracking/DECISIONS.md
+tracking/HANDOFF.md
+tracking/SESSION-LOG.md
+tracking/STATUS.md
+windows/Bluey.Link.Tests/GeminiScreenTests.cs
+windows/Bluey.Link.Tests/ScreenAuthorityTests.cs
+windows/Bluey.Link.Tests/TlsTests.cs
+windows/Bluey.Link/AudioAuthority.cs
+windows/Bluey.Link/Bluey.Link.csproj
+windows/Bluey.Link/GeminiAnswers.cs
+windows/Bluey.Link/LinkServer.cs
+windows/Bluey.Link/LiveAuthority.cs
+windows/Bluey.Link/ScreenAnswers.cs
+windows/Bluey.Link/ScreenAuthority.cs
+windows/Bluey.Screen.Tests/Bluey.Screen.Tests.csproj
+windows/Bluey.Screen.Tests/ControlTreeTests.cs
+windows/Bluey.Screen.Tests/ScreenTests.cs
+windows/Bluey.Screen.Tests/WorkflowTests.cs
+windows/Bluey.Screen/Bluey.Screen.csproj
+windows/Bluey.Screen/ControlTree.cs
+windows/Bluey.Screen/Geometry.cs
+windows/Bluey.Screen/ScreenSession.cs
+windows/Bluey.Screen/ScreenWorkflow.cs
+windows/Bluey.Screen/Targets.cs
+windows/Bluey.Windows/Bluey.Windows.csproj
+windows/Bluey.Windows/Connection/WindowsLinkHost.cs
+windows/Bluey.Windows/ControlsWindow.cs
+windows/Bluey.Windows/NativeSmoke.cs
+windows/Bluey.Windows/OverlayWindow.cs
+windows/Bluey.Windows/Program.cs
+windows/Bluey.Windows/Screen/NativeAnalysis.cs
+windows/Bluey.Windows/Screen/NativeCapture.cs
+windows/Bluey.Windows/Screen/ScreenCoordinator.cs
+windows/Bluey.Windows/Screen/ScreenSmoke.cs
+windows/Bluey.Windows/Screen/ScreenWindow.cs
+windows/README.md
+```
 
 # Retained F4-B evidence (no new acceptance)
 

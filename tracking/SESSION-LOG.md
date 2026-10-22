@@ -891,3 +891,28 @@ codec/UIA smoke pending Windows runner. Android app and all original sources and
 animation math unchanged. Both CI workflows/artifacts pending, physical unverified.
 Next after CI: offline combined QA stages, with OCR identity and F4-B provider gates
 kept separate. No real cloud action is authorized by this task.
+
+
+F4-C completion: PR7 opened/attached against port/live-ai-voice; PR6 remains open at
+4b38029, neither merged. Final application 6f471fa9a8144d1802cc1550c5244e3960c90f8a. Native review
+refinement timestamps first frame, closes capture immediately after copy, validates
+actual BGRA buffer length/blank pixels, bounds label scanning and rechecks cloaking;
+regression synchronization awaits real fake-provider entry/cleanup, no assertions
+removed. Local Core27/Screen31/Link141 and WPF0 warnings/errors pass. Windows push
+39833445133 and Android dispatch39833445930 pass at that SHA; stacked PR checks
+39833455671/39833455629 also pass. Windows native35 checks/14 public fixture frames,
+Android111 tests/lint0 errors18 warnings. Downloaded apps/evidence; all413 Windows
+manifest entries and APK checksum recomputed successfully; inspected TRX/native
+JSON/public synthetic image. Exact artifacts/hashes/48 paths/signer in STATUS.
+
+No actual WGC screenshot in CI, OCR recognition or Gemini request was made. Actual
+WinRT codec/blank rejection and native UIA public labels/password exclusion pass.
+OCR identity blocker is confirmed by Microsoft docs and runner availability guard,
+not resolved; physical capture/DPI/fidelity/performance and optional model behavior
+remain unverified. New debug signer differs; Android app source unchanged so retain
+installed F4-B APK unless consciously reinstalling/re-pairing. Static17 Markdown/
+218 links and JSONL checks pass; initial scanner needed explicit HTML anchor support.
+Original Apple/assets, Android app, motion/OverlayArt unchanged. Closeout updates
+tracking only. Exactly one next action: developer performs offline combined QA
+stages in project/QA.md, recording OCR unavailable separately; cloud stage requires
+separate current Free Tier/phone/screenshot authorization. No provider credit spent.

@@ -96,8 +96,12 @@ behavior and user project eligibility remain UNVERIFIED. No real Codex API call.
 ## F4-C stacked checkpoint / 2026-10-22 Asia/Karachi
 
 Active code/CI slice, explicitly authorized before F4-B physical acceptance. Base
-4b38029 on port/live-ai-voice; no PR6 modification/merge. Local Screen29/Link140 pass
-and native WPF cross-build0 warnings/errors. Native WGC/UIA/codec smoke and Android
-CI/artifacts pending. Native OCR deployment BLOCKED for portable output: Microsoft
+4b38029 on port/live-ai-voice; PR7 targets that branch, no PR6 modification/merge.
+Application 6f471fa9a8144d1802cc1550c5244e3960c90f8a: local/Windows CI Core27,Screen31,
+Link141 pass; native35 checks and WPF0 warnings/errors; Android111 tests/lint0 errors
+18 warnings. Matching Windows39833445133/Android39833445930 artifacts/evidence
+uploaded, downloaded and SHA-verified (413 Windows entries+APK). STATUS records
+exact links/hashes/signer. Native codec/UIA checks use public fixtures; WGC capture
+not executed. Documentation closeout changes no application code. Native OCR deployment BLOCKED for portable output: Microsoft
 requires package identity. No false recognition/capture claim or silent installation.
 F4-B/F4-C physical/provider acceptance stays unverified. See D013 and combined QA.
