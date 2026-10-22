@@ -36,7 +36,7 @@ internal sealed class ScreenWindow:Window
         panel.Children.Add(phones);panel.Children.Add(reviewed);
         Button("Share THIS reviewed snapshot for ONE authorized phone question",()=>{if(previewId==null||reviewed.IsChecked!=true||phones.SelectedItem is not PhoneRow row||row.Peer.ConsentId==null)throw new ScreenException("review-and-select-current-phone");host.Live.ApproveScreen(row.Peer.Lease,row.Peer.ConsentId,previewId,true);reviewed.IsChecked=false;return Task.CompletedTask;});
         panel.Children.Add(status);choices.ItemsSource=coordinator.Choices();choices.SelectedIndex=0;
-        timer.Tick+=(_,_)=>{if(!busy)Refresh();};timer.Start();Closed+=(_,_)=>{timer.Stop();coordinator.Stop();ClearPreview();};Refresh();
+        timer.Tick+=(_,_)=>Refresh();timer.Start();Closed+=(_,_)=>{timer.Stop();coordinator.Stop();ClearPreview();};Refresh();
     }
     private void ClearPreview(){preview.Source=null;previewId=null;targets.ItemsSource=null;reviewed.IsChecked=false;}
     private void Refresh() {
@@ -48,7 +48,7 @@ internal sealed class ScreenWindow:Window
             if(!rows.SequenceEqual(targets.Items.Cast<TargetRow>())){targets.ItemsSource=rows;targets.SelectedItem=rows.FirstOrDefault(r=>r.Target.Id==selected);}
         }
         var lease=(phones.SelectedItem as PhoneRow)?.Peer.Lease;var peers=host.Live.Peers.Select(p=>new PhoneRow(p)).ToArray();if(!peers.SequenceEqual(phones.Items.Cast<PhoneRow>())){phones.ItemsSource=peers;phones.SelectedItem=peers.FirstOrDefault(p=>p.Peer.Lease==lease);}
-        status.Text=(operationFailure==null?"":operationFailure+"\n")+coordinator.Status+"\nCloud screen sharing: "+(coordinator.State.CloudApproved?"ONE QUESTION APPROVED":"OFF")+(info==null?"\nSnapshot: none":$"\nSnapshot {info.Id} · age {info.AgeMs/1000}s /60s · {info.Surface.Kind} · {info.Surface.ImageWidth}×{info.Surface.ImageHeight} · {info.Targets.Length} targets · OCR {info.Ocr}");
+        status.Text=(operationFailure==null?"":operationFailure+"\n")+"Screen capture: "+(coordinator.Busy&&coordinator.Status.StartsWith("Screen capture: Capturing")?"Capturing":info==null?"OFF":"Preview ready")+"\nLast operation: "+coordinator.Status+"\nCloud screen sharing: "+(coordinator.State.CloudApproved?"ONE QUESTION APPROVED":"OFF")+(info==null?"\nSnapshot: none":$"\nSnapshot {info.Id} · age {info.AgeMs/1000}s /60s · {info.Surface.Kind} · {info.Surface.ImageWidth}×{info.Surface.ImageHeight} · {info.Targets.Length} targets · OCR {info.Ocr}");
     }
     private sealed record TargetRow(Target Target){public override string ToString()=>$"{Target.Id} [{Target.Role}] {Target.Text} @{Target.NormalizedBounds.Center.X:0},{Target.NormalizedBounds.Center.Y:0}";}
     private sealed record PhoneRow(Bluey.Link.LivePeer Peer){public override string ToString()=>$"Device {Peer.DeviceId} · pin {Peer.Pin} · mic={Peer.Microphone}, cloud={Peer.Cloud}, approved={Peer.Authorized}";}
