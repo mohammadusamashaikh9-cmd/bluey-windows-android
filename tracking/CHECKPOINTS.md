@@ -97,10 +97,11 @@ behavior and user project eligibility remain UNVERIFIED. No real Codex API call.
 
 Active code/CI slice, explicitly authorized before F4-B physical acceptance. Base
 4b38029 on port/live-ai-voice; PR7 targets that branch, no PR6 modification/merge.
-Application 6f471fa9a8144d1802cc1550c5244e3960c90f8a: local/Windows CI Core27,Screen31,
+Application fc832f8890d8dc0f8e565b74a4a79b4687343828: Windows CI Core27,Screen32,
 Link141 pass; native35 checks and WPF0 warnings/errors; Android111 tests/lint0 errors
-18 warnings. Matching Windows39833445133/Android39833445930 artifacts/evidence
-uploaded, downloaded and SHA-verified (413 Windows entries+APK). STATUS records
+18 warnings. Matching Windows39834969073/Android39834970366 artifacts/evidence
+uploaded with CI SHA manifests. Final downloads policy-blocked at sa19/sa9; earlier
+6f471fa downloads rehashed413 Windows entries+APK, superseded. STATUS records
 exact links/hashes/signer. Native codec/UIA checks use public fixtures; WGC capture
 not executed. Documentation closeout changes no application code. Native OCR deployment BLOCKED for portable output: Microsoft
 requires package identity. No false recognition/capture claim or silent installation.

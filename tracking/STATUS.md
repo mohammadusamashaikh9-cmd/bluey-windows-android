@@ -19,8 +19,8 @@ annotations. Google image/structured pages policy403; current official Google SD
 source verifies inline multipart/JSON schema shape; actual fixed-model multimodal
 behavior and arbitrary account eligibility remain unverified. D013 records limits.
 
-Final tested application revision: **6f471fa9a8144d1802cc1550c5244e3960c90f8a**. Local and actual Windows
-CI: Core27, Screen31, Link141 pass (199 total, zero failures/skips), WPF/net10
+Final tested application revision: **fc832f8890d8dc0f8e565b74a4a79b4687343828**. Actual Windows
+CI: Core27, Screen32, Link141 pass (200 total, zero failures/skips), WPF/net10
 Windows22000 build0 warnings/errors. Windows native35 checks pass; Android111
 tests pass with lint0 errors/18 retained warnings. Matching artifacts verified below.
 No real provider call/key/personal screenshot or OS input action was used. F4-B's
@@ -39,32 +39,34 @@ application revision above changes tracking only, not the tested binaries.
 
 | Evidence | Actual result / download |
 | --- | --- |
-| Windows push CI | [39833445133](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39833445133): Core27/Screen31/Link141; native35; clean WPF; self-contained win-x64 |
-| Windows app + SHA256SUMS | [artifact12449837151](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39833445133/artifacts/12449837151); no separately installed desktop runtime required |
-| Windows TRX/native evidence | [artifact12449337862](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39833445133/artifacts/12449337862); 13 retained WPF frames +1 clearly public synthetic screen fixture; no real screenshot |
-| Android dispatch CI | [39833445930](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39833445930):111 tests,zero failed/errors/skips; lint0 errors/18 warnings; verified debug signature |
-| Matching regression APK + SHA256SUMS + signer | [artifact12450176553](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39833445930/artifacts/12450176553) |
-| Android JUnit/lint/bitmap evidence | [artifact12450012143](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39833445930/artifacts/12450012143) |
-| Additional stacked PR checks | Windows39833455671 and Android39833455629 also pass at this application revision |
+| Windows push CI | [39834969073](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39834969073): Core27/Screen32/Link141; native35; clean WPF; self-contained win-x64 |
+| Windows app + SHA256SUMS | [artifact12450033743](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39834969073/artifacts/12450033743); no separately installed desktop runtime required |
+| Windows TRX/native evidence | [artifact12449963853](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39834969073/artifacts/12449963853); 13 retained WPF frames +1 clearly public synthetic screen fixture; no real screenshot |
+| Android dispatch CI | [39834970366](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39834970366):111 tests,zero failed/errors/skips; lint0 errors/18 warnings; verified debug signature |
+| Matching regression APK + SHA256SUMS + signer | [artifact12450572867](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39834970366/artifacts/12450572867) |
+| Android JUnit/lint/bitmap evidence | [artifact12450647703](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39834970366/artifacts/12450647703) |
+| Additional stacked PR checks | Windows39834977612 and Android39834977562 also pass at this application revision |
 
-Downloaded both app/evidence archives. Recomputed all413 Windows manifest entries
-and the APK entry successfully; inspected actual TRX totals, native JSON and the
-public ALPHA BETA/Save reference image. Windows native stderr is empty. Artifacts
-retain14 days from2026-10-22; authenticated GitHub download may be required.
+Final Windows/Android uploads and hashes are observed in actual CI logs/artifact
+metadata. Final archive downloads were blocked by this environment's network policy
+at productionresultssa19/sa9.blob.core.windows.net, so final bytes were NOT locally
+rehashed. Earlier6f471fa app/evidence downloads were successful: all413 Windows
+manifest entries/APK were rehashed, TRX/native JSON and public ALPHA BETA/Save frame
+inspected; that is earlier-revision evidence only, superseded by downloads above.
+Artifacts retain14 days from2026-10-22; authenticated GitHub download may be required.
 
 | File | SHA-256 |
 | --- | --- |
-| Windows artifact ZIP (GitHub upload digest) | `5d92d002e1bb7a69ecc66315cec12995261959bdae069110c1cbf697510cd210` |
-| Bluey.Windows.exe | `4d9893b60bd56f753da20450ce7bd2780fffcd33cedb0b384ad85babcb8b8c38` |
-| Bluey.Windows.dll | `0627488dc8d3752e81d32db1c35f327820ef9c61b654bd67a7982a7b82c970b7` |
-| Windows SHA256SUMS.txt | `50a592357d71987cf914249d7270566edd3fea266126b0cc9f5dee100f809d26` |
-| Android app-debug.apk | `4f7babbea811f8818193aad4ddf41c1f839528753ad5a1b3f102124b4ce2de23` |
-| Android SHA256SUMS.txt | `dc32b8cfabfd4ea5bab8e23b3be630bbf0757b7f6cc48cb9c712aaa508efbfa7` |
+| Windows artifact ZIP (GitHub upload digest) | `dc51d74dcff53a85f84751035fd975c6be6ba1233b6c632c78b4584ffbf3a76f` |
+| Bluey.Windows.exe | `37bf5077ad8e8f12ca10e0101725953d3bda2c5ec5173c248d43ef79154031a9` |
+| Bluey.Windows.dll | `79d939581a1b72e5ddd615205549f882408f21a99c75d259b867f64726a4f0fc` |
+| Windows SHA256SUMS.txt | `68c5970cfc9c1d10ec4cc918b88ebc197a941ffb0c23e6a97e01cae0bfafd94f` |
+| Android app-debug.apk | `0dd17e7c894e336f5b23d206bf634b1e6790b1d39f0a5e8b550d83fd16ccb0a4` |
 
 New APK public signer SHA256:
-`4e6a46301206873067494a9615fb2ffe959c2622ce3df81f4a2f8b8f1f7f7789`,
+`d2fdccd16b1fc08e1f339479184903badf0c222048dc620e0cd68270d1d1ebd3`,
 different from the F4-B delivered b30fe5e0… signer. Android app/protocol source is
-unchanged: retain the installed accepted F4-B APK for the offline screen test.
+unchanged: retain the installed F4-B APK for the offline screen test.
 If deliberately replacing it, compare signers first; a mismatch requires conscious
 uninstall/reinstall, loses Android Keystore identity/trust and needs F3 re-pairing
 plus revocation of the old phone. Never erase Windows protected keys/trust files.
@@ -92,8 +94,14 @@ Static closeout:17 canonical/Windows Markdown files,218 local links/anchors reso
 (including explicit legacy HTML anchors); protocol JSONL parses; git diff --check.
 Original Mac/iOS/Shared/assets, Android app, Bluey.Core motion and OverlayArt unchanged
 against4b38029. Initial local API/compiler errors corrected during implementation;
-all final local/CI tests pass. An initial link-check false positive on an existing
+final focused local Screen32/WPF checks and all final CI tests pass. An initial link-check false positive on an existing
 HTML anchor was resolved by recognizing explicit anchors, without changing that link.
+
+Final source cleanup also binds queued local points to their current snapshot:
+replacement, expiry or invalidation drops pending points and returns home once.
+An authenticated model point replaces any local queue, preventing full-queue failure.
+A deterministic stale-context regression passes; current capture status refreshes
+during work and shows OFF after disposal, with historical results labeled separately.
 
 Exact48 changed paths against the F4-B base:
 

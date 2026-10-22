@@ -916,3 +916,28 @@ Original Apple/assets, Android app, motion/OverlayArt unchanged. Closeout update
 tracking only. Exactly one next action: developer performs offline combined QA
 stages in project/QA.md, recording OCR unavailable separately; cloud stage requires
 separate current Free Tier/phone/screenshot authorization. No provider credit spent.
+
+
+Final F4-C source review found a local visual queue lifetime gap: queued manual
+points could survive snapshot invalidation, and a model point could encounter a
+full local queue. Bind local queue to current snapshot, drop it on invalidation and
+return home once; a validated reply replaces queued local points. New deterministic
+regression passes. Also refresh capture status during work and after disposal,
+labeling previous operation results separately. Focused local Screen32 tests and
+WPF0 warnings/errors pass. Intermediate25f2979 CI was superseded/canceled by normal
+workflow concurrency when the status refinement was pushed; no test failure claimed.
+
+Final application fc832f8890d8dc0f8e565b74a4a79b4687343828: Windows push39834969073 and Android
+dispatch39834970366 pass at the exact same SHA; stacked PR39834977612/39834977562
+also pass. Windows Core27/Screen32/Link141 (200 total),35 native checks, clean WPF/
+self-contained x64; Android111 tests/lint0 errors18 warnings/signature verified.
+Final apps/manifests/evidence uploaded, exact links and observed CI hashes in STATUS.
+Final archive downloads policy-blocked at sa19/sa9; no final local rehash claim.
+Earlier6f471fa archives were successfully inspected/rehashed and are superseded.
+New final debug signer d2fdccd1… differs from prior builds; Android source/protocol
+unchanged, retaining the current F4-B APK avoids unnecessary identity replacement.
+No real WGC screenshot, native OCR recognition, Gemini/OpenAI request or credential
+was used. OCR requires supported package identity; physical/provider acceptance
+remains pending. Tracking-only closeout leaves application bytes unchanged; no PR6
+modification or merge. Next: developer offline combined QA stages in project/QA.md;
+any future cloud stage requires separate current Free Tier/phone/screen authorization.
