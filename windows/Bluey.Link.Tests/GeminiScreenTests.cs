@@ -51,4 +51,11 @@ public sealed class GeminiScreenTests
         using var s=new Setup();var h=new Handler{Status=HttpStatusCode.ServiceUnavailable,Reply="private synthetic provider message"};using var http=new HttpClient(h);
         var error=await Assert.ThrowsAsync<AudioAnswerException>(()=>new GeminiAnswers(new Key(),http).AnswerWithScreen(new byte[4800],s.Approval,default));Assert.Equal(AudioAnswerFailure.Unavailable,error.Reason);Assert.DoesNotContain("private",error.ToString());Assert.Equal(1,h.Calls);
     }
+    [Fact] public async Task NonstringModelTargetIsIgnoredButExtraActionFieldsAreRejected() {
+        using var s=new Setup();var h=new Handler{Reply=s.Response(new{answer="Safe answer.",snapshotId=s.Approval.Info.Id,targetId=new{click=true}})};using var http=new HttpClient(h);
+        Assert.Null((await new GeminiAnswers(new Key(),http).AnswerWithScreen(new byte[4800],s.Approval,default)).TargetId);
+        h.Entered=new(TaskCreationOptions.RunContinuationsAsynchronously);h.Reply=s.Response(new{answer="Safe answer.",snapshotId=s.Approval.Info.Id,targetId="W1",action="click"});
+        var failure=await Assert.ThrowsAsync<AudioAnswerException>(()=>new GeminiAnswers(new Key(),http).AnswerWithScreen(new byte[4800],s.Approval,default));Assert.Equal(AudioAnswerFailure.Malformed,failure.Reason);Assert.Equal(2,h.Calls); // Two explicit independent test invocations, no retries.
+    }
+
 }

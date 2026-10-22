@@ -512,3 +512,11 @@ image/jpeg and response_json_schema. Provider-specific changes must follow those
 inspected public contracts, never an example's alternate model. Actual fixed-model
 image/audio compatibility and user Free Tier eligibility remain physical/provider
 unverified. No real request, billing action or automatic model/provider fallback.
+
+
+F4-C implementation review: timestamp the first acquired frame, not the end of
+JPEG processing; dispose the capture session immediately after its single frame
+copy. Native blank/protected-image rejection is exercised on generated bitmaps,
+including explicit buffer length before CopyToBuffer. Label normalization scans
+at most4096 input characters and allocates only bounded output. Exclude cloaked/
+minimized/changed windows when revalidating effects. No HDR color-fidelity claim.

@@ -5,9 +5,9 @@ namespace Bluey.Link.Tests;
 public sealed class ScreenAuthorityTests
 {
     private sealed class Answers:IAudioAnswers,IScreenAudioAnswers {
-        public bool ContractVerified=>true;public bool ScreenContractVerified=>true;public int AudioCalls,ScreenCalls;public ApprovedScreen? Media;public TaskCompletionSource<ScreenReply>? Pending;
+        public bool ContractVerified=>true;public bool ScreenContractVerified=>true;public int AudioCalls,ScreenCalls;public ApprovedScreen? Media;public TaskCompletionSource Entered=new(TaskCreationOptions.RunContinuationsAsynchronously);public TaskCompletionSource<ScreenReply>? Pending;
         public Task<string> Answer(ReadOnlyMemory<byte> pcm,CancellationToken stop){AudioCalls++;return Task.FromResult("Audio-only synthetic answer.");}
-        public Task<ScreenReply> AnswerWithScreen(ReadOnlyMemory<byte> pcm,ApprovedScreen screen,CancellationToken stop){ScreenCalls++;Media=screen;return Pending?.Task??Task.FromResult(new ScreenReply("The word is ALPHA.","W1"));}
+        public Task<ScreenReply> AnswerWithScreen(ReadOnlyMemory<byte> pcm,ApprovedScreen screen,CancellationToken stop){ScreenCalls++;Media=screen;Entered.TrySetResult();return Pending?.Task??Task.FromResult(new ScreenReply("The word is ALPHA.","W1"));}
     }
     private static Message M(string type,object p)=>Wire.Decode(Wire.Encode(type,Guid.NewGuid().ToString(),0,p)[..^1]);
     private sealed class Setup {
@@ -38,10 +38,10 @@ public sealed class ScreenAuthorityTests
     }
     [Theory][InlineData(0)][InlineData(1)][InlineData(2)][InlineData(3)] public async Task StopDisconnectSleepAndScreenWithdrawalDiscardPendingProviderResult(int mode) {
         var s=new Setup();s.Fake.Pending=new(TaskCreationOptions.RunContinuationsAsynchronously);s.Capture();s.Approve();s.Grant();s.SendTurn();
-        for(int i=0;i<100&&s.Fake.ScreenCalls==0;i++)await Task.Delay(2);Assert.Equal(1,s.Fake.ScreenCalls);
+        await s.Fake.Entered.Task.WaitAsync(TimeSpan.FromSeconds(5));Assert.Equal(1,s.Fake.ScreenCalls);
         if(mode==0)s.Authority.StopAll();if(mode==1)s.Authority.Close("tls");if(mode==2)s.Authority.ObservePresentation("tls",M("presentation",new{turnId=s.Turn,state="asleep",@event="cancel",text=""}));if(mode==3)s.Authority.Screens.Invalidate();
         s.Fake.Pending.SetResult(new("Stale answer", "W1"));
-        for(int i=0;i<200&&s.Authority.AudioOutcomes.Length==0;i++)await Task.Delay(2);
+        using(var timeout=new CancellationTokenSource(5000))while(s.Authority.AudioOutcomes.Length==0)await Task.Delay(1,timeout.Token);
         Assert.Null(s.Authority.Screens.Info);Assert.All(s.Fake.Media!.Jpeg.ToArray(),b=>Assert.Equal(0,b));
         if(mode!=1)while(s.Authority.Reader("tls").TryRead(out var p))Assert.DoesNotContain(p.Type,new[]{"audioReply","audioDone"});
     }

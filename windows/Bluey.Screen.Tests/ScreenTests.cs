@@ -74,4 +74,13 @@ public sealed class ScreenTests
         Assert.Equal(p,q.Tick(0,false).Point);Assert.False(q.Tick(3199,false).Home);Assert.False(q.Tick(5000,false).Home);Assert.True(q.Tick(5001,false).Home);
         q.Enqueue(p,6000);q.Tick(6000,true);Assert.False(q.Tick(13000,true).Home);q.Tick(14000,false);Assert.False(q.Tick(19000,false).Home);Assert.True(q.Tick(19001,false).Home);q.Enqueue(p,20000);Assert.True(q.Stop().Home);Assert.Null(q.Tick(30000,false).Point);
     }
+    [Fact] public void LongUntrustedLabelsHaveBoundedScanningAndNoUnboundedSplitCopies() {
+        Assert.Equal("",Targets.Clean(new string(' ',10000)+"private suffix"));
+        Assert.Equal(128,Targets.Clean(new string('x',10000),128).Length);Assert.Equal("ALPHA BETA",Targets.Clean(" ALPHA\n\tBETA "));
+    }
+    [Fact] public void GeometryChangeInvalidatesLocalAndApprovedTargetsBeforeAnEffect() {
+        var valid=true;var state=new ScreenSession(()=>0,_=>valid);var shot=Shot();state.CompleteCapture(state.BeginCapture(true),shot);state.SetAnalysis(shot.Id,new([Line],[],true,OcrStatus.Ready));state.MarkPreviewReady(shot.Id);state.Approve(shot.Id,"tls","c","a",true);
+        using var context=state.TakeForQuestion("tls","c","a","t")!;valid=false;Assert.False(state.IsValid(context));Assert.Throws<ScreenException>(()=>state.PointAtTarget(shot.Id,"W1"));Assert.Throws<ScreenException>(()=>state.CompleteQuestion(context,"W1"));state.Invalidate();Assert.True(context.Stop.IsCancellationRequested);
+    }
+
 }

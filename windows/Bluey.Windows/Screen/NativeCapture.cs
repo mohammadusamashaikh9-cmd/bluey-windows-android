@@ -39,7 +39,7 @@ internal sealed class NativeCapture
     internal static bool Matches(Surface surface)
     {
         var primary=BoxOf(Native.PrimaryBounds());if(primary!=surface.Primary)return false;
-        return surface.Kind!=SurfaceKind.Window||TryBounds((nint)surface.NativeId,out var b)&&b==surface.Physical&&Native.IsWindowVisible((nint)surface.NativeId)&&!IsIconic((nint)surface.NativeId);
+        return surface.Kind!=SurfaceKind.Window||TryBounds((nint)surface.NativeId,out var b)&&b==surface.Physical&&Native.IsWindowVisible((nint)surface.NativeId)&&!IsIconic((nint)surface.NativeId)&&DwmGetWindowAttribute((nint)surface.NativeId,14,out int cloaked,4)==0&&cloaked==0;
     }
     internal async Task<Snapshot> Capture(SurfaceChoice choice,CancellationToken stop)
     {
@@ -51,12 +51,13 @@ internal sealed class NativeCapture
             var item=CreateItem(choice.Handle,choice.Monitor);var size=item.Size;
             if(size.Width!=(int)choice.Physical.Width||size.Height!=(int)choice.Physical.Height||size.Width<1||size.Height<1||size.Width*(long)size.Height>MaxPixels)throw new ScreenException("capture-geometry");
             using var device=CreateDevice();using var pool=Direct3D11CaptureFramePool.CreateFreeThreaded(device,DirectXPixelFormat.B8G8R8A8UIntNormalized,1,size);
-            using var session=pool.CreateCaptureSession(item);session.IsCursorCaptureEnabled=false;
+            var session=pool.CreateCaptureSession(item);session.IsCursorCaptureEnabled=false;bool captureActive=true;long capturedAt=0;DateTimeOffset capturedUtc=default;
             var frameResult=new TaskCompletionSource<SoftwareBitmap>(TaskCreationOptions.RunContinuationsAsynchronously);int taken=0;
             async void Frame(Direct3D11CaptureFramePool sender,object args) {
                 if(Interlocked.Exchange(ref taken,1)!=0)return;
                 try {
                     using var frame=sender.TryGetNextFrame();if(frame==null||frame.ContentSize.Width!=size.Width||frame.ContentSize.Height!=size.Height)throw new ScreenException("capture-changed");
+                    capturedAt=Environment.TickCount64;capturedUtc=DateTimeOffset.UtcNow;
                     var bitmap=await SoftwareBitmap.CreateCopyFromSurfaceAsync(frame.Surface,BitmapAlphaMode.Ignore).AsTask(cancel).ConfigureAwait(false);
                     if(!frameResult.TrySetResult(bitmap))bitmap.Dispose();
                 } catch {frameResult.TrySetException(new ScreenException("capture-denied-or-unavailable"));}
@@ -67,23 +68,17 @@ internal sealed class NativeCapture
             try {
                 cancel.ThrowIfCancellationRequested();session.StartCapture();
                 image=await frameResult.Task.WaitAsync(cancel).ConfigureAwait(false);
+                session.Dispose();captureActive=false;pool.FrameArrived-=Frame;
                 jpeg=await Encode(image,cancel).ConfigureAwait(false);
                 var scale=Math.Min(1,1100.0/Math.Max(image.PixelWidth,image.PixelHeight));
                 var surface=new Surface(choice.Monitor?SurfaceKind.PrimaryDisplay:SurfaceKind.Window,(long)choice.Handle,choice.Physical,choice.Primary,choice.Dpi,choice.Dpi,(int)Math.Round(image.PixelWidth*scale),(int)Math.Round(image.PixelHeight*scale));
                 if(!Matches(surface)){System.Security.Cryptography.CryptographicOperations.ZeroMemory(jpeg);throw new ScreenException("capture-changed");}
                 using(var decoded=await Decode(jpeg,cancel).ConfigureAwait(false)) {
-                    var bytes=new byte[decoded.PixelWidth*decoded.PixelHeight*4];
-                    try {
-                        using var pixels=new InMemoryRandomAccessStream();
-                        var buffer=new global::Windows.Storage.Streams.Buffer((uint)bytes.Length);decoded.CopyToBuffer(buffer);
-                        using var reader=DataReader.FromBuffer(buffer);reader.ReadBytes(bytes);
-                        var different=false;for(int n=4;n<bytes.Length;n+=4)if(bytes[n]!=bytes[0]||bytes[n+1]!=bytes[1]||bytes[n+2]!=bytes[2]){different=true;break;}
-                        if(!different)throw new ScreenException("blank-or-protected");
-                    } finally {System.Security.Cryptography.CryptographicOperations.ZeroMemory(bytes);}
+                    EnsureNonblank(decoded);
                 }
-                cancel.ThrowIfCancellationRequested();var shot=new Snapshot(surface,jpeg,Environment.TickCount64,DateTimeOffset.UtcNow);jpeg=null;return shot;
+                cancel.ThrowIfCancellationRequested();var shot=new Snapshot(surface,jpeg,capturedAt,capturedUtc);jpeg=null;return shot;
             } finally {
-                pool.FrameArrived-=Frame;item.Closed-=Closed;frameResult.TrySetCanceled();
+                pool.FrameArrived-=Frame;item.Closed-=Closed;if(captureActive)session.Dispose();frameResult.TrySetCanceled();
                 if(image!=null)image.Dispose();else if(frameResult.Task.IsCompletedSuccessfully)frameResult.Task.Result.Dispose();
                 if(jpeg!=null)System.Security.Cryptography.CryptographicOperations.ZeroMemory(jpeg);
             }
@@ -111,6 +106,17 @@ internal sealed class NativeCapture
         stream.Seek(0);var decoder=await BitmapDecoder.CreateAsync(stream).AsTask(stop);
         if(decoder.PixelWidth is <1 or >1100||decoder.PixelHeight is <1 or >1100)throw new ScreenException("decoded-size");
         return await decoder.GetSoftwareBitmapAsync(BitmapPixelFormat.Bgra8,BitmapAlphaMode.Ignore).AsTask(stop);
+    }
+    internal static void EnsureNonblank(SoftwareBitmap decoded)
+    {
+        if(decoded.PixelWidth>1100||decoded.PixelHeight>1100||decoded.BitmapPixelFormat!=BitmapPixelFormat.Bgra8)throw new ScreenException("decoded-size");
+        var bytes=new byte[checked(decoded.PixelWidth*decoded.PixelHeight*4)];
+        try {
+            var buffer=new global::Windows.Storage.Streams.Buffer((uint)bytes.Length){Length=(uint)bytes.Length};decoded.CopyToBuffer(buffer);
+            using var reader=DataReader.FromBuffer(buffer);reader.ReadBytes(bytes);
+            var different=false;for(int n=4;n<bytes.Length;n+=4)if(bytes[n]!=bytes[0]||bytes[n+1]!=bytes[1]||bytes[n+2]!=bytes[2]){different=true;break;}
+            if(!different)throw new ScreenException("blank-or-protected");
+        } finally {System.Security.Cryptography.CryptographicOperations.ZeroMemory(bytes);}
     }
     private static GraphicsCaptureItem CreateItem(nint handle,bool monitor)
     {

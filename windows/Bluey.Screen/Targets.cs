@@ -16,8 +16,14 @@ public sealed record Target(string Id,string Text,string Role,Box ImageBounds,Bo
 public static class Targets
 {
     public static string Clean(string text,int max=256) {
-        var s=string.Join(" ",text.Split((char[]?)null,StringSplitOptions.RemoveEmptyEntries));
-        return new(s.Where(c=>!char.IsControl(c)&&!char.IsSurrogate(c)&&char.GetUnicodeCategory(c)!=UnicodeCategory.Format).Take(max).ToArray());
+        if(max is <1 or >256)throw new ScreenException("text-bound");
+        var output=new System.Text.StringBuilder(Math.Min(max,256));var space=false;
+        foreach(var c in text.AsSpan(0,Math.Min(text.Length,4096))) {
+            if(char.IsWhiteSpace(c)){space=output.Length>0;continue;}
+            if(char.IsControl(c)||char.IsSurrogate(c)||char.GetUnicodeCategory(c)==UnicodeCategory.Format)continue;
+            if(space&&output.Length<max)output.Append(' ');space=false;if(output.Length>=max)break;output.Append(c);
+        }
+        return output.ToString().Trim();
     }
     public static Target[] Extract(Surface surface,Analysis analysis) {
         var found=new List<Target>(1140);int l=0,w=0,c=0;

@@ -30,7 +30,7 @@ public sealed class WorkflowTests
         var time=new ManualTime();var state=new ScreenSession(()=>0);var workflow=new ScreenWorkflow(state,time);var source=new Source{Pending=new(TaskCreationOptions.RunContinuationsAsynchronously)};
         var capture=workflow.Capture(true,source);time.Advance(TimeSpan.FromSeconds(8));await Assert.ThrowsAnyAsync<OperationCanceledException>(()=>capture);
         Assert.Null(state.Info);Assert.True(workflow.Busy);await Assert.ThrowsAsync<ScreenException>(()=>workflow.Capture(true,source));
-        var late=Shot();source.Pending.SetResult(late);for(int i=0;i<100&&!late.Disposed;i++)await Task.Delay(1);Assert.True(late.Disposed);Assert.False(workflow.Busy);
+        var late=Shot();source.Pending.SetResult(late);using(var timeout=new CancellationTokenSource(5000))while(!late.Disposed||workflow.Busy)await Task.Delay(1,timeout.Token);Assert.True(late.Disposed);Assert.False(workflow.Busy);
     }
     [Fact] public async Task AnalysisCancellationAndLateResultsCannotRestoreTextOrPixels() {
         var state=new ScreenSession(()=>0);var workflow=new ScreenWorkflow(state);await workflow.Capture(true,new Source());var reader=new Reader{Pending=new(TaskCreationOptions.RunContinuationsAsynchronously)};
