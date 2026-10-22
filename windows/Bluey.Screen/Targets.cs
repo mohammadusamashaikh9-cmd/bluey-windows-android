@@ -48,7 +48,8 @@ public sealed class Pointing
 {
     private readonly Queue<VisualPoint> queue=new();private long holdUntil,quietSince;private bool active,speaking;
     public void Enqueue(VisualPoint point,long now){if(queue.Count==4)throw new ScreenException("point-queue");queue.Enqueue(point);if(!active)quietSince=now;active=true;}
-    public (VisualPoint? Point,bool Home) Tick(long now,bool talking) {
+    public (VisualPoint? Point,bool Home) Tick(long now,bool talking,bool contextCurrent=true) {
+        if(!contextCurrent)return Stop();
         if(speaking&&!talking)quietSince=now;speaking=talking;
         if(!active)return(null,false);
         if(now>=holdUntil&&queue.Count>0){var p=queue.Dequeue();holdUntil=now+3200;if(!speaking)quietSince=now;return(p,false);}

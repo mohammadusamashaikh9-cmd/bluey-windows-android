@@ -11,7 +11,7 @@ internal sealed class ScreenCoordinator : IDisposable
 {
     private readonly OverlayWindow overlay;private readonly CursorEngine engine;private readonly Connection.WindowsLinkHost host;
     private readonly NativeCapture capture=new();private readonly NativeAnalysis analysis=new();private readonly ScreenWorkflow workflow;
-    private readonly Pointing pointing=new();private Surface? pointSurface;private PointDirective? remotePoint;private readonly DispatcherTimer timer=new(){Interval=TimeSpan.FromMilliseconds(100)};
+    private readonly Pointing pointing=new();private string? localSnapshot;private Surface? pointSurface;private PointDirective? remotePoint;private readonly DispatcherTimer timer=new(){Interval=TimeSpan.FromMilliseconds(100)};
     internal ScreenSession State=>host.Live.Screens;internal bool Busy=>workflow.Busy;
     internal string Status{get;private set;}="Screen capture: OFF · cloud screen sharing: OFF";
     internal ScreenCoordinator(OverlayWindow overlay,CursorEngine engine,Connection.WindowsLinkHost host) {
@@ -20,7 +20,7 @@ internal sealed class ScreenCoordinator : IDisposable
     }
     private void DisplayChanged(){Stop();Status="Display/DPI changed — screenshot discarded; capture again.";}
     private void Receive(PointDirective directive)=>overlay.Dispatcher.BeginInvoke(()=>{
-        if(!host.Live.CanPresent(directive))return;remotePoint=directive;pointSurface=directive.Surface;pointing.Enqueue(directive.Point,Environment.TickCount64);
+        if(!host.Live.CanPresent(directive))return;pointing.Stop();localSnapshot=null;remotePoint=directive;pointSurface=directive.Surface;pointing.Enqueue(directive.Point,Environment.TickCount64);
     });
     internal SurfaceChoice[] Choices()=>NativeCapture.Choices(overlay.Coordinates.DpiX);
     internal async Task Capture(SurfaceChoice selected,Window progress)
@@ -51,15 +51,16 @@ internal sealed class ScreenCoordinator : IDisposable
         try {using var stream=new MemoryStream(bytes,false);var bitmap=new BitmapImage();bitmap.BeginInit();bitmap.CacheOption=BitmapCacheOption.OnLoad;bitmap.StreamSource=stream;bitmap.EndInit();bitmap.Freeze();State.MarkPreviewReady(media.Info.Id);return bitmap;}
         finally{System.Security.Cryptography.CryptographicOperations.ZeroMemory(bytes);}
     }
-    internal void Point(string id,string target) {var info=State.Info??throw new ScreenException("stale-snapshot");var p=State.PointAtTarget(id,target);pointSurface=info.Surface;remotePoint=null;pointing.Enqueue(p,Environment.TickCount64);Tick();}
-    internal void PointSpot(string id,double x,double y){var info=State.Info??throw new ScreenException("stale-snapshot");var p=State.PointAtSpot(id,x,y);pointSurface=info.Surface;remotePoint=null;pointing.Enqueue(p,Environment.TickCount64);Tick();}
-    internal void Home(){pointing.Stop();remotePoint=null;pointSurface=null;engine.GoHome();overlay.Art.SpeechTarget=null;}
+    internal void Point(string id,string target) {var info=State.Info??throw new ScreenException("stale-snapshot");var p=State.PointAtTarget(id,target);BindLocal(info);pointing.Enqueue(p,Environment.TickCount64);Tick();}
+    internal void PointSpot(string id,double x,double y){var info=State.Info??throw new ScreenException("stale-snapshot");var p=State.PointAtSpot(id,x,y);BindLocal(info);pointing.Enqueue(p,Environment.TickCount64);Tick();}
+    private void BindLocal(SnapshotInfo info){if(localSnapshot!=info.Id||remotePoint!=null)pointing.Stop();localSnapshot=info.Id;pointSurface=info.Surface;remotePoint=null;}
+    internal void Home(){pointing.Stop();localSnapshot=null;remotePoint=null;pointSurface=null;engine.GoHome();overlay.Art.SpeechTarget=null;}
     internal void Stop(){State.Invalidate();host.StopLive();Home();Status="Screen capture: OFF · discarded · cloud sharing OFF";}
     private void Tick() {
         State.Expire();
         if(pointSurface is {} geometry&&(!NativeCapture.Matches(geometry)||remotePoint is {} d&&!host.Live.CanPresent(d))){State.Invalidate();Home();}
         if(State.Info is {} info&&!NativeCapture.Matches(info.Surface)){Stop();Status="Selected window moved/resized or display changed — screenshot discarded.";}
-        var step=pointing.Tick(Environment.TickCount64,host.Server?.Presentation.State=="speaking");
+        var step=pointing.Tick(Environment.TickCount64,host.Server?.Presentation.State=="speaking",localSnapshot==null||State.Info?.Id==localSnapshot);
         if(step.Point is {} p&&pointSurface is {} s&&NativeCapture.Matches(s)) {
             overlay.Point(new(p.Position.X,p.Position.Y));overlay.Art.SpeechTarget=new(p.Showing.X,p.Showing.Y,p.Showing.Width,p.Showing.Height);
         }

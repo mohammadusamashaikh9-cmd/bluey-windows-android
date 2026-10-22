@@ -83,4 +83,11 @@ public sealed class ScreenTests
         using var context=state.TakeForQuestion("tls","c","a","t")!;valid=false;Assert.False(state.IsValid(context));Assert.Throws<ScreenException>(()=>state.PointAtTarget(shot.Id,"W1"));Assert.Throws<ScreenException>(()=>state.CompleteQuestion(context,"W1"));state.Invalidate();Assert.True(context.Stop.IsCancellationRequested);
     }
 
+    [Fact] public void InvalidatedContextDropsAllQueuedPointsAndReturnsHomeOnce() {
+        var choreography=new Pointing();var p=new VisualPoint(new(50,50),new(40,40,20,20));
+        choreography.Enqueue(p,0);choreography.Enqueue(p,1);
+        var canceled=choreography.Tick(2,false,false);Assert.True(canceled.Home);Assert.Null(canceled.Point);
+        Assert.Equal((null,false),choreography.Tick(10000,false));
+        choreography.Enqueue(p,10001);Assert.NotNull(choreography.Tick(10001,false).Point);
+    }
 }
