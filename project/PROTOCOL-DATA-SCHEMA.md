@@ -240,3 +240,22 @@ It does not claim physical audio/provider interoperability. Android retains the
 pink reply state at least400ms, including the unchanged250ms transition, even when
 chirps are off/unavailable. Sleep/Stop/background/withdrawal invalidates that delayed
 completion. Caption cleanup remains source reading time (5800ms for this fixture).
+
+## F4-C host-local snapshot contract (D013)
+
+No new LAN message or frame-limit change. Screenshot pixels/targets stay Windows-side.
+Snapshot: unpredictable UUID, UTC capture date, monotonic capture/60s expiry, source
+kind/native identity, physical selected/primary bounds, DPI, encoded-image dimensions,
+L/W/C targets with image/physical/DIP/normalized rectangles. Target IDs cannot resolve
+without the current snapshot UUID.0..1000 spots are finite;1000 maps to the last
+physical pixel. Only primary-display-contained windows are supported.
+
+Screen approval binds snapshot ID, ready trusted lease/current microphone+cloud
+consent and current/next one-question authorization. It is consumed once by the
+existing audioEnd flow; never transported as a full screenshot/frame. The provider
+request contains bounded inline audio/wav and image/jpeg, plus bounded untrusted
+target metadata. Structured text reply allows only answer/snapshotId/targetId;
+answer sanitized<=256 BMP characters; optional target must exactly match a target
+in that same fresh snapshot. Wrong/malformed/missing target yields text without
+pointing. Extra model command fields are rejected, never dispatched. Only ordinary
+audioReply/audioDone and presentation return to Android/Windows.

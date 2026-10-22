@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using Bluey.Screen;
 namespace Bluey.Link;
 // Shares the current authenticated lease, consent, cancellation and outbox with D011.
 public sealed partial class LiveAuthority
@@ -23,7 +24,7 @@ public sealed partial class LiveAuthority
             if(Provider!=VoiceProvider.GeminiFree||!answers.ContractVerified||!freeTierConfirmed)throw new ProtocolException("Gemini unavailable or Free Tier unconfirmed");
             if(!sessions.TryGetValue(lease,out var s)||s.Consent!=reviewedConsent||!s.Microphone||!s.Cloud||s.Continuous)throw new ProtocolException("hold-only consent required");
             foreach(var other in sessions.Values)Cancel(other,"stopped");
-            s.Authorization=Guid.NewGuid().ToString();s.Deadline=mono()+60000;s.AudioUsed=false;
+            s.Authorization=Guid.NewGuid().ToString();s.Deadline=mono()+60000;s.AudioUsed=false;Screens.BindAuthorization(lease,reviewedConsent,s.Authorization);
             if(!s.Out.Writer.TryWrite(new("audioGrant",new{authorizationId=s.Authorization,consentId=s.Consent,provider="GeminiFree",sessionSeconds=60})))Cancel(s,"limit");return s.Authorization!;
         }
     }
@@ -53,27 +54,37 @@ public sealed partial class LiveAuthority
     }
     private async Task AnswerAudio(string lease,Session s,string auth,string turn,byte[] data,CancellationTokenSource issue,long attempt,long started)
     {
-        await Task.Yield();
+        await Task.Yield();ApprovedScreen? screen=null;string? target=null;
         lock(gate) {
             if(!sessions.TryGetValue(lease,out var active)||active!=s||s.Authorization!=auth||s.AudioId!=turn){CryptographicOperations.ZeroMemory(data);issue.Dispose();return;}
             if(!s.Cloud||!s.Microphone||s.Continuous||Provider!=VoiceProvider.GeminiFree||mono()>=s.Deadline||issue.IsCancellationRequested){s.Issue=null;Cancel(s,"expired");CryptographicOperations.ZeroMemory(data);issue.Dispose();return;}
+            try {screen=Screens.TakeForQuestion(lease,s.Consent!,auth,turn);if(screen!=null&&!ScreenAvailable)throw new ScreenException("provider-capability");}
+            catch(ScreenException){Cancel(s,"denied");CryptographicOperations.ZeroMemory(data);screen?.Dispose();issue.Dispose();return;}
         }
         string? result=null;AudioAnswerFailure? failure=null;
-        try {result=await answers.Answer(data,issue.Token).WaitAsync(issue.Token);}catch(AudioAnswerException e){failure=e.Reason;}
+        try {
+            using var linked=CancellationTokenSource.CreateLinkedTokenSource(issue.Token,screen?.Stop??CancellationToken.None);
+            if(screen==null)result=await answers.Answer(data,linked.Token).WaitAsync(linked.Token);
+            else {var reply=await ((IScreenAudioAnswers)answers).AnswerWithScreen(data,screen,linked.Token).WaitAsync(linked.Token);result=reply.Answer;target=reply.TargetId;}
+        }catch(AudioAnswerException e){failure=e.Reason;}
         catch(Exception){/* No provider errors, transcripts or audio in diagnostics. */}
         finally {CryptographicOperations.ZeroMemory(data);}
         lock(gate) {
-            if(!sessions.TryGetValue(lease,out var current)||current!=s||s.Authorization!=auth||s.AudioId!=turn){RecordAudio(attempt,s.AudioStopCode=="timeout"?"timeout":"canceled",started,data.Length);issue.Dispose();return;}
+            if(!sessions.TryGetValue(lease,out var current)||current!=s||s.Authorization!=auth||s.AudioId!=turn){RecordAudio(attempt,s.AudioStopCode=="timeout"?"timeout":"canceled",started,data.Length);screen?.Dispose();issue.Dispose();return;}
             s.Issue=null;
             if(issue.IsCancellationRequested||mono()>=s.Deadline){var code=mono()>=s.Deadline?"expired":"timeout";RecordAudio(attempt,code,started,data.Length);Cancel(s,code);issue.Dispose();return;}
+            if(screen!=null&&!Screens.IsValid(screen)){RecordAudio(attempt,"canceled",started,data.Length);Cancel(s,"stopped",true);screen.Dispose();issue.Dispose();return;}
             // Nonstreamed completed answer. No model text ever becomes a command.
             var text=result==null||result.Length>4096?"":string.Join(" ",result.Split((char[]?)null,StringSplitOptions.RemoveEmptyEntries));
             text=new string(text.Where(c=>!char.IsControl(c)&&!char.IsSurrogate(c)).Take(256).ToArray());
             if(text.Length==0){var code=FailureCode(failure);RecordAudio(attempt,code,started,data.Length);Cancel(s,code);}
-            else if(!s.Out.Writer.TryWrite(new("audioReply",new{authorizationId=auth,turnId=turn,text}))||!s.Out.Writer.TryWrite(new("audioDone",new{authorizationId=auth,turnId=turn})))Cancel(s,"limit");
+            else {
+                if(screen!=null)Screens.CompleteQuestion(screen,target);
+                if(!s.Out.Writer.TryWrite(new("audioReply",new{authorizationId=auth,turnId=turn,text}))||!s.Out.Writer.TryWrite(new("audioDone",new{authorizationId=auth,turnId=turn})))Cancel(s,"limit");
             else RecordAudio(attempt,"answer",started,data.Length,text.Length);
+            }
             // Keep authority only to deliver/clear this completed reply; AudioUsed refuses a second request.
         }
-        issue.Dispose();
+        screen?.Dispose();issue.Dispose();
     }
 }

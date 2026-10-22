@@ -867,3 +867,27 @@ sa2/sa10; final archive bytes not locally rehashed. No actual model request/key/
 capture occurred. Physical response root cause for three non503 requests remains
 unknown. No PR creation/merge/F4-C. Next: developer's single physical sequence in
 QA, with separate current authorization before any one Free Tier request.
+
+
+## F4-C implementation / 2026-10-22 Asia/Karachi
+
+Verified clean4b38029 checkout/PR6 open/unmerged/main7930efd; explicit fetch refspec
+was needed because origin's configured fetch did not create its remote branch ref.
+Created port/screen-understanding from origin/port/live-ai-voice. Read project/source
+authority and Microsoft Learn capture/interop/SDK/OCR/security docs. Microsoft lists
+OCR as requiring package identity; implemented supported adapter/explicit portable
+blocker, no registration/install/unsupported fallback. Google docs403; official
+python-genai c97ae02ff87b5138bee29100b56c04c649233fed documents multimodal parts/
+JPEG and response_json_schema. No model call/key/private image.
+
+Implemented pure screen snapshots/maps/target limits/approval/cancellation/choreo;
+native single WGC snapshot, bounded in-memory JPEG, read-only UIA, WPF preview/local
+pointing and optional same-authorized-question Gemini image context. New pure API
+tests initially failed to compile while types were absent; xUnit2031 test assertion
+was corrected. First native build identified namespace qualification and .NET10
+QueryInterface ref/in errors; corrected. Local Screen29/Link140 tests now pass;
+WPF native cross-build clean. Native capture is not executed in CI; synthetic
+codec/UIA smoke pending Windows runner. Android app and all original sources and
+animation math unchanged. Both CI workflows/artifacts pending, physical unverified.
+Next after CI: offline combined QA stages, with OCR identity and F4-B provider gates
+kept separate. No real cloud action is authorized by this task.

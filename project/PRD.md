@@ -61,3 +61,9 @@ F4-B adds explicitly authorized, foreground live voice while retaining offline
 simulation. Hold-only audio is the default; continuous-awake context needs a separate
 informed choice. Windows owns protected credentials and current-device authorization.
 No background recording, capture, tools or hosted service enters this slice.
+
+F4-C now provides explicit native Windows snapshot/preview, read-only target
+extraction/visual pointing and independently approved optional Gemini image context.
+It is a stacked code/CI slice, not physical F4-B/F4-C acceptance. Portable native OCR
+requires a supported package-identity deployment; the app states that blocker and
+never presents synthetic annotations as OCR. See D013 and the combined QA sequence.

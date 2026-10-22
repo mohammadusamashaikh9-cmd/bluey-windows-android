@@ -405,3 +405,48 @@ resource use and latency still require the above separately authorized observati
 The budget increases128→512 combined thinking/output tokens (up to4× potential
 output allowance), with low thinking, one question and a256-character caption cap;
 this is not a cost guarantee or proof of Free Tier eligibility.
+
+## F4-C combined offline and future provider acceptance
+
+Code/CI acceptance is separate from physical acceptance. F4-B repaired fake tests
+passed, but five prior developer API requests (two503s) produced no verified genuine
+Windows reply. Neither that gate nor F4-C physical functionality is accepted here.
+Codex/CI use public synthetic pixels/audio/fake HTTP only; no real cloud request.
+
+Combined later physical sequence (cloud steps require separate current user approval):
+
+1. Use the matching Windows build; Android source/protocol unchanged, so the current
+   F4-B phone APK remains compatible. Compare APK signers before replacing a debug
+   APK; differing signer requires deliberate reinstall/re-pair/revocation of old
+   identity. Preserve Windows protected files. Authenticate F3 and verify normal
+   gaze, moods, touch priority and F4-A offline gesture/border behavior.
+2. Open Screen Understanding. With cloud OFF, choose a harmless visible third-party
+   window wholly inside primary display, containing known public text/buttons.
+   Capture once, verify the OS indicator and accurate preview; Cancel/discard works.
+3. Analyze locally. Record native OCR status honestly: this portable distribution
+   reports UnavailableIdentity because Microsoft requires package identity. Do not
+   mark L/W recognition passed until a supported identity deployment is available.
+   Inspect available UIA C labels/roles/rectangles (no password/hidden values), and
+   point at a target or a known0..1000 spot. Only Bluey's overlay moves, not the OS
+   mouse. Return Home/Stop works; no action is injected. Synthetic demo is explicitly
+   declared fixture annotations, not a capture/recognition pass.
+4. Test100/150/200% scaling, primary offsets if available, a moved/resized/closed
+   selected window and display/DPI change. Old IDs must fail; expiry60s, replacement,
+   Stop/Ctrl+Alt+S and disconnect discard pixels/preview/approval and stale points.
+5. Only after separately checking Free Tier/project/privacy terms and authorizing
+   ONE real question: select GeminiFree, Start current phone hold-only consent,
+   capture/review a harmless snapshot, select that exact phone and explicitly
+   approve screen sharing, then grant one question in existing Windows AI settings.
+   Ask≤5s: "Bluey, what text is visible on my screen?" No extra image/OCR call occurs.
+6. Verify a genuine non-demo answer in Windows, pink reply/chirp/listening, optional
+   correct target pointing and source caption cleanup. A valid answer without a
+   target is allowed. Stop/sleep/background/withdrawal/revocation must discard
+   pending screen context/replies; reconnect never restores approval. If it fails,
+   retain only safe outcome/attempt/time/counts; separate F4-B provider failures
+   from F4-C capture/identity/OCR/coordinate behavior. Do not automatically retry.
+
+Automated evidence includes pure maps/freshness/consent/secure-field/deadline tests,
+injected capture/OCR cancellation, fake multimodal HTTP/structured responses, actual
+TLS revocation and existing animation/protocol tests. Native CI only uses generated
+public bitmaps/read-only UIA on its own harmless window. It never captures a real
+desktop/private image; WGC permission/capture fidelity and CPU/FPS remain unverified.

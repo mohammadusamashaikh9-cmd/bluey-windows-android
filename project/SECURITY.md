@@ -228,3 +228,31 @@ is retained there. Windows says "queued" rather than claiming phone/display rece
 The Android actionable failure status terminates authorization without fabricating
 an answer. Distinct20s request timeout and60s authorization expiry remain bounded;
 no retries, extra grant, paid fallback or automatic resubmission is introduced.
+
+## F4-C capture privacy and effect boundary (D013)
+
+Capture is OFF until a Windows user button. No face/wake/connection/provider event
+starts capture. WGC sessions are one snapshot, with the OS indicator unchanged,
+explicit selection and8s cancellation. Bluey-owned windows are not selectable;
+credential/control/overlay windows are hidden during capture and display exclusion
+is requested on owned windows. The nonsensitive cancel window stays reachable.
+WDA_EXCLUDEFROMCAPTURE is best effort, never an infallible privacy guarantee; the
+actual image must be previewed/reviewed. Protected/blank/denied/changed captures fail.
+No screen/audio/private OCR/model text is saved/logged; owned media buffers are
+zeroed and WPF/OS copies released, without a secure physical-memory-erase claim.
+
+Cloud image sharing remains independently OFF even with a key/audio consent. Only
+a reviewed snapshot approved for an exact current trusted phone/consent can bind
+to the existing one-question Free Tier grant. The same Gemini client/request is
+used; no added request/retry/paid fallback. Project eligibility is not attested.
+Google may use free-tier inputs under its terms; sensitive pixels require discard
+and a harmless reselected window. No automatic crop/redaction is claimed.
+
+Screen/UIA/model strings are untrusted data. UIA skips passwords/offscreen subtrees
+before reading names, never reads ValuePattern/TextPattern or input patterns.
+ControlTree has no invoke/focus/input interface. A model can return a validated
+optional target ID only; that produces a visual overlay point after authenticated
+caption ownership is proven. No OS mouse movement or input/app executor exists.
+Stop/replacement/expiry/configuration change/consent withdrawal/sleep/background/
+disconnect/revocation invalidate media, approvals and late callbacks. The remote
+HTTP service cannot authorize capture, new phones, new cloud calls or privileges.

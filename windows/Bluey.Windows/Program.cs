@@ -21,15 +21,17 @@ internal static class Program
         var engine = new CursorEngine(settings, () => timer.Elapsed.TotalSeconds, random.NextDouble);
         var visuals = new VisualState(engine, random.NextDouble);
         var overlay = new OverlayWindow(engine, visuals);
-        var host = new Connection.WindowsLinkHost();
+        var screenState=new Bluey.Screen.ScreenSession(surfaceCurrent:s=>Screen.NativeCapture.Matches(s)&&Math.Abs(Native.GetDpiForWindow(overlay.Handle)-s.DpiX)<.1);
+        var host = new Connection.WindowsLinkHost(screenState);
+        var screen=new Screen.ScreenCoordinator(overlay,engine,host);Screen.ScreenWindow? screenWindow=null;
         var voice = new VoicePresentation(overlay.Art, host, engine);
         Connection.ConnectionWindow? connection = null; AI.AiWindow? ai=null;
         var controls = new ControlsWindow(engine, overlay, visuals, () => {
-            if (connection == null) { connection = new(host); connection.Closed += (_,_) => connection = null; connection.Show(); }
+            if (connection == null) { connection = new(host); Screen.OwnPrivacy.Protect(connection);connection.Closed += (_,_) => connection = null; connection.Show(); }
             else connection.Activate();
-        }, () => voice.Preview(engine.Now), () => {if(ai==null){ai=new(host);ai.Closed+=(_,_)=>ai=null;ai.Show();}else ai.Activate();});
+        }, () => voice.Preview(engine.Now), () => {if(ai==null){ai=new(host);Screen.OwnPrivacy.Protect(ai);ai.Closed+=(_,_)=>ai=null;ai.Show();}else ai.Activate();},()=>{if(screenWindow==null){screenWindow=new(screen,host);screenWindow.Closed+=(_,_)=>screenWindow=null;screenWindow.Show();}else screenWindow.Activate();},screen.Stop);
         overlay.Frame += () => { voice.Tick(engine.Now); host.Publish(engine.Face(engine.Now)); };
-        app.Exit += (_,_) => { ai?.Close(); connection?.Close(); Task.Run(host.Stop).GetAwaiter().GetResult(); };
+        app.Exit += (_,_) => { screenWindow?.Close();screen.Dispose();ai?.Close(); connection?.Close(); Task.Run(host.Stop).GetAwaiter().GetResult(); };
         app.MainWindow = controls;
         engine.GoHome(); overlay.Show(); controls.Show();
         return app.Run();

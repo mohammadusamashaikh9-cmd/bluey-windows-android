@@ -380,3 +380,26 @@ Start/approval. Never treat local limits as an attestation of zero cost.
 No API key is needed for offline QA; keep keys empty, microphone denied and provider
 OfflineSimulation. See project/QA.md for the offline physical retest and a separate
 future free-tier test requiring explicit user authorization. No live test ran in CI.
+
+## F4-C Screen Understanding (stacked development slice)
+
+Open Screen Understanding from existing controls. Default capture/cloud OFF; choose
+primary display or a visible window wholly within it, Capture once, review pixels,
+Analyze locally and select L/W/C or a0..1000 spot to move Bluey's overlay. No actual
+mouse/input action is performed. Home or STOP/Ctrl+Alt+S remains accessible.
+The explicitly marked synthetic fixture uses public generated pixels and declared
+annotations; it is not a real screenshot or OCR success.
+
+**Known deployment blocker:** Microsoft lists Windows.Media.Ocr as requiring package
+identity. This unsigned portable build has none, so native OCR is explicitly
+unavailable. Read-only UIA targets/spot pointing and native capture remain separate.
+No package registration, installer, OCR download or external process is silently
+used. Physical WGC/click-through/exclusion/DPI/quality/resource QA is still pending.
+
+Optional cloud image context: choose GeminiFree/Start current phone consent before
+capture; review exact preview, select current phone and approve that snapshot, then
+authorize one question in existing AI settings. It uses the same protected Gemini
+key and one image+audio request. No screenshot is sent to Android; audio-only remains
+available. Screenshot consent is separate from audio permission, and Google Free
+Tier/project/privacy review still applies. Discard sensitive content; no automatic
+redaction/crop is claimed. No real Gemini call was used in development/CI.

@@ -1,3 +1,35 @@
+# Current F4-C stacked implementation
+
+2026-10-22 Asia/Karachi. Explicitly authorized before final F4-B physical retest;
+this is not F4-B acceptance. Base origin/port/live-ai-voice verified4b380294e883e669d29000cd844962db88439e58;
+accepted main7930efd unchanged. Branch port/screen-understanding targets the F4-B
+branch. Do not modify/merge PR6 or merge the F4-C PR.
+
+Implemented pure Bluey.Screen maps/snapshots/targets/consent/workflow/choreography,
+WGC/D3D11 one-snapshot capture with selectable primary/window and preview, read-only
+UIA, supported WinRT OCR adapter/availability guard, local pointing/Home/Stop, and
+optional same-request Gemini WAV+JPEG/structured target context. No Android app or
+LAN schema change. No screenshot/audio/private text/key logging or persistence.
+
+Exact native OCR deployment blocker: Microsoft requires package identity; current
+portable unsigned build has none. UI reports UnavailableIdentity, not fabricated
+recognition. No package install/registration or external OCR is added. Real capture,
+UIA targets and point-at-spot remain independent; synthetic demo labels all declared
+annotations. Google image/structured pages policy403; current official Google SDK
+source verifies inline multipart/JSON schema shape; actual fixed-model multimodal
+behavior and arbitrary account eligibility remain unverified. D013 records limits.
+
+Local actual results: Screen29, Link140 tests pass; WPF/net10 Windows22000 build
+0 warnings/errors. Core/Windows native/Android CI and development artifacts pending.
+No real provider call/key/personal screenshot or OS input action was used. F4-B's
+five reported API attempts/two503s/no proven genuine visible answer stay pending.
+
+One next action after CI: developer runs the offline stages of the combined F4-B/
+F4-C QA sequence, recording the OCR identity blocker separately from capture/UIA/
+pointing; no cloud test occurs without separately current explicit authorization.
+
+# Retained F4-B evidence (no new acceptance)
+
 # Current F4-B response repair — PR #6
 
 2026-10-22 Asia/Karachi. Continue port/live-ai-voice from reviewed7c846a3;

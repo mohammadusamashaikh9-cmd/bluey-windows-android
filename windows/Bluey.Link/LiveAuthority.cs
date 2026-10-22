@@ -2,21 +2,21 @@ using System.Threading.Channels;
 namespace Bluey.Link;
 public sealed record LivePeer(string Lease,string Pin,string DeviceId,string? ConsentId,bool Microphone,bool Cloud,bool Continuous,bool Authorized);
 // Only ready, trusted TLS sessions are registered. HTTP work never blocks LAN reads/rendering.
-public sealed partial class LiveAuthority(IClientSecretIssuer issuer,Func<long>? milliseconds=null,Func<long>? unixSeconds=null,IAudioAnswers? audioAnswers=null,bool openAiEnabled=false)
+public sealed partial class LiveAuthority(IClientSecretIssuer issuer,Func<long>? milliseconds=null,Func<long>? unixSeconds=null,IAudioAnswers? audioAnswers=null,bool openAiEnabled=false,Bluey.Screen.ScreenSession? screenSession=null)
 {
     private sealed class Session(string pin,string device){public long AudioRequestAt;public AudioTurn? Audio;public string? AudioId;public string? AudioStopCode;public bool AudioUsed;public string Pin=pin,Device=device;public string? Consent,Authorization;public bool Microphone,Cloud,Continuous;public long Deadline,LastMint=-30000;public int Mints;public string Model=LiveProtocol.Models[0];public LiveLimits Limits=new();public CancellationTokenSource? Issue;public HashSet<string> Requests=[];public Channel<LivePacket> Out=Channel.CreateBounded<LivePacket>(8);}
     private readonly IAudioAnswers answers=audioAnswers??new UnavailableAudioAnswers();
     public VoiceProvider Provider {get;private set;}=VoiceProvider.OfflineSimulation;
     public bool GeminiAvailable=>answers.ContractVerified;
-    public void SelectProvider(VoiceProvider selected){lock(gate){if(!Enum.IsDefined(selected))throw new ProtocolException("provider");if(selected==VoiceProvider.OpenAIRealtime&&!openAiEnabled)throw new ProtocolException("OpenAI disabled");foreach(var s in sessions.Values)Cancel(s,"stopped",true);Provider=selected;}}
+    public void SelectProvider(VoiceProvider selected){lock(gate){Screens.Invalidate();if(!Enum.IsDefined(selected))throw new ProtocolException("provider");if(selected==VoiceProvider.OpenAIRealtime&&!openAiEnabled)throw new ProtocolException("OpenAI disabled");foreach(var s in sessions.Values)Cancel(s,"stopped",true);Provider=selected;}}
     private readonly object gate=new();private readonly Dictionary<string,Session> sessions=[];
     private readonly Func<long> mono=milliseconds??(()=>Environment.TickCount64),unix=unixSeconds??(()=>DateTimeOffset.UtcNow.ToUnixTimeSeconds());
     public LivePeer[] Peers {get{lock(gate)return sessions.Select(k=>new LivePeer(k.Key,k.Value.Pin,k.Value.Device,k.Value.Consent,k.Value.Microphone,k.Value.Cloud,k.Value.Continuous,k.Value.Authorization!=null)).ToArray();}}
     public void Open(string lease,string pin,string device){lock(gate){if(sessions.Count>=4)throw new ProtocolException("live slots");sessions.Add(lease,new(pin,device));}}
     public ChannelReader<LivePacket> Reader(string lease){lock(gate)return sessions.TryGetValue(lease,out var s)?s.Out.Reader:throw new ProtocolException("live closed");}
-    private static void Cancel(Session s,string code,bool force=false){var notify=force||s.Authorization!=null||code!="stopped";if(s.Issue!=null)s.AudioStopCode=code;s.Authorization=null;s.Audio?.Dispose();s.Audio=null;s.AudioId=null;s.AudioUsed=false;s.Issue?.Cancel();s.Issue=null;while(s.Out.Reader.TryRead(out _)){}if(notify&&!s.Out.Writer.TryWrite(new("liveStop",new{code})))s.Out.Writer.TryComplete();}
-    public void Close(string lease){lock(gate){if(sessions.Remove(lease,out var s)){Cancel(s,"disconnected");s.Out.Writer.TryComplete();}}}
-    public void StopAll(){lock(gate)foreach(var s in sessions.Values)Cancel(s,"stopped",true);}
+    private void Cancel(Session s,string code,bool force=false){if(force||s.Authorization!=null||code!="stopped")Screens.Invalidate();var notify=force||s.Authorization!=null||code!="stopped";if(s.Issue!=null)s.AudioStopCode=code;s.Authorization=null;s.Audio?.Dispose();s.Audio=null;s.AudioId=null;s.AudioUsed=false;s.Issue?.Cancel();s.Issue=null;while(s.Out.Reader.TryRead(out _)){}if(notify&&!s.Out.Writer.TryWrite(new("liveStop",new{code})))s.Out.Writer.TryComplete();}
+    public void Close(string lease){lock(gate){Screens.Invalidate();if(sessions.Remove(lease,out var s)){Cancel(s,"disconnected");s.Out.Writer.TryComplete();}}}
+    public void StopAll(){lock(gate){Screens.Invalidate();foreach(var s in sessions.Values)Cancel(s,"stopped",true);}}
     public string Authorize(string lease,string reviewedConsent,string model,LiveLimits limits)
     {
         if(!openAiEnabled)throw new ProtocolException("OpenAI disabled");
@@ -29,8 +29,8 @@ public sealed partial class LiveAuthority(IClientSecretIssuer issuer,Func<long>?
     public void Handle(string lease,Message m)
     {
         lock(gate){if(!sessions.TryGetValue(lease,out var s))throw new ProtocolException("live closed");LiveProtocol.Validate(m.Type,m.Payload);var p=m.Payload;
-            if(m.Type=="liveConsent"){Cancel(s,"stopped");s.Consent=Wire.Text(p,"consentId");s.Microphone=LiveProtocol.Flag(p,"microphone");s.Cloud=LiveProtocol.Flag(p,"cloud");s.Continuous=LiveProtocol.Flag(p,"continuous");return;}
-            if(m.Type=="liveStop"){Cancel(s,"stopped");s.Consent=null;s.Microphone=s.Cloud=false;return;}
+            if(m.Type=="liveConsent"){if(s.Consent!=null||!LiveProtocol.Flag(p,"microphone")||!LiveProtocol.Flag(p,"cloud"))Screens.Invalidate();Cancel(s,"stopped");s.Consent=Wire.Text(p,"consentId");s.Microphone=LiveProtocol.Flag(p,"microphone");s.Cloud=LiveProtocol.Flag(p,"cloud");s.Continuous=LiveProtocol.Flag(p,"continuous");return;}
+            if(m.Type=="liveStop"){Screens.Invalidate();Cancel(s,"stopped");s.Consent=null;s.Microphone=s.Cloud=false;return;}
             if(Provider!=VoiceProvider.OpenAIRealtime){Cancel(s,"denied");return;}
             if(m.Type!="liveRequest")throw new ProtocolException("live direction");
             var request=Wire.Text(p,"requestId");var auth=Wire.Text(p,"authorizationId");
@@ -54,5 +54,5 @@ public sealed partial class LiveAuthority(IClientSecretIssuer issuer,Func<long>?
             }
         }issue.Dispose();
     }
-    public void Expire(){lock(gate)foreach(var s in sessions.Values)if(s.Authorization!=null&&(mono()>=s.Deadline||s.Audio?.Expired(mono())==true||Provider==VoiceProvider.GeminiFree&&s.Issue!=null&&mono()-s.AudioRequestAt>=20000))Cancel(s,Provider==VoiceProvider.GeminiFree&&s.Issue!=null&&mono()<s.Deadline?"timeout":"expired");}
+    public void Expire(){Screens.Expire();lock(gate)foreach(var s in sessions.Values)if(s.Authorization!=null&&(mono()>=s.Deadline||s.Audio?.Expired(mono())==true||Provider==VoiceProvider.GeminiFree&&s.Issue!=null&&mono()-s.AudioRequestAt>=20000))Cancel(s,Provider==VoiceProvider.GeminiFree&&s.Issue!=null&&mono()<s.Deadline?"timeout":"expired");}
 }

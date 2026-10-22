@@ -84,3 +84,16 @@ reported rate, bounds native buffers and falls back after unsupported constructo
 were inspected: F4-B deliberately uses only a foreground Activity, no microphone
 foreground/background service, and stops on pause. Physical routes/interruptions still
 need testing. Documentation inspection is not hardware evidence.
+
+## F4-C implemented bounds
+
+Windows11 SDK projection TFM22000; WGC/D3D11 one-frame capture with8s deadline,
+input<=16Mi pixels, JPEG<=1100px edge/768KiB at quality.72. Capture/encoding/analysis/
+HTTP stay outside render callbacks. Analysis caller deadline5s; UIA450ms/depth10/
+queue512/visited5000/140 controls, one native-worker slot. Native provider RPC cannot
+be forcibly aborted; late results are dropped and new work cannot accumulate there.
+Line400/word600 IDs are hard caps. Native OCR requires identity/installed language;
+no downloads or unsupported unpackaged fallback. Snapshot TTL60s. Image-aware
+request<=1600000 bytes, response<=16384 bytes, same20s/512-token/one-question F4-B
+bounds; audio-only request remains330000 bytes. These are limits, not measured
+physical performance/latency/FPS promises.

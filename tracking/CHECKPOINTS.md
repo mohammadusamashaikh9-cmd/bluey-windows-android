@@ -91,3 +91,13 @@ Local downloads blocked at sa2/sa10, CI evidence only. Earlier PR test3967312329
 failed one scheduler-dependent20ms cleanup assertion; awaited entry/cleanup retains
 all byte/no-stale-reply assertions and passes final CI. Physical/provider repaired
 behavior and user project eligibility remain UNVERIFIED. No real Codex API call.
+
+
+## F4-C stacked checkpoint / 2026-10-22 Asia/Karachi
+
+Active code/CI slice, explicitly authorized before F4-B physical acceptance. Base
+4b38029 on port/live-ai-voice; no PR6 modification/merge. Local Screen29/Link140 pass
+and native WPF cross-build0 warnings/errors. Native WGC/UIA/codec smoke and Android
+CI/artifacts pending. Native OCR deployment BLOCKED for portable output: Microsoft
+requires package identity. No false recognition/capture claim or silent installation.
+F4-B/F4-C physical/provider acceptance stays unverified. See D013 and combined QA.
