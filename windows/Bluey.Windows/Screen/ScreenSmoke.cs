@@ -13,7 +13,7 @@ namespace Bluey.Windows.Screen;
 internal static class ScreenSmoke
 {
     internal static string[] Run(string output) {
-        var checks=new List<string>();void Check(bool ok,string name){if(!ok)throw new InvalidOperationException(name);checks.Add(name);}
+        var checks=new List<string>(CaptureSmoke.Run());void Check(bool ok,string name){if(!ok)throw new InvalidOperationException(name);checks.Add(name);}
         using var state=new ScreenSession();using var shot=SyntheticFixture.Create(96);var id=shot.Id;state.CompleteCapture(state.BeginCapture(true),shot);state.SetAnalysis(id,SyntheticFixture.Annotations(shot.Surface));
         using var media=state.CopyCurrent();
         var encoded=Pump(Task.Run(async()=>{using var bitmap=await NativeCapture.Decode(media.Jpeg,default);NativeCapture.EnsureNonblank(bitmap);using var blank=new global::Windows.Graphics.Imaging.SoftwareBitmap(global::Windows.Graphics.Imaging.BitmapPixelFormat.Bgra8,32,32,global::Windows.Graphics.Imaging.BitmapAlphaMode.Ignore);try{NativeCapture.EnsureNonblank(blank);throw new InvalidOperationException("uniform bitmap must fail");}catch(ScreenException){}return await NativeCapture.Encode(bitmap,default);}));
