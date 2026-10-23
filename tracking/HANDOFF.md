@@ -1,36 +1,35 @@
 # Handoff
 
-F4-C port/screen-understanding is stacked on unmerged port/live-ai-voice at4b38029,
-not main. The user explicitly authorized starting before F4-B physical acceptance.
-Do not modify PR6, merge either PR, spend API credits or start F5.
+2026-10-24 Asia/Karachi. PR7 stays on port/screen-understanding, base port/live-ai-voice.
+PR6 head4b38029 remains open/unmerged and unchanged; do not merge either PR.
+Previous environment attempt made no edits. Resumed cleanad5f7aa in working repo.
 
-D013 describes primary/window WGC snapshot/preview, pure Bluey.Screen geometry/
-freshness/consent/targets/choreography, native WinRT OCR/UIA and optional approved
-image+audio through existing GeminiAnswers/one-question LiveAuthority. No Android
-app/LAN schema/animation rewrite. Screenshot bytes remain Windows-only.
+Repair app fdc9572ee9e305cc489d9784a50f865943355cf5: explicit Unicode GetWindowTextW and corrected
+Microsoft IDXGIDevice IID. Native red d32b1e4/40006819441 reproduced title truncation
+and E_NOINTERFACE in shared setup; two-line fix16efb78/40007491657 passes the same
+contracts. Full native capture success on the laptop is NOT inferred from that.
 
-Microsoft-supported native OCR requires package identity; portable output has none.
-The adapter/UI explicitly reports UnavailableIdentity. No unsupported OCR claim,
-installer/identity registration or external process. Real capture/UIA/spot pointing
-remain independent; declared synthetic demo is clearly identified. Actual physical
-WGC/exclusion/DPI/fidelity/resource and fixed-model provider behavior unverified.
-Google docs locally403; official SDK confirms generic request/schema contract.
+Eight bounded in-memory safe diagnostic rows expose selection/support/item/device/
+pool/session/first-frame/copy/encode/validation stages, HRESULT and elapsed counts.
+No title, handle, pixels, OCR/private text, key, raw exception or traffic is logged.
+UI offers selectable diagnostics, safe failure guidance and existing Stop/discard.
+One-shot capture, preview, F3 and cloud consent, DPI/bounds/zeroing remain intact.
+No OCR packaging, provider call/key, fallback/dependency/server or F5 actions.
 
-PR7 is open against port/live-ai-voice. Tested application fc832f8890d8dc0f8e565b74a4a79b4687343828:
-Windows CI Core27/Screen32/Link141 pass; WPF0 warnings/errors; native35
-checks pass. Android111 tests/lint0 errors18 warnings pass at the same application
-revision. Windows39834969073/Android39834970366 apps/manifests/evidence uploaded,
-CI hashes recorded; final downloads blocked by policy at sa19/sa9, not locally
-rehashed. Earlier6f471fa archives were downloaded/rehashed, superseded now. Exact
-links/hashes/48 paths in STATUS. Local focused Screen32 and WPF build pass. Subsequent tracking-only closeout does not change application bytes.
-Queued local points cancel with snapshot invalidation; reply points replace the
-local queue. Capture status refreshes during work and after disposal.
-Native WinRT codec/UIA execute only on public fixtures; WGC capture not executed,
-OCR identity guard reports unavailable. New APK signer differs; unchanged Android
-source permits retaining the installed F4-B APK rather than reinstalling/re-pairing.
-F4-B developer evidence is still five calls,two503s,no verified genuine reply.
-No real model request/key/personal screenshot/input injection in development.
+Local Core27/Screen35/Link141 pass; WPF0 warnings/errors. Windows40008459044:
+203 unit tests,42 native checks, self-contained x64. Android40008459792:111 tests,
+lint0 errors18 warnings, matching APK/signature. PR40008467356/40008467447 also pass.
+Windows app/evidence downloaded; all413 manifest entries and EXE hash reverified.
+Exact artifacts/hashes/14 repair paths in STATUS; later closeout is tracking-only.
+Android code unchanged: retain installed APK to avoid debug-signer/re-enrollment
+churn. New optional regression APK signer differs; never silently replace identity.
 
-One next action: developer executes offline stages of the combined QA
-sequence; supported identity deployment is required before native OCR acceptance,
-and any cloud stage needs separate current Free Tier/phone/screenshot authorization.
+Native checks prove actual HWND titles and separate window/primary item + device/
+pool/session construction, NOT first-frame screenshots: CI never StartCapture.
+Invalid-window stage/HRESULT privacy is exercised. OCR identity blocker remains
+separate; physical preview/DPI/driver/exclusion/resource and F4-B provider behavior
+remain unverified. Original Apple/Android/animation/link/protected-key code unchanged.
+
+One next action: developer executes [local-only capture retest](../project/QA.md#f4-c-capture-repair-physical-retest-local-only)
+(primary and Notepad independently), cloud OFF; on failure copy only safe diagnostic
+kind/stage/outcome/HRESULT/time. No packaging/cloud/API test is authorized here.

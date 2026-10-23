@@ -941,3 +941,36 @@ was used. OCR requires supported package identity; physical/provider acceptance
 remains pending. Tracking-only closeout leaves application bytes unchanged; no PR6
 modification or merge. Next: developer offline combined QA stages in project/QA.md;
 any future cloud stage requires separate current Free Tier/phone/screen authorization.
+
+
+## F4-C capture repair / 2026-10-24 Asia/Karachi
+
+User resumed after unavailable environment; previous attempt made no edits. Actual
+command execution now works: /workspace is not Git root; located repository and ran
+pwd/status/branch/HEAD clean atad5f7aa on existing port/screen-understanding. Fetched
+refs; PR7 correct base, PR6 unchanged4b38029/open. Read AGENTS/project source/QA
+skills, D013/current tracking and Microsoft Learn/official header. No new planning
+cycle/checkpoint, branch, architecture, dependency, provider or OCR packaging.
+
+Added real HWND Unicode + separate window/primary item/D3D pool/session probes,
+without StartCapture/pixels. Red d32b1e4/40006819441 and PR40006824913 failed
+UNICODE_WINDOW_TITLE and WGC_D3D_POOL_SESSION/0x80004002; item creation passed.
+Official dxgi.h IID differs from the requested UUID. Two-line fix16efb78 corrects
+Unicode and IDXGIDevice; Windows40007491657/PR40007500633 pass actual native contracts.
+New pure diagnostics tests first fail on unimplemented Record, then pass; one local
+build needed System.IO import, corrected. Stage wrappers preserve HRESULT without
+raw exceptions; callback stage cannot regress; UI keeps only8 safe summaries.
+
+Final app fdc9572ee9e305cc489d9784a50f865943355cf5: local Core27/Screen35/Link141 pass, WPF0 warnings/
+errors. Windows40008459044 and Android40008459792 pass at same SHA; stacked PR
+40008467356/40008467447 pass. Windows203 unit/42 native, Android111 tests/lint0
+errors18 warnings; all artifacts/manifests uploaded. Windows app/evidence downloaded,
+413 manifest entries and EXE hash locally reverified. Exact hashes/links/signer and
+14 changed paths in STATUS. Android APK source unchanged; avoid unnecessary signer
+replacement/re-pairing. Native OCR identity remains a separate blocker. No actual
+StartCapture/desktop pixels, model requests, API key, original source/animation/link
+changes or OS input. Physical first-frame/copy/encode/preview/permission/driver/DPI
+remains unverified; do not call this complete laptop capture acceptance. Current
+QA has separate primary and Notepad local tests. Tracking-only closeout changes no
+application bytes. Next: developer performs that local-only retest, cloud OFF, and
+reports safe diagnostics on failure. Keep PR6/7 unmerged.

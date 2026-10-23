@@ -106,3 +106,20 @@ exact links/hashes/signer. Native codec/UIA checks use public fixtures; WGC capt
 not executed. Documentation closeout changes no application code. Native OCR deployment BLOCKED for portable output: Microsoft
 requires package identity. No false recognition/capture claim or silent installation.
 F4-B/F4-C physical/provider acceptance stays unverified. See D013 and combined QA.
+
+
+## F4-C native capture repair / 2026-10-24 Asia/Karachi
+
+Physical gate remains pending: developer observed truncated titles and failed capture
+before preview, so OCR/UIA/pointing was not accepted. Red native d32b1e4 Windows
+40006819441 reproduced Unicode title failure and shared D3D E_NOINTERFACE. Microsoft
+header identifies a mistyped IDXGIDevice IID;16efb78 two-line fix passes native setup.
+Final app fdc9572ee9e305cc489d9784a50f865943355cf5: local/Windows Core27,Screen35,Link141 and42 native
+checks pass, WPF0 warnings/errors; Android111 tests/lint0 errors18 warnings pass.
+Windows40008459044 / Android40008459792 publish matching artifacts/manifests.
+Windows413-file manifest and EXE rehashed after download; exact links/hashes in
+STATUS. Native probes do not start capture/read pixels; physical primary/window
+first-frame/preview remains UNVERIFIED. OCR package identity remains separately
+BLOCKED; no packaging/provider/F5 or PR6 modification/merge. Last8 safe diagnostics
+contain no title/pixels/private text/credentials. Canonical QA gives one local-only
+retest; next is developer physical primary and Notepad checks with cloud OFF.
