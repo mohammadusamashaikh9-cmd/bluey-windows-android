@@ -16,6 +16,7 @@ internal sealed class OverlayWindow : Window
     internal DisplayTransform Coordinates => coordinates;
     internal OverlayArt Art => art;
     internal event Action? Frame;
+    internal event Action? DisplayChanged;
     internal OverlayWindow(CursorEngine engine, VisualState visuals)
     {
         this.engine = engine;
@@ -28,7 +29,7 @@ internal sealed class OverlayWindow : Window
         {
             hwnd = new WindowInteropHelper(this).Handle;
             HwndSource.FromHwnd(hwnd)!.AddHook(Hook);
-            Native.ConfigureOverlay(hwnd); FitPrimary();
+            Native.ConfigureOverlay(hwnd); Screen.NativeCapture.Exclude(hwnd); FitPrimary();
         };
         CompositionTarget.Rendering += Render;
         Closed += (_, _) => { CompositionTarget.Rendering -= Render; hwnd = 0; };
@@ -38,7 +39,7 @@ internal sealed class OverlayWindow : Window
         if (msg == Native.WmNcHitTest) { handled = true; return -1; } // HTTRANSPARENT, plus layered WS_EX_TRANSPARENT across threads.
         if (msg == Native.WmMouseActivate) { handled = true; return 3; } // MA_NOACTIVATE
         if (msg is Native.WmDisplayChange or Native.WmDpiChanged)
-            Dispatcher.BeginInvoke(FitPrimary, DispatcherPriority.Loaded);
+            Dispatcher.BeginInvoke(()=>{FitPrimary();DisplayChanged?.Invoke();}, DispatcherPriority.Loaded);
         return 0;
     }
     internal void FitPrimary()

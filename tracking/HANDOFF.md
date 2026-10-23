@@ -1,31 +1,35 @@
 # Handoff
 
-Current F4-B Gemini response repair, existing PR #6 / port/live-ai-voice. No merge.
-Start reviewed7c846a3; baseline regression commit58278fe reproduced request/outcome
-classification loss locally and Android coalesced reply/done pink-state loss in CI.
-Developer physical evidence: five Gemini calls,two503s,tokens used,no proven visible
-answer. Non503 contents and exact physical root cause remain unknown.
+2026-10-24 Asia/Karachi. PR7 stays on port/screen-understanding, base port/live-ai-voice.
+PR6 head4b38029 remains open/unmerged and unchanged; do not merge either PR.
+Previous environment attempt made no edits. Resumed cleanad5f7aa in working repo.
 
-D012: remove candidateCount, low thinking,512 combined tokens, preserve256-character
-short answers/one question/5s input/20s deadline. Distinct safe outcomes propagate
-through strict C#/Kotlin validators;8 local metadata records only.400ms minimum
-reply-state dwell includes original250ms transition and is cancellation guarded.
-Shared synthetic trace verifies both language boundaries and native WPF caption.
-Offline preview statuses are read-only and open existing opt-in panel without
-permissions/capture. Key stores, animations, F3 trust and explicit approvals remain.
+Repair app fdc9572ee9e305cc489d9784a50f865943355cf5: explicit Unicode GetWindowTextW and corrected
+Microsoft IDXGIDevice IID. Native red d32b1e4/40006819441 reproduced title truncation
+and E_NOINTERFACE in shared setup; two-line fix16efb78/40007491657 passes the same
+contracts. Full native capture success on the laptop is NOT inferred from that.
 
-Delivery application revision36287bcdcb95496c3da8f61973a51fc1e337913f. Windows39674027367: Core27/Link124,
-WPF clean,29 native checks/self-contained x64. Android39674027307:111 tests,
-lint0 errors18 warnings/debug APK. Both pass and upload matching apps/manifests;
-STATUS has exact34 paths, CI links/hashes/public signer. New signer b30fe5e09b7e…
-differs from prior c48278f1…; compare installed signer and deliberately re-pair if
-reinstall is needed. Downloads locally policy403 at sa2/sa10, CI evidence only.
-Earlier PR cancellation-test20ms race is fixed by awaited entry/cleanup; full tests
-pass. No real API calls or keys.
-New native physical acceptance is unverified. Check STATUS for final CI/artifacts,
-signer continuity and precise diff. Prior debug signers may prevent in-place update;
-never silently erase an Android identity. Preserve Windows protected data.
+Eight bounded in-memory safe diagnostic rows expose selection/support/item/device/
+pool/session/first-frame/copy/encode/validation stages, HRESULT and elapsed counts.
+No title, handle, pixels, OCR/private text, key, raw exception or traffic is logged.
+UI offers selectable diagnostics, safe failure guidance and existing Stop/discard.
+One-shot capture, preview, F3 and cloud consent, DPI/bounds/zeroing remain intact.
+No OCR packaging, provider call/key, fallback/dependency/server or F5 actions.
 
-One next action after matching CI artifacts: developer runs the single physical
-sequence in project/QA.md. Any real request needs separate current user authorization
-and Free Tier/project review. Leave PR #6 unmerged; do not start F4-C.
+Local Core27/Screen35/Link141 pass; WPF0 warnings/errors. Windows40008459044:
+203 unit tests,42 native checks, self-contained x64. Android40008459792:111 tests,
+lint0 errors18 warnings, matching APK/signature. PR40008467356/40008467447 also pass.
+Windows app/evidence downloaded; all413 manifest entries and EXE hash reverified.
+Exact artifacts/hashes/14 repair paths in STATUS; later closeout is tracking-only.
+Android code unchanged: retain installed APK to avoid debug-signer/re-enrollment
+churn. New optional regression APK signer differs; never silently replace identity.
+
+Native checks prove actual HWND titles and separate window/primary item + device/
+pool/session construction, NOT first-frame screenshots: CI never StartCapture.
+Invalid-window stage/HRESULT privacy is exercised. OCR identity blocker remains
+separate; physical preview/DPI/driver/exclusion/resource and F4-B provider behavior
+remain unverified. Original Apple/Android/animation/link/protected-key code unchanged.
+
+One next action: developer executes [local-only capture retest](../project/QA.md#f4-c-capture-repair-physical-retest-local-only)
+(primary and Notepad independently), cloud OFF; on failure copy only safe diagnostic
+kind/stage/outcome/HRESULT/time. No packaging/cloud/API test is authorized here.

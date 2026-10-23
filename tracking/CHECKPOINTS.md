@@ -91,3 +91,35 @@ Local downloads blocked at sa2/sa10, CI evidence only. Earlier PR test3967312329
 failed one scheduler-dependent20ms cleanup assertion; awaited entry/cleanup retains
 all byte/no-stale-reply assertions and passes final CI. Physical/provider repaired
 behavior and user project eligibility remain UNVERIFIED. No real Codex API call.
+
+
+## F4-C stacked checkpoint / 2026-10-22 Asia/Karachi
+
+Active code/CI slice, explicitly authorized before F4-B physical acceptance. Base
+4b38029 on port/live-ai-voice; PR7 targets that branch, no PR6 modification/merge.
+Application fc832f8890d8dc0f8e565b74a4a79b4687343828: Windows CI Core27,Screen32,
+Link141 pass; native35 checks and WPF0 warnings/errors; Android111 tests/lint0 errors
+18 warnings. Matching Windows39834969073/Android39834970366 artifacts/evidence
+uploaded with CI SHA manifests. Final downloads policy-blocked at sa19/sa9; earlier
+6f471fa downloads rehashed413 Windows entries+APK, superseded. STATUS records
+exact links/hashes/signer. Native codec/UIA checks use public fixtures; WGC capture
+not executed. Documentation closeout changes no application code. Native OCR deployment BLOCKED for portable output: Microsoft
+requires package identity. No false recognition/capture claim or silent installation.
+F4-B/F4-C physical/provider acceptance stays unverified. See D013 and combined QA.
+
+
+## F4-C native capture repair / 2026-10-24 Asia/Karachi
+
+Physical gate remains pending: developer observed truncated titles and failed capture
+before preview, so OCR/UIA/pointing was not accepted. Red native d32b1e4 Windows
+40006819441 reproduced Unicode title failure and shared D3D E_NOINTERFACE. Microsoft
+header identifies a mistyped IDXGIDevice IID;16efb78 two-line fix passes native setup.
+Final app fdc9572ee9e305cc489d9784a50f865943355cf5: local/Windows Core27,Screen35,Link141 and42 native
+checks pass, WPF0 warnings/errors; Android111 tests/lint0 errors18 warnings pass.
+Windows40008459044 / Android40008459792 publish matching artifacts/manifests.
+Windows413-file manifest and EXE rehashed after download; exact links/hashes in
+STATUS. Native probes do not start capture/read pixels; physical primary/window
+first-frame/preview remains UNVERIFIED. OCR package identity remains separately
+BLOCKED; no packaging/provider/F5 or PR6 modification/merge. Last8 safe diagnostics
+contain no title/pixels/private text/credentials. Canonical QA gives one local-only
+retest; next is developer physical primary and Notepad checks with cloud OFF.

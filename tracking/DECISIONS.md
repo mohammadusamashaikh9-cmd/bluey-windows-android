@@ -443,3 +443,108 @@ Empty, or Budget when finishReason=MAX_TOKENS. Treat absent/null parts as no vis
 text while retaining strict type/duplicate/media validation. No physical response
 shape is inferred. The retained nonempty MAX_TOKENS behavior still returns bounded
 visible text; Budget specifically identifies exhaustion without visible text.
+
+## D013 / 2026-10-22 Asia/Karachi — F4-C native snapshots and nonprivileged pointing
+
+User explicitly authorizes a stacked F4-C slice before F4-B physical acceptance.
+Base origin/port/live-ai-voice=4b380294e883e669d29000cd844962db88439e58;
+main7930efd remains accepted. Do not modify PR6/its branch or merge either PR.
+F4-B still has no proven genuine visible physical answer (five developer-reported
+requests,two503s,other outcomes unknown). No provider calls/keys are authorized here.
+
+Use Windows.Graphics.Capture's supported1903+ desktop interop for an explicitly
+selected primary display or wholly contained visible window; start exactly one
+bounded snapshot on a user button, retain the OS capture indicator and promptly
+dispose the session. A visible bounded native-window selector is used instead of
+an opaque picker result: capture-item public properties do not supply the HWND/
+monitor rectangle needed to prove the existing primary overlay's coordinate map.
+Retain strict dimension/bounds checks; window movement/resize or display/DPI changes
+invalidate the snapshot. Use the Windows SDK projection supplied by a versioned
+.NET10 Windows TFM, D3D11 P/Invoke and SoftwareBitmap surface copy/encoding, avoiding
+Win2D/SharpDX/another UI framework. JPEG max edge1100,quality.72,768KiB; bound input
+pixels to16Mi, processing deadlines and one capture/analysis in flight. No pixels
+or OCR/private provider text enter logs or screenshot files by default.
+
+Use a small pure Bluey.Screen library for geometry, freshness, target extraction,
+one-shot screen consent and choreography, separate from motion/render/TLS adapters.
+Preserve L1..400,W1..600,C1..140, top-left/y-down,0..1000 coordinates. Windows OCR
+supplies actual word rectangles; never synthesize word boxes. UI Automation reads
+only visible nonpassword labels/roles/rectangles, never values/text patterns or
+input patterns. Cap depth10/visited5000/queue512/control140 and450ms traversal;
+one worker slot prevents a slow native provider from accumulating blocked tasks.
+A native RPC cannot be safely preempted; caller deadline/late-result rejection and
+single-slot isolation limit its effect. No click/type/drag/input/application actions.
+
+Microsoft Learn's current desktop WinRT support list explicitly requires package
+identity for Windows.Media.Ocr. The current unsigned portable WPF app has none.
+Implement the supported native adapter with an identity/language availability check;
+do not claim unsupported unpackaged OCR works, silently install/register a package,
+change security policy or introduce external OCR. Report this exact deployment
+blocker separately from fake/synthetic extraction tests; UIA/visual pointing and
+native capture remain independently useful. Packaging/identity is not silently added.
+
+Snapshots are unpredictable UUIDs, capture UTC+monotonic time,60s maximum lifetime,
+physical capture/primary rectangles and DIP DPI map, with no stale-ID fallback.
+Each cloud image approval is separate from audio/cloud approval and tied to exact
+snapshot/current trusted lease+consent. Consume it only in the existing one-question
+Gemini path; do not add another request, credential/server or LAN image payload.
+Stop/sleep/background/disconnect/revocation/replacement/configuration change clears
+media/cancels work. Treat UIA/OCR/model text as untrusted data. Optional model target
+IDs can only resolve to the same fresh snapshot and produce a visual point; a valid
+answer without a usable target remains acceptable. Reuse F4-A captions and source
+point choreography (2.2s minimum hold,5s quiet-home) without changing CursorEngine.
+
+Cloud capture stays OFF by default and requires an accurate reviewed preview and
+explicit current per-phone screen consent; no crop/redaction guarantee is made.
+If sensitive data is visible, discard and capture a harmless window. Capture
+exclusion is best-effort (WDA_EXCLUDEFROMCAPTURE is not a security guarantee);
+Bluey-owned windows are excluded/hidden where supported and never selectable.
+WPF/OS copies are released, owned media arrays zeroed; no secure physical-RAM erase
+claim. No screenshot sent to Android, no new protocol command unless necessary.
+
+Official docs inspected successfully: Microsoft Learn screen-capture,
+IGraphicsCaptureItemInterop.CreateForWindow, SoftwareBitmap.CreateCopyFromSurfaceAsync,
+SetWindowDisplayAffinity, desktop WinRT TFM configuration and
+winrt-api-desktop-app-support (OCR identity restriction). Google image-understanding/
+structured-output pages returned policy403; official googleapis/python-genai source
+at c97ae02ff87b5138bee29100b56c04c649233fed documents parts grouping,inline media,
+image/jpeg and response_json_schema. Provider-specific changes must follow those
+inspected public contracts, never an example's alternate model. Actual fixed-model
+image/audio compatibility and user Free Tier eligibility remain physical/provider
+unverified. No real request, billing action or automatic model/provider fallback.
+
+
+F4-C implementation review: timestamp the first acquired frame, not the end of
+JPEG processing; dispose the capture session immediately after its single frame
+copy. Native blank/protected-image rejection is exercised on generated bitmaps,
+including explicit buffer length before CopyToBuffer. Label normalization scans
+at most4096 input characters and allocates only bounded output. Exclude cloaked/
+minimized/changed windows when revalidating effects. No HDR color-fidelity claim.
+
+
+D013 capture repair evidence / 2026-10-24 Asia/Karachi: developer reports physical
+single-character picker titles and capture-denied-or-unavailable before preview;
+no local OCR/UIA/pointing physical pass follows from that attempt. Separate native
+regression d32b1e4, Windows40006819441, reproduced Unicode title failure and
+E_NOINTERFACE(0x80004002) in D3D/pool setup. Window and primary item creation passed.
+Microsoft GetWindowTextW documentation specifies Unicode; its P/Invoke omitted
+CharSet.Unicode. Microsoft win32metadata dxgi.h declares IDXGIDevice as
+54ec77fa-1377-44e6-8c32-88fd5f44c84c; code requested the different invalid UUID
+54ec77fa-1377-44e6-8c32-388fd5f44c84. That request cannot obtain IDXGIDevice from
+the D3D device. Two-line correction16efb78 passes actual Windows40007491657 native
+Unicode/window-item/primary-item/D3D/pool/session contract checks. No StartCapture
+or desktop pixels were used in CI; physical first-frame/copy/encode remains pending.
+This confirms source defects and shared setup failure, not all laptop behavior.
+
+Add only bounded in-memory capture outcome diagnostics: eight immutable local
+attempt summaries, kind/stage/outcome/HRESULT/elapsed counts. No exception messages,
+titles, handles, OCR/private text, pixels, credentials or stacks enter those records.
+User can select/copy safe diagnostics from Screen Understanding. Preserve one-shot
+capture, preview/consent, deadlines, cancellation, geometry and zeroed media. No
+OCR packaging, legacy fallback, dependency/server/provider/control change.
+
+Official references inspected: [GetWindowTextW](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowtextw),
+[CreateForWindow](https://learn.microsoft.com/en-us/windows/win32/api/windows.graphics.capture.interop/nf-windows-graphics-capture-interop-igraphicscaptureiteminterop-createforwindow),
+[DXGI wrapping](https://learn.microsoft.com/en-us/windows/win32/api/windows.graphics.directx.direct3d11.interop/nf-windows-graphics-directx-direct3d11-interop-createdirect3d11devicefromdxgidevice),
+and [Microsoft dxgi.h](https://github.com/microsoft/win32metadata/blob/main/generation/WinSDK/RecompiledIdlHeaders/shared/dxgi.h).
+Observed header SHA256ee21f6792f9d3f65c5007272be92bdf916aaa91491031142909124a37a4f8dd5.

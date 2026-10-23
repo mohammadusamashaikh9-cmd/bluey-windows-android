@@ -113,3 +113,15 @@ Windows/Android status. Shared synthetic response/presentation traces cover fake
 HTTP, real TLS transport, Android controller and actual WPF caption application.
 Offline preview exposes read-only statuses and opens the existing opt-in settings;
 no consent, recording or provider action occurs merely by opening settings.
+
+## F4-C stacked screen slice
+
+D013 starts before F4-B physical acceptance, from4b38029 on port/live-ai-voice. New
+branch port/screen-understanding targets that branch, not main; PR6 stays unchanged.
+Pure snapshot/workflow/target/map/choreography code, native WGC/WinRT/UIA adapters,
+WPF preview/local controls and optional same-request Gemini image context are
+implemented. Android app/protocol unchanged. Real device/provider success is not
+inferred from compile/fake tests. Local Screen29/Link140 tests and WPF build pass.
+Native capture and geometry still need physical QA; Microsoft-supported native OCR
+is blocked in the current portable distribution by package identity. No installer,
+identity registration, model call or F5 action is added to hide that constraint.

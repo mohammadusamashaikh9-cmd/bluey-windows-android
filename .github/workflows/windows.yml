@@ -1,10 +1,10 @@
 name: Windows overlay
 on:
   push:
-    branches: [main, port/windows-overlay, port/secure-device-link, port/ai-voice-foundation, port/live-ai-voice]
+    branches: [main, port/windows-overlay, port/secure-device-link, port/ai-voice-foundation, port/live-ai-voice, port/screen-understanding]
     paths: ['windows/**', 'Shared/Fonts/**', 'protocol/**', '.github/workflows/windows.yml']
   pull_request:
-    branches: [main]
+    branches: [main, port/live-ai-voice]
     paths: ['windows/**', 'Shared/Fonts/**', 'protocol/**', '.github/workflows/windows.yml']
   workflow_dispatch:
 permissions:
@@ -29,6 +29,8 @@ jobs:
           global-json-file: windows/global.json
       - name: Pure deterministic tests
         run: dotnet test Bluey.Core.Tests -c Release --logger 'trx;LogFileName=core.trx' --results-directory TestResults
+      - name: Pure screen geometry, policy, extraction and cancellation tests
+        run: dotnet test Bluey.Screen.Tests -c Release --logger 'trx;LogFileName=screen.trx' --results-directory TestResults
       - name: Strict protocol and actual TLS loopback tests
         run: dotnet test Bluey.Link.Tests -c Release --logger 'trx;LogFileName=link.trx' --results-directory TestResults
       - name: Build native WPF application

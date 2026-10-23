@@ -95,6 +95,7 @@ internal static class NativeSmoke
                 Check(displayed==1,"Completed synthetic answer displays exactly once in WPF adapter");
                 Check(actualArt.CurrentCaption==null,"Shared reply caption clears at source reading deadline");
             }
+            checks.AddRange(Screen.ScreenSmoke.Run(output));
             File.WriteAllText(Path.Combine(output, "native-smoke.json"), JsonSerializer.Serialize(new { passed = checks.Count, failed = 0, checks,
                 platform = Environment.OSVersion.ToString(), desktopAcceptance = "UNVERIFIED: physical click routing, focus, DPI changes, capture, fidelity, pacing, CPU" }, new JsonSerializerOptions { WriteIndented = true }));
             return 0;
