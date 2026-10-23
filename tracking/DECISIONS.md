@@ -520,3 +520,31 @@ copy. Native blank/protected-image rejection is exercised on generated bitmaps,
 including explicit buffer length before CopyToBuffer. Label normalization scans
 at most4096 input characters and allocates only bounded output. Exclude cloaked/
 minimized/changed windows when revalidating effects. No HDR color-fidelity claim.
+
+
+D013 capture repair evidence / 2026-10-24 Asia/Karachi: developer reports physical
+single-character picker titles and capture-denied-or-unavailable before preview;
+no local OCR/UIA/pointing physical pass follows from that attempt. Separate native
+regression d32b1e4, Windows40006819441, reproduced Unicode title failure and
+E_NOINTERFACE(0x80004002) in D3D/pool setup. Window and primary item creation passed.
+Microsoft GetWindowTextW documentation specifies Unicode; its P/Invoke omitted
+CharSet.Unicode. Microsoft win32metadata dxgi.h declares IDXGIDevice as
+54ec77fa-1377-44e6-8c32-88fd5f44c84c; code requested the different invalid UUID
+54ec77fa-1377-44e6-8c32-388fd5f44c84. That request cannot obtain IDXGIDevice from
+the D3D device. Two-line correction16efb78 passes actual Windows40007491657 native
+Unicode/window-item/primary-item/D3D/pool/session contract checks. No StartCapture
+or desktop pixels were used in CI; physical first-frame/copy/encode remains pending.
+This confirms source defects and shared setup failure, not all laptop behavior.
+
+Add only bounded in-memory capture outcome diagnostics: eight immutable local
+attempt summaries, kind/stage/outcome/HRESULT/elapsed counts. No exception messages,
+titles, handles, OCR/private text, pixels, credentials or stacks enter those records.
+User can select/copy safe diagnostics from Screen Understanding. Preserve one-shot
+capture, preview/consent, deadlines, cancellation, geometry and zeroed media. No
+OCR packaging, legacy fallback, dependency/server/provider/control change.
+
+Official references inspected: [GetWindowTextW](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowtextw),
+[CreateForWindow](https://learn.microsoft.com/en-us/windows/win32/api/windows.graphics.capture.interop/nf-windows-graphics-capture-interop-igraphicscaptureiteminterop-createforwindow),
+[DXGI wrapping](https://learn.microsoft.com/en-us/windows/win32/api/windows.graphics.directx.direct3d11.interop/nf-windows-graphics-directx-direct3d11-interop-createdirect3d11devicefromdxgidevice),
+and [Microsoft dxgi.h](https://github.com/microsoft/win32metadata/blob/main/generation/WinSDK/RecompiledIdlHeaders/shared/dxgi.h).
+Observed header SHA256ee21f6792f9d3f65c5007272be92bdf916aaa91491031142909124a37a4f8dd5.

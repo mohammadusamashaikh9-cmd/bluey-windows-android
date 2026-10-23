@@ -403,3 +403,15 @@ key and one image+audio request. No screenshot is sent to Android; audio-only re
 available. Screenshot consent is separate from audio permission, and Google Free
 Tier/project/privacy review still applies. Discard sensitive content; no automatic
 redaction/crop is claimed. No real Gemini call was used in development/CI.
+
+F4-C capture repair: the window picker uses explicit Unicode Win32 marshalling;
+DXGI device creation requests Microsoft's correct IDXGIDevice identity. The native
+CI probes verify real title/item/device/pool/session setup without StartCapture or
+desktop pixels. They do not certify a working physical laptop capture.
+
+Screen Understanding includes a selectable, read-only safe diagnostics box holding
+only the last eight completed local attempts: kind, failing stage, outcome, HRESULT
+and elapsed ms. No titles, handles, images, OCR/private text or credentials are in
+these records; they are memory-only. On failure, copy only that row. Stop/discard
+remains available. Primary-display and Notepad physical checks are in project/QA.md;
+OCR package identity is separate and unchanged. Keep cloud sharing OFF for retest.

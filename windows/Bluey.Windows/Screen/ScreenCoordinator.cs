@@ -13,6 +13,7 @@ internal sealed class ScreenCoordinator : IDisposable
     private readonly NativeCapture capture=new();private readonly NativeAnalysis analysis=new();private readonly ScreenWorkflow workflow;
     private readonly Pointing pointing=new();private string? localSnapshot;private Surface? pointSurface;private PointDirective? remotePoint;private readonly DispatcherTimer timer=new(){Interval=TimeSpan.FromMilliseconds(100)};
     internal ScreenSession State=>host.Live.Screens;internal bool Busy=>workflow.Busy;
+    internal string CaptureDiagnostics=>capture.Diagnostics.Text;
     internal string Status{get;private set;}="Screen capture: OFF · cloud screen sharing: OFF";
     internal ScreenCoordinator(OverlayWindow overlay,CursorEngine engine,Connection.WindowsLinkHost host) {
         this.overlay=overlay;this.engine=engine;this.host=host;workflow=new(State);host.Live.PointRequested+=Receive;

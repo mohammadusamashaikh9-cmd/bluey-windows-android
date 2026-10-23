@@ -4,6 +4,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using Bluey.Screen;
 using Windows.Graphics.Capture;
 using Windows.Graphics.DirectX;
 using Windows.Graphics.DirectX.Direct3D11;
@@ -21,11 +22,22 @@ internal static class CaptureSmoke
             Probe("UNICODE_WINDOW_TITLE",()=>{
                 var text=new StringBuilder(257);Private("GetWindowTextW").Invoke(null,[hwnd,text,257]);
                 if(text.ToString()!="*Untitled - Notepad — 蓝莓")throw new InvalidOperationException("Unicode title marshalling failed");
+                fixture.Title="*Untitled - Notepad";text.Clear();Private("GetWindowTextW").Invoke(null,[hwnd,text,257]);
+                if(text.ToString()!="*Untitled - Notepad")throw new InvalidOperationException("Notepad-style title marshalling failed");
             });
             var task=Task.Run(()=>{
                 Probe("WGC_SUPPORT",()=>{if(!NativeCapture.Supported)throw new PlatformNotSupportedException("WGC unavailable on runner");});
                 Probe("WGC_WINDOW_ITEM",()=>{var item=(GraphicsCaptureItem)Private("CreateItem").Invoke(null,[hwnd,false])!;if(item.Size.Width<1||item.Size.Height<1)throw new InvalidOperationException("Empty public window item");});
                 Probe("WGC_PRIMARY_ITEM",()=>{var monitor=MonitorFromPoint(default,1);var item=(GraphicsCaptureItem)Private("CreateItem").Invoke(null,[monitor,true])!;if(item.Size.Width<1||item.Size.Height<1)throw new InvalidOperationException("Empty primary item");});
+                Probe("INVALID_WINDOW_STAGE_AND_HRESULT",()=>{
+                    var native=new NativeCapture();var primary=Native.PrimaryBounds();
+                    var bounds=new Box(primary.Left,primary.Top,primary.Right-primary.Left,primary.Bottom-primary.Top);
+                    try {native.Capture(new((nint)(-1),false,"PRIVATE_TITLE_MUST_NOT_APPEAR",new(bounds.X,bounds.Y,320,210),bounds,96),default).GetAwaiter().GetResult();throw new InvalidOperationException("Invalid handle must fail");}
+                    catch(CaptureFailure e) {
+                        if(e.Report.Stage!=CaptureStage.CreateWindowItem||e.Report.NativeHresult==null||native.Diagnostics.Text.Contains("PRIVATE"))throw new InvalidOperationException("Stage or HRESULT privacy failed");
+                    }
+                });
+                Probe("SELF_WINDOW_FILTER",()=>{if(NativeCapture.Choices(96).Any(c=>c.Handle==hwnd))throw new InvalidOperationException("Self window must not be selectable");});
                 Probe("WGC_D3D_POOL_SESSION",()=>{
                     using var device=(IDirect3DDevice)Private("CreateDevice").Invoke(null,null)!;
                     using var pool=Direct3D11CaptureFramePool.CreateFreeThreaded(device,DirectXPixelFormat.B8G8R8A8UIntNormalized,1,new(){Width=320,Height=210});

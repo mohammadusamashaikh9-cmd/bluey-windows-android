@@ -450,3 +450,32 @@ injected capture/OCR cancellation, fake multimodal HTTP/structured responses, ac
 TLS revocation and existing animation/protocol tests. Native CI only uses generated
 public bitmaps/read-only UIA on its own harmless window. It never captures a real
 desktop/private image; WGC permission/capture fidelity and CPU/FPS remain unverified.
+
+
+### F4-C capture repair physical retest (local only)
+
+Use the new complete Windows development folder; keep Gemini/cloud screen sharing
+OFF. The existing Android APK is unchanged and need not be reinstalled. No phone,
+key, model request or OCR packaging is required for these capture checks.
+
+1. **Primary display:** close/hide sensitive windows and show only harmless public
+   test content on the primary display. Open Screen Understanding, refresh choices,
+   select Primary display, and click Capture once. Verify the OS indicator, accurate
+   preview, expected dimensions/freshness and cloud OFF. Stop/discard must remove
+   preview/approval; cancel during capture must not restore late pixels. This is a
+   separate display capture result, not inferred from a window item test.
+2. **Notepad:** open a visible Notepad window wholly within primary display with
+   `BLUEY SCREEN TEST`, `ALPHA BETA`, `12345`, `SCREEN CAPTURE WORKING` on separate
+   lines. Refresh choices and verify recognizable full `*Untitled - Notepad` (or
+   its localized equivalent). Select it and click Capture once. Preview must show
+   the actual public text in that window. Stop/discard clears it. Do not treat OCR
+   UnavailableIdentity as a WGC failure; recognition remains a separate deployment
+   checkpoint. Only after preview works may local UIA/spot pointing be evaluated.
+
+If either capture fails, retain only the selectable safe diagnostic row: local
+capture attempt number, PrimaryDisplay/Window, stage, outcome, HRESULT and ms.
+For example, DxgiDevice/0x80004002 identifies interface setup; FirstFrame/TimedOut
+identifies the wait; SurfaceCopy/JpegEncode identify later operations. Do not share
+window titles, screenshots, OCR text, credentials or personal content. No automatic
+retry/fallback, no API call. CI metadata/D3D/session tests do NOT prove real first
+frame acquisition on the laptop. Record both physical results independently.

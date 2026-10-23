@@ -10,13 +10,14 @@ internal sealed class ScreenWindow:Window
     private readonly ScreenCoordinator coordinator;private readonly Connection.WindowsLinkHost host;
     private readonly ComboBox choices=new(){MinWidth=300};private readonly ListBox targets=new(){Height=140};private readonly ListBox phones=new(){Height=85};
     private readonly Image preview=new(){MaxHeight=380,Stretch=Stretch.Uniform};private readonly TextBlock status=new(){TextWrapping=TextWrapping.Wrap};
+    private readonly TextBox diagnostics=new(){IsReadOnly=true,Height=115,TextWrapping=TextWrapping.Wrap,VerticalScrollBarVisibility=ScrollBarVisibility.Auto};
     private readonly CheckBox reviewed=new(){Content="I reviewed THIS preview and approve sending its image/visible text to Google for ONE question from the selected current phone."};
     private readonly DispatcherTimer timer=new(){Interval=TimeSpan.FromMilliseconds(200)};private string? previewId,operationFailure;private bool busy;
     internal ScreenWindow(ScreenCoordinator coordinator,Connection.WindowsLinkHost host) {
         this.coordinator=coordinator;this.host=host;Title="Bluey — Screen Understanding (OFF by default)";Width=850;Height=940;MinWidth=650;MinHeight=550;OwnPrivacy.Protect(this);
         var panel=new StackPanel{Margin=new(18)};Content=new ScrollViewer{Content=panel,VerticalScrollBarVisibility=ScrollBarVisibility.Auto};
         void Text(string s)=>panel.Children.Add(new TextBlock{Text=s,TextWrapping=TextWrapping.Wrap,Margin=new(0,6,0,6)});
-        void Button(string text,Func<Task> action) {var b=new Button{Content=text,Margin=new(0,3,0,3),Padding=new(6)};b.Click+=async(_,_)=>{if(busy)return;busy=true;operationFailure=null;try{await action();Refresh();}catch(Exception e){operationFailure=e is ScreenException se?"Screen operation stopped: "+se.Code:"Screen operation canceled/failed safely. No private error details logged.";}finally{busy=false;}};panel.Children.Add(b);}
+        void Button(string text,Func<Task> action) {var b=new Button{Content=text,Margin=new(0,3,0,3),Padding=new(6)};b.Click+=async(_,_)=>{if(busy)return;busy=true;operationFailure=null;try{await action();Refresh();}catch(Exception e){operationFailure=e is CaptureFailure failure?failure.Report.UserMessage+"\n"+failure.Report.SafeText:e is OperationCanceledException?"Capture/analysis canceled or deadline reached. See the last safe capture diagnostic.":e is ScreenException se?"Screen operation stopped: "+se.Code:"Screen operation canceled/failed safely. No private error details logged.";}finally{busy=false;}};panel.Children.Add(b);}
         Text("Screen Understanding · primary display and windows wholly inside it · one snapshot, no background capture");panel.Children.Add(choices);
         Button("Refresh visible window/display choices",()=>{choices.ItemsSource=coordinator.Choices();choices.SelectedIndex=0;return Task.CompletedTask;});
         Button("Capture selected window/display — local only",async()=>{if(choices.SelectedItem is not SurfaceChoice selected)throw new ScreenException("select-surface");preview.Source=null;previewId=null;reviewed.IsChecked=false;await coordinator.Capture(selected,this);});
@@ -35,11 +36,12 @@ internal sealed class ScreenWindow:Window
         Text("Google free-tier content may improve its products. Avoid sensitive conversations/screens. Project Free Tier eligibility is not verified by the app. No paid fallback, second request, tools, grounding or input actions.");
         panel.Children.Add(phones);panel.Children.Add(reviewed);
         Button("Share THIS reviewed snapshot for ONE authorized phone question",()=>{if(previewId==null||reviewed.IsChecked!=true||phones.SelectedItem is not PhoneRow row||row.Peer.ConsentId==null)throw new ScreenException("review-and-select-current-phone");host.Live.ApproveScreen(row.Peer.Lease,row.Peer.ConsentId,previewId,true);reviewed.IsChecked=false;return Task.CompletedTask;});
-        panel.Children.Add(status);choices.ItemsSource=coordinator.Choices();choices.SelectedIndex=0;
+        panel.Children.Add(status);Text("Safe local capture diagnostics — last8 completed attempts; stages/HRESULT/timing only. Select/copy this box when reporting a failure. No titles or pixels.");panel.Children.Add(diagnostics);choices.ItemsSource=coordinator.Choices();choices.SelectedIndex=0;
         timer.Tick+=(_,_)=>Refresh();timer.Start();Closed+=(_,_)=>{timer.Stop();coordinator.Stop();ClearPreview();};Refresh();
     }
     private void ClearPreview(){preview.Source=null;previewId=null;targets.ItemsSource=null;reviewed.IsChecked=false;}
     private void Refresh() {
+        diagnostics.Text=coordinator.CaptureDiagnostics;
         var info=coordinator.State.Info;
         if(info==null)ClearPreview();
         else {

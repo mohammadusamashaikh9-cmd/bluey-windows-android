@@ -1,3 +1,4 @@
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using Bluey.Screen;
@@ -15,6 +16,7 @@ internal sealed record SurfaceChoice(nint Handle,bool Monitor,string Label,Box P
 internal sealed class NativeCapture
 {
     private int busy;
+    internal CaptureDiagnostics Diagnostics{get;}=new();
     internal const long MaxPixels=16*1024*1024;
     internal static bool Supported=>GraphicsCaptureSession.IsSupported();
     internal static bool Exclude(nint hwnd)=>SetWindowDisplayAffinity(hwnd,0x11); // Best effort, not a security guarantee.
@@ -44,48 +46,71 @@ internal sealed class NativeCapture
     internal async Task<Snapshot> Capture(SurfaceChoice choice,CancellationToken stop)
     {
         if(Interlocked.CompareExchange(ref busy,1,0)!=0)throw new ScreenException("capture-busy");
+        var started=Environment.TickCount64;var kind=choice.Monitor?SurfaceKind.PrimaryDisplay:SurfaceKind.Window;
+        int stage=(int)CaptureStage.Selection;bool succeeded=false;
+        void At(CaptureStage value)=>Volatile.Write(ref stage,(int)value);
+        CaptureFailure Fail(CaptureOutcome outcome,Exception? cause=null,CaptureStage? at=null) {
+            succeeded=false;return new(Diagnostics.Record(kind,at??(CaptureStage)Volatile.Read(ref stage),outcome,Environment.TickCount64-started,cause));
+        }
+        using var deadline=new CancellationTokenSource(TimeSpan.FromSeconds(8));
         try {
-            if(!Supported||choice.Physical.Width*choice.Physical.Height>MaxPixels)throw new ScreenException("capture-unavailable");
+            if(choice.Physical.Width*choice.Physical.Height>MaxPixels)throw new ScreenException("image-size");
             if(!choice.Monitor){GetWindowThreadProcessId(choice.Handle,out var pid);if(pid==Environment.ProcessId)throw new ScreenException("self-capture-denied");}
-            using var deadline=new CancellationTokenSource(TimeSpan.FromSeconds(8));using var linked=CancellationTokenSource.CreateLinkedTokenSource(stop,deadline.Token);var cancel=linked.Token;
-            var item=CreateItem(choice.Handle,choice.Monitor);var size=item.Size;
+            At(CaptureStage.Support);if(!Supported)throw Fail(CaptureOutcome.Unsupported);
+            using var linked=CancellationTokenSource.CreateLinkedTokenSource(stop,deadline.Token);var cancel=linked.Token;
+            At(choice.Monitor?CaptureStage.CreateMonitorItem:CaptureStage.CreateWindowItem);
+            var item=CreateItem(choice.Handle,choice.Monitor);At(CaptureStage.ItemSize);var size=item.Size;
             if(size.Width!=(int)choice.Physical.Width||size.Height!=(int)choice.Physical.Height||size.Width<1||size.Height<1||size.Width*(long)size.Height>MaxPixels)throw new ScreenException("capture-geometry");
-            using var device=CreateDevice();using var pool=Direct3D11CaptureFramePool.CreateFreeThreaded(device,DirectXPixelFormat.B8G8R8A8UIntNormalized,1,size);
-            var session=pool.CreateCaptureSession(item);session.IsCursorCaptureEnabled=false;bool captureActive=true;long capturedAt=0;DateTimeOffset capturedUtc=default;
+            At(CaptureStage.D3DDevice);using var device=CreateDevice();
+            At(CaptureStage.FramePool);using var pool=Direct3D11CaptureFramePool.CreateFreeThreaded(device,DirectXPixelFormat.B8G8R8A8UIntNormalized,1,size);
+            At(CaptureStage.CaptureSession);var session=pool.CreateCaptureSession(item);session.IsCursorCaptureEnabled=false;
+            bool captureActive=true;long capturedAt=0;DateTimeOffset capturedUtc=default;
             var frameResult=new TaskCompletionSource<SoftwareBitmap>(TaskCreationOptions.RunContinuationsAsynchronously);int taken=0;
             async void Frame(Direct3D11CaptureFramePool sender,object args) {
                 if(Interlocked.Exchange(ref taken,1)!=0)return;
+                var frameStage=CaptureStage.FirstFrame;
                 try {
-                    using var frame=sender.TryGetNextFrame();if(frame==null||frame.ContentSize.Width!=size.Width||frame.ContentSize.Height!=size.Height)throw new ScreenException("capture-changed");
+                    At(frameStage);using var frame=sender.TryGetNextFrame();
+                    if(frame==null||frame.ContentSize.Width!=size.Width||frame.ContentSize.Height!=size.Height)throw new ScreenException("capture-changed");
                     capturedAt=Environment.TickCount64;capturedUtc=DateTimeOffset.UtcNow;
+                    frameStage=CaptureStage.SurfaceCopy;At(frameStage);
                     var bitmap=await SoftwareBitmap.CreateCopyFromSurfaceAsync(frame.Surface,BitmapAlphaMode.Ignore).AsTask(cancel).ConfigureAwait(false);
                     if(!frameResult.TrySetResult(bitmap))bitmap.Dispose();
-                } catch {frameResult.TrySetException(new ScreenException("capture-denied-or-unavailable"));}
+                } catch(OperationCanceledException){frameResult.TrySetCanceled(cancel);}
+                catch(ScreenException e){frameResult.TrySetException(e);}
+                catch(Exception e){frameResult.TrySetException(new NativeStep(frameStage,e.HResult));}
             }
             void Closed(GraphicsCaptureItem _,object args)=>frameResult.TrySetException(new ScreenException("window-closed"));
-            pool.FrameArrived+=Frame;item.Closed+=Closed;
-            SoftwareBitmap? image=null;byte[]? jpeg=null;
+            pool.FrameArrived+=Frame;item.Closed+=Closed;SoftwareBitmap? image=null;byte[]? jpeg=null;
             try {
-                cancel.ThrowIfCancellationRequested();session.StartCapture();
+                cancel.ThrowIfCancellationRequested();At(CaptureStage.StartSession);session.StartCapture();
+                // A free-threaded callback may already be copying; never overwrite its later stage.
+                Interlocked.CompareExchange(ref stage,(int)CaptureStage.FirstFrame,(int)CaptureStage.StartSession);
                 image=await frameResult.Task.WaitAsync(cancel).ConfigureAwait(false);
                 session.Dispose();captureActive=false;pool.FrameArrived-=Frame;
-                jpeg=await Encode(image,cancel).ConfigureAwait(false);
-                var scale=Math.Min(1,1100.0/Math.Max(image.PixelWidth,image.PixelHeight));
-                var surface=new Surface(choice.Monitor?SurfaceKind.PrimaryDisplay:SurfaceKind.Window,(long)choice.Handle,choice.Physical,choice.Primary,choice.Dpi,choice.Dpi,(int)Math.Round(image.PixelWidth*scale),(int)Math.Round(image.PixelHeight*scale));
-                if(!Matches(surface)){System.Security.Cryptography.CryptographicOperations.ZeroMemory(jpeg);throw new ScreenException("capture-changed");}
-                using(var decoded=await Decode(jpeg,cancel).ConfigureAwait(false)) {
-                    EnsureNonblank(decoded);
-                }
-                cancel.ThrowIfCancellationRequested();var shot=new Snapshot(surface,jpeg,capturedAt,capturedUtc);jpeg=null;return shot;
+                At(CaptureStage.JpegEncode);jpeg=await Encode(image,cancel).ConfigureAwait(false);
+                var scale=Math.Min(1,1100.0/Math.Max(image.PixelWidth,image.PixelHeight));At(CaptureStage.GeometryValidation);
+                var surface=new Surface(kind,(long)choice.Handle,choice.Physical,choice.Primary,choice.Dpi,choice.Dpi,(int)Math.Round(image.PixelWidth*scale),(int)Math.Round(image.PixelHeight*scale));
+                if(!Matches(surface))throw new ScreenException("capture-changed");
+                At(CaptureStage.JpegDecode);using(var decoded=await Decode(jpeg,cancel).ConfigureAwait(false)) {At(CaptureStage.BlankValidation);EnsureNonblank(decoded);}
+                cancel.ThrowIfCancellationRequested();var shot=new Snapshot(surface,jpeg,capturedAt,capturedUtc);jpeg=null;succeeded=true;return shot;
             } finally {
                 pool.FrameArrived-=Frame;item.Closed-=Closed;if(captureActive)session.Dispose();frameResult.TrySetCanceled();
                 if(image!=null)image.Dispose();else if(frameResult.Task.IsCompletedSuccessfully)frameResult.Task.Result.Dispose();
                 if(jpeg!=null)System.Security.Cryptography.CryptographicOperations.ZeroMemory(jpeg);
             }
-        } catch(OperationCanceledException){throw;}
-        catch(ScreenException){throw;}
-        catch {throw new ScreenException("capture-denied-or-unavailable");}
-        finally {Volatile.Write(ref busy,0);}
+        } catch(CaptureFailure){succeeded=false;throw;}
+        catch(OperationCanceledException) {
+            var failure=Fail(deadline.IsCancellationRequested?CaptureOutcome.TimedOut:CaptureOutcome.Canceled);
+            if(deadline.IsCancellationRequested)throw failure;throw;
+        }
+        catch(NativeStep e){throw Fail(CaptureOutcome.NativeFailure,e,e.Stage);}
+        catch(ScreenException e){throw Fail(e.Code switch {"blank-or-protected"=>CaptureOutcome.BlankOrProtected,"capture-geometry" or "capture-changed" or "window-closed" or "geometry"=>CaptureOutcome.Changed,_=>CaptureOutcome.InvalidSelection});}
+        catch(Exception e){throw Fail(CaptureOutcome.NativeFailure,e);}
+        finally {
+            if(succeeded)Diagnostics.Record(kind,CaptureStage.Complete,CaptureOutcome.Succeeded,Environment.TickCount64-started);
+            Volatile.Write(ref busy,0);
+        }
     }
     internal static async Task<byte[]> Encode(SoftwareBitmap image,CancellationToken stop)
     {
@@ -120,24 +145,31 @@ internal sealed class NativeCapture
     }
     private static GraphicsCaptureItem CreateItem(nint handle,bool monitor)
     {
-        const string name="Windows.Graphics.Capture.GraphicsCaptureItem";nint text=0,factory=0,item=0;
+        const string name="Windows.Graphics.Capture.GraphicsCaptureItem";nint text=0,factory=0,item=0;var stage=CaptureStage.ActivationFactory;
         try {
             Marshal.ThrowExceptionForHR(WindowsCreateString(name,name.Length,out text));var iid=typeof(ICaptureItemInterop).GUID;
             Marshal.ThrowExceptionForHR(RoGetActivationFactory(text,ref iid,out factory));var interop=(ICaptureItemInterop)Marshal.GetObjectForIUnknown(factory);
             var itemId=new Guid("79c3f95b-31f7-4ec2-a464-632ef5d30760");
+            stage=monitor?CaptureStage.CreateMonitorItem:CaptureStage.CreateWindowItem;
             Marshal.ThrowExceptionForHR(monitor?interop.CreateForMonitor(handle,ref itemId,out item):interop.CreateForWindow(handle,ref itemId,out item));
-            return WinRT.MarshalInspectable<GraphicsCaptureItem>.FromAbi(item);
-        } finally {if(item!=0)Marshal.Release(item);if(factory!=0)Marshal.Release(factory);if(text!=0)WindowsDeleteString(text);}
+            stage=CaptureStage.ItemProjection;return WinRT.MarshalInspectable<GraphicsCaptureItem>.FromAbi(item);
+        } catch(Exception e){throw new NativeStep(stage,e.HResult);}
+        finally {if(item!=0)Marshal.Release(item);if(factory!=0)Marshal.Release(factory);if(text!=0)WindowsDeleteString(text);}
     }
     private static IDirect3DDevice CreateDevice()
     {
-        nint device=0,context=0,dxgi=0,inspectable=0;
+        nint device=0,context=0,dxgi=0,inspectable=0;var stage=CaptureStage.D3DDevice;
         try {
             var hr=D3D11CreateDevice(0,1,0,0x20,0,0,7,out device,out _,out context);
             if(hr<0)Marshal.ThrowExceptionForHR(D3D11CreateDevice(0,5,0,0x20,0,0,7,out device,out _,out context)); // WARP, bounded single frame.
-            var iid=new Guid("54ec77fa-1377-44e6-8c32-88fd5f44c84c");Marshal.ThrowExceptionForHR(Marshal.QueryInterface(device,in iid,out dxgi));
-            Marshal.ThrowExceptionForHR(CreateDirect3D11DeviceFromDXGIDevice(dxgi,out inspectable));return WinRT.MarshalInterface<IDirect3DDevice>.FromAbi(inspectable);
-        } finally {if(inspectable!=0)Marshal.Release(inspectable);if(dxgi!=0)Marshal.Release(dxgi);if(context!=0)Marshal.Release(context);if(device!=0)Marshal.Release(device);}
+            stage=CaptureStage.DxgiDevice;var iid=new Guid("54ec77fa-1377-44e6-8c32-88fd5f44c84c");Marshal.ThrowExceptionForHR(Marshal.QueryInterface(device,in iid,out dxgi));
+            stage=CaptureStage.DeviceProjection;Marshal.ThrowExceptionForHR(CreateDirect3D11DeviceFromDXGIDevice(dxgi,out inspectable));return WinRT.MarshalInterface<IDirect3DDevice>.FromAbi(inspectable);
+        } catch(Exception e){throw new NativeStep(stage,e.HResult);}
+        finally {if(inspectable!=0)Marshal.Release(inspectable);if(dxgi!=0)Marshal.Release(dxgi);if(context!=0)Marshal.Release(context);if(device!=0)Marshal.Release(device);}
+    }
+    private sealed class NativeStep:IOException {
+        internal CaptureStage Stage{get;}
+        internal NativeStep(CaptureStage stage,int hresult):base("Native capture step failed"){Stage=stage;HResult=hresult;}
     }
     private static Box BoxOf(Native.Rect r)=>new(r.Left,r.Top,r.Right-r.Left,r.Bottom-r.Top);
     private static bool TryBounds(nint hwnd,out Box box){var hr=DwmGetWindowAttribute(hwnd,9,out Native.Rect rect,Marshal.SizeOf<Native.Rect>());box=BoxOf(rect);return hr==0&&box.Valid;}
