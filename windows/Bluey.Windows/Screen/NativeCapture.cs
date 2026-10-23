@@ -135,7 +135,7 @@ internal sealed class NativeCapture
         try {
             var hr=D3D11CreateDevice(0,1,0,0x20,0,0,7,out device,out _,out context);
             if(hr<0)Marshal.ThrowExceptionForHR(D3D11CreateDevice(0,5,0,0x20,0,0,7,out device,out _,out context)); // WARP, bounded single frame.
-            var iid=new Guid("54ec77fa-1377-44e6-8c32-388fd5f44c84");Marshal.ThrowExceptionForHR(Marshal.QueryInterface(device,in iid,out dxgi));
+            var iid=new Guid("54ec77fa-1377-44e6-8c32-88fd5f44c84c");Marshal.ThrowExceptionForHR(Marshal.QueryInterface(device,in iid,out dxgi));
             Marshal.ThrowExceptionForHR(CreateDirect3D11DeviceFromDXGIDevice(dxgi,out inspectable));return WinRT.MarshalInterface<IDirect3DDevice>.FromAbi(inspectable);
         } finally {if(inspectable!=0)Marshal.Release(inspectable);if(dxgi!=0)Marshal.Release(dxgi);if(context!=0)Marshal.Release(context);if(device!=0)Marshal.Release(device);}
     }
@@ -148,7 +148,7 @@ internal sealed class NativeCapture
     }
     private delegate bool EnumProc(nint hwnd,nint param);
     [DllImport("user32.dll")]private static extern bool EnumWindows(EnumProc proc,nint param);
-    [DllImport("user32.dll")]private static extern int GetWindowTextW(nint hwnd,StringBuilder text,int count);
+    [DllImport("user32.dll",CharSet=CharSet.Unicode,ExactSpelling=true)]private static extern int GetWindowTextW(nint hwnd,StringBuilder text,int count);
     [DllImport("user32.dll")]private static extern uint GetWindowThreadProcessId(nint hwnd,out uint pid);
     [DllImport("user32.dll")]private static extern bool IsIconic(nint hwnd);
     [DllImport("user32.dll")]private static extern nint GetWindow(nint hwnd,uint which);
