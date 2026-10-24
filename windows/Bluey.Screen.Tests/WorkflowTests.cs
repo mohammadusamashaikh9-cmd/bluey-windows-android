@@ -4,8 +4,8 @@ public sealed class WorkflowTests
 {
     private static Snapshot Shot()=>new(new(SurfaceKind.Window,1,new(0,0,400,300),new(0,0,800,600),96,96,400,300),[255,216,0,255,217],0,DateTimeOffset.UnixEpoch);
     private sealed class Source:ISnapshotSource {
-        public int Calls;public TaskCompletionSource<Snapshot>? Pending;
-        public Task<Snapshot> Capture(CancellationToken stop){Calls++;return Pending?.Task??Task.FromResult(Shot());}
+        public int Calls;public Snapshot? Next;public TaskCompletionSource<Snapshot>? Pending;
+        public Task<Snapshot> Capture(CancellationToken stop){Calls++;return Pending?.Task??Task.FromResult(Next??Shot());}
     }
     private sealed class Reader:ILocalReader {
         public TaskCompletionSource<Analysis>? Pending;public ReadOnlyMemory<byte> Borrowed;public int Calls;
@@ -40,5 +40,13 @@ public sealed class WorkflowTests
     [Fact] public async Task ValidSyntheticCaptureAndAnalysisHaveDeterministicTarget() {
         var state=new ScreenSession(()=>0);var workflow=new ScreenWorkflow(state);await workflow.Capture(true,new Source());var reader=new Reader();await workflow.Analyze(reader);
         Assert.Equal("known",Assert.Single(state.Info!.Targets).Text);Assert.Equal("L1",state.Info.Targets[0].Id);Assert.Equal(1,reader.Calls);Assert.All(reader.Borrowed.ToArray(),b=>Assert.Equal(0,b));
+    }
+    [Fact] public async Task PreviewOnlyImageCannotStartAnalysisAndStopStillClearsMedia() {
+        var plan=CaptureGeometry.Resolve(SurfaceKind.Window,new(0,0,400,300),new(0,0,800,600),null,600,450,144);
+        var shot=new Snapshot(plan.ToSurface(1),[255,216,0,255,217],0,DateTimeOffset.UnixEpoch);
+        using var state=new ScreenSession(()=>0);var workflow=new ScreenWorkflow(state);await workflow.Capture(true,new Source{Next=shot});
+        using var preview=state.CopyCurrent();Assert.False(preview.Info.Surface.MappingVerified);var reader=new Reader();
+        await Assert.ThrowsAsync<ScreenException>(()=>workflow.Analyze(reader));Assert.Equal(0,reader.Calls);Assert.False(workflow.Busy);
+        state.Invalidate();Assert.Null(state.Info);Assert.True(shot.Disposed);Assert.True(preview.Stop.IsCancellationRequested);
     }
 }

@@ -27,7 +27,7 @@ public sealed class ScreenWorkflow(ScreenSession state,TimeProvider? time=null)
         if(Interlocked.CompareExchange(ref busy,1,0)!=0)throw new ScreenException("analysis-busy");
         ScreenMedia? media=null;Task<Analysis>? pending=null;
         try {
-            media=state.CopyCurrent();using var deadline=new CancellationTokenSource(TimeSpan.FromSeconds(5),clock);
+            media=state.CopyCurrent();media.Info.Surface.RequireMapping();using var deadline=new CancellationTokenSource(TimeSpan.FromSeconds(5),clock);
             using var linked=CancellationTokenSource.CreateLinkedTokenSource(media.Stop,deadline.Token);
             pending=reader.Analyze(media,linked.Token);var result=await pending.WaitAsync(linked.Token).ConfigureAwait(false);state.SetAnalysis(media.Info.Id,result);
         } finally {

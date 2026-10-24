@@ -479,3 +479,29 @@ identifies the wait; SurfaceCopy/JpegEncode identify later operations. Do not sh
 window titles, screenshots, OCR text, credentials or personal content. No automatic
 retry/fallback, no API call. CI metadata/D3D/session tests do NOT prove real first
 frame acquisition on the laptop. Record both physical results independently.
+
+
+### F4-C ItemSize geometry regression retest
+
+The developer reports the title fix works, but two actual Notepad attempts stopped
+at Window/ItemSize/Changed (203ms and110ms), without frames or preview, cloud OFF.
+The old exact-equality check compared different API extents. Its rejection is
+confirmed; actual laptop DWM/WGC dimension values are still unknown.
+
+Use the new entire Windows artifact folder; retain the existing Android APK. Keep
+cloud screen sharing OFF. Place Notepad wholly inside primary display, away from
+its edges, with public lines BLUEY SCREEN TEST / ALPHA BETA /12345 / SCREEN CAPTURE
+WORKING (one per line). Refresh the recognizable title and Capture once. Expect the
+actual image preview and a safe diagnostic with DWM/WGC/Win32 width/height, absolute
+delta, DPI scale and map mode. Verified VisibleBounds or WindowFrame allows local
+spot pointing: use0/0,500/500,1000/1000, confirm the overlay follows the corresponding
+preview locations without moving the real mouse, then Return Home/Stop/discard.
+If local UIA targets are available, they must map to actual visible controls; OCR
+package identity remains a separate blocker and is not required for spot pointing.
+
+PREVIEW ONLY means no reliable measured transform: image inspection is allowed,
+but analysis/pointing and screen sharing must remain disabled. Copy only safe
+numeric diagnostic fields; do not share window titles, screenshot pixels or text.
+A moved/resized/closed window, display/DPI change, expiry or Stop must invalidate
+prior targets and approval. Cancel must not restore a late image. No cloud/model
+request is authorized by this retest. CI cannot replace this physical observation.

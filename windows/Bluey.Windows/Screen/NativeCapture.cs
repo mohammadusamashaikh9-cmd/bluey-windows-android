@@ -17,7 +17,7 @@ internal sealed class NativeCapture
 {
     private int busy;
     internal CaptureDiagnostics Diagnostics{get;}=new();
-    internal const long MaxPixels=16*1024*1024;
+    internal const long MaxPixels=CaptureGeometry.MaxPixels;
     internal static bool Supported=>GraphicsCaptureSession.IsSupported();
     internal static bool Exclude(nint hwnd)=>SetWindowDisplayAffinity(hwnd,0x11); // Best effort, not a security guarantee.
     internal static bool HasPackageIdentity {get{uint n=0;return GetCurrentPackageFullName(ref n,null)==122;}}
@@ -41,16 +41,16 @@ internal sealed class NativeCapture
     internal static bool Matches(Surface surface)
     {
         var primary=BoxOf(Native.PrimaryBounds());if(primary!=surface.Primary)return false;
-        return surface.Kind!=SurfaceKind.Window||TryBounds((nint)surface.NativeId,out var b)&&b==surface.Physical&&Native.IsWindowVisible((nint)surface.NativeId)&&!IsIconic((nint)surface.NativeId)&&DwmGetWindowAttribute((nint)surface.NativeId,14,out int cloaked,4)==0&&cloaked==0;
+        return surface.Kind!=SurfaceKind.Window||TryBounds((nint)surface.NativeId,out var b)&&b==surface.SelectionBounds&&(surface.WindowFrameBounds is not {} frame||TryWindowBounds((nint)surface.NativeId,out var now)&&now==frame)&&Native.IsWindowVisible((nint)surface.NativeId)&&!IsIconic((nint)surface.NativeId)&&DwmGetWindowAttribute((nint)surface.NativeId,14,out int cloaked,4)==0&&cloaked==0;
     }
     internal async Task<Snapshot> Capture(SurfaceChoice choice,CancellationToken stop)
     {
         if(Interlocked.CompareExchange(ref busy,1,0)!=0)throw new ScreenException("capture-busy");
         var started=Environment.TickCount64;var kind=choice.Monitor?SurfaceKind.PrimaryDisplay:SurfaceKind.Window;
-        int stage=(int)CaptureStage.Selection;bool succeeded=false;
+        int stage=(int)CaptureStage.Selection;bool succeeded=false;CaptureDimensions? dimensions=null;
         void At(CaptureStage value)=>Volatile.Write(ref stage,(int)value);
         CaptureFailure Fail(CaptureOutcome outcome,Exception? cause=null,CaptureStage? at=null) {
-            succeeded=false;return new(Diagnostics.Record(kind,at??(CaptureStage)Volatile.Read(ref stage),outcome,Environment.TickCount64-started,cause));
+            succeeded=false;return new(Diagnostics.Record(kind,at??(CaptureStage)Volatile.Read(ref stage),outcome,Environment.TickCount64-started,cause,dimensions));
         }
         using var deadline=new CancellationTokenSource(TimeSpan.FromSeconds(8));
         try {
@@ -60,7 +60,12 @@ internal sealed class NativeCapture
             using var linked=CancellationTokenSource.CreateLinkedTokenSource(stop,deadline.Token);var cancel=linked.Token;
             At(choice.Monitor?CaptureStage.CreateMonitorItem:CaptureStage.CreateWindowItem);
             var item=CreateItem(choice.Handle,choice.Monitor);At(CaptureStage.ItemSize);var size=item.Size;
-            if(size.Width!=(int)choice.Physical.Width||size.Height!=(int)choice.Physical.Height||size.Width<1||size.Height<1||size.Width*(long)size.Height>MaxPixels)throw new ScreenException("capture-geometry");
+            Box? windowFrame=null;
+            if(!choice.Monitor&&TryWindowBounds(choice.Handle,out var measured))windowFrame=measured;
+            dimensions=new((int)choice.Physical.Width,(int)choice.Physical.Height,size.Width,size.Height,windowFrame is {} f?(int)f.Width:null,windowFrame is {} g?(int)g.Height:null,choice.Dpi,null);
+            if(!choice.Monitor&&(!TryBounds(choice.Handle,out var visible)||visible!=choice.Physical))throw new ScreenException("capture-changed");
+            var geometry=CaptureGeometry.Resolve(kind,choice.Physical,choice.Primary,windowFrame,size.Width,size.Height,choice.Dpi);
+            dimensions=dimensions with {Mapping=geometry.Mapping};
             At(CaptureStage.D3DDevice);using var device=CreateDevice();
             At(CaptureStage.FramePool);using var pool=Direct3D11CaptureFramePool.CreateFreeThreaded(device,DirectXPixelFormat.B8G8R8A8UIntNormalized,1,size);
             At(CaptureStage.CaptureSession);var session=pool.CreateCaptureSession(item);session.IsCursorCaptureEnabled=false;
@@ -89,10 +94,9 @@ internal sealed class NativeCapture
                 image=await frameResult.Task.WaitAsync(cancel).ConfigureAwait(false);
                 session.Dispose();captureActive=false;pool.FrameArrived-=Frame;
                 At(CaptureStage.JpegEncode);jpeg=await Encode(image,cancel).ConfigureAwait(false);
-                var scale=Math.Min(1,1100.0/Math.Max(image.PixelWidth,image.PixelHeight));At(CaptureStage.GeometryValidation);
-                var surface=new Surface(kind,(long)choice.Handle,choice.Physical,choice.Primary,choice.Dpi,choice.Dpi,(int)Math.Round(image.PixelWidth*scale),(int)Math.Round(image.PixelHeight*scale));
-                if(!Matches(surface))throw new ScreenException("capture-changed");
-                At(CaptureStage.JpegDecode);using(var decoded=await Decode(jpeg,cancel).ConfigureAwait(false)) {At(CaptureStage.BlankValidation);EnsureNonblank(decoded);}
+                At(CaptureStage.GeometryValidation);var surface=geometry.ToSurface((long)choice.Handle);
+                if(image.PixelWidth!=geometry.Width||image.PixelHeight!=geometry.Height||item.Size.Width!=geometry.Width||item.Size.Height!=geometry.Height||!Matches(surface))throw new ScreenException("capture-changed");
+                At(CaptureStage.JpegDecode);using(var decoded=await Decode(jpeg,cancel).ConfigureAwait(false)) {if(decoded.PixelWidth!=surface.ImageWidth||decoded.PixelHeight!=surface.ImageHeight)throw new ScreenException("capture-changed");At(CaptureStage.BlankValidation);EnsureNonblank(decoded);}
                 cancel.ThrowIfCancellationRequested();var shot=new Snapshot(surface,jpeg,capturedAt,capturedUtc);jpeg=null;succeeded=true;return shot;
             } finally {
                 pool.FrameArrived-=Frame;item.Closed-=Closed;if(captureActive)session.Dispose();frameResult.TrySetCanceled();
@@ -108,7 +112,7 @@ internal sealed class NativeCapture
         catch(ScreenException e){throw Fail(e.Code switch {"blank-or-protected"=>CaptureOutcome.BlankOrProtected,"capture-geometry" or "capture-changed" or "window-closed" or "geometry"=>CaptureOutcome.Changed,_=>CaptureOutcome.InvalidSelection});}
         catch(Exception e){throw Fail(CaptureOutcome.NativeFailure,e);}
         finally {
-            if(succeeded)Diagnostics.Record(kind,CaptureStage.Complete,CaptureOutcome.Succeeded,Environment.TickCount64-started);
+            if(succeeded)Diagnostics.Record(kind,CaptureStage.Complete,CaptureOutcome.Succeeded,Environment.TickCount64-started,dimensions:dimensions);
             Volatile.Write(ref busy,0);
         }
     }
@@ -171,6 +175,12 @@ internal sealed class NativeCapture
         internal CaptureStage Stage{get;}
         internal NativeStep(CaptureStage stage,int hresult):base("Native capture step failed"){Stage=stage;HResult=hresult;}
     }
+    // GetWindowRect is DPI-virtualized. Scope only this synchronous read, then restore the caller context.
+    internal static bool TryWindowBounds(nint hwnd,out Box bounds) {
+        bounds=default;var previous=SetThreadDpiAwarenessContext((nint)(-4));if(previous==0)return false;
+        try {if(!GetWindowRect(hwnd,out var rect))return false;bounds=BoxOf(rect);return bounds.Valid;}
+        finally {SetThreadDpiAwarenessContext(previous);}
+    }
     private static Box BoxOf(Native.Rect r)=>new(r.Left,r.Top,r.Right-r.Left,r.Bottom-r.Top);
     private static bool TryBounds(nint hwnd,out Box box){var hr=DwmGetWindowAttribute(hwnd,9,out Native.Rect rect,Marshal.SizeOf<Native.Rect>());box=BoxOf(rect);return hr==0&&box.Valid;}
     [ComImport,Guid("3628e81b-3cac-4c60-b7f4-23ce0e0c3356"),InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
@@ -192,6 +202,8 @@ internal sealed class NativeCapture
     [DllImport("combase.dll",CharSet=CharSet.Unicode)]private static extern int WindowsCreateString(string text,int length,out nint handle);
     [DllImport("combase.dll")]private static extern int WindowsDeleteString(nint handle);
     [DllImport("combase.dll")]private static extern int RoGetActivationFactory(nint name,ref Guid iid,out nint factory);
+    [DllImport("user32.dll")]private static extern nint SetThreadDpiAwarenessContext(nint context);
+    [DllImport("user32.dll")]private static extern bool GetWindowRect(nint hwnd,out Native.Rect rect);
     [DllImport("d3d11.dll")]private static extern int D3D11CreateDevice(nint adapter,int driver,nint software,uint flags,nint levels,uint count,uint version,out nint device,out uint level,out nint context);
     [DllImport("d3d11.dll")]private static extern int CreateDirect3D11DeviceFromDXGIDevice(nint dxgi,out nint inspectable);
 }

@@ -32,13 +32,14 @@ internal sealed class ScreenCoordinator : IDisposable
             foreach(var window in hidden)window.Hide();
             Status="Screen capture: Capturing ONE snapshot · Cancel remains available";
             var completed=await workflow.Capture(true,new Source(capture,selected));
-            Status=completed?"Screen capture: Preview ready · cloud sharing OFF · review the actual pixels":"Screen capture: OFF — canceled or superseded";
+            Status=completed?(State.Info?.Surface.MappingVerified==true?"Screen capture: Preview ready · verified coordinate mapping · cloud sharing OFF":"Screen capture: Preview ready ONLY · coordinates unverified · pointing and screen sharing disabled"):"Screen capture: OFF — canceled or superseded";
         } catch {Status="Screen capture: OFF — canceled/denied/unavailable; no snapshot";throw;}
         finally {foreach(var window in hidden)try{window.Show();}catch(InvalidOperationException){}}
     }
     private sealed class Source(NativeCapture native,SurfaceChoice selection):ISnapshotSource {public Task<Snapshot> Capture(CancellationToken stop)=>Task.Run(()=>native.Capture(selection,stop),stop);}
     private sealed class Reader(NativeAnalysis native):ILocalReader {public Task<Analysis> Analyze(ScreenMedia media,CancellationToken stop)=>Task.Run(()=>native.Analyze(media,stop),stop);}
     internal async Task Analyze() {
+        State.Info?.Surface.RequireMapping();
         try{await workflow.Analyze(new Reader(analysis));}catch{Status="Local OCR: Failed/canceled — no recognition result published";if(State.Info is {} failed)State.SetAnalysis(failed.Id,new([],[],false,OcrStatus.Failed));throw;}
         Status=State.Info?.Ocr switch {
             OcrStatus.Ready=>"Local OCR: Ready · trusted word rectangles · UIA labels only",

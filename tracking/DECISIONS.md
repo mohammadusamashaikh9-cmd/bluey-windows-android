@@ -548,3 +548,28 @@ Official references inspected: [GetWindowTextW](https://learn.microsoft.com/en-u
 [DXGI wrapping](https://learn.microsoft.com/en-us/windows/win32/api/windows.graphics.directx.direct3d11.interop/nf-windows-graphics-directx-direct3d11-interop-createdirect3d11devicefromdxgidevice),
 and [Microsoft dxgi.h](https://github.com/microsoft/win32metadata/blob/main/generation/WinSDK/RecompiledIdlHeaders/shared/dxgi.h).
 Observed header SHA256ee21f6792f9d3f65c5007272be92bdf916aaa91491031142909124a37a4f8dd5.
+
+D013 ItemSize geometry correction / 2026-10-25 Asia/Karachi: developer verifies
+Unicode picker titles fixed, but two real Notepad attempts fail at ItemSize/Changed
+before frames (203ms/110ms). Actual dimension values remain unknown. Exact equality
+between WGC item size and DWM visible bounds is an invalid precondition: Microsoft
+GetWindowRect documents invisible resize borders and DPI virtualization; DWM bounds
+are not DPI-adjusted. Use positive, pixel-budgeted WGC size for the frame pool.
+
+Measure GetWindowRect under a scoped per-monitor-v2 thread DPI context. Select a
+verified image-to-screen transform only for exact visible-bound matches or a WGC
+size matching the independently measured physical Win32 rectangle containing the
+visible DWM rectangle, with bounded per-edge padding and primary-display containment.
+Persist both selection and frame bounds for freshness. Never infer a transform
+solely from similar aspect ratios or a DPI ratio. Unknown but bounded geometries
+may produce local preview only; all coordinate methods, targets and screen sharing
+fail closed until mapping is verified. Oversized/inconsistent frames still reject.
+Do not crop/warp pixels or add another backend. Unchanged-window validation occurs
+before/after capture; preview-only is explicit in UI/diagnostics, not an implicit
+geometry relaxation. Existing verified Surface aspect/bounds rules remain intact.
+
+Safe dimension metadata adds DWM/WGC/Win32 widths/heights, absolute deltas, DPI and
+mapping mode to the existing eight in-memory records; never title/text/pixels/key.
+No screenshot sharing, point effect or trust can be authorized by dimension hints.
+Physical WGC frame acquisition and transform accuracy remain pending retest; CI
+uses pure examples and native metadata/public generated images, not private captures.

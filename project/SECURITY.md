@@ -256,3 +256,13 @@ caption ownership is proven. No OS mouse movement or input/app executor exists.
 Stop/replacement/expiry/configuration change/consent withdrawal/sleep/background/
 disconnect/revocation invalidate media, approvals and late callbacks. The remote
 HTTP service cannot authorize capture, new phones, new cloud calls or privileges.
+
+
+F4-C coordinate confidence: a bounded screenshot preview is not proof of a valid
+screen transform. Only exact visible-bound matches or a bounded, measured physical
+Win32 frame match may create pointable targets. The physical frame read scopes and
+restores per-monitor-v2 DPI awareness, and freshness retains both selected visible
+and measured frame bounds. Unknown scale/aspect origins remain preview-only; core
+coordinate methods, target extraction, analysis and screenshot approval reject
+unverified mappings independently of disabled UI controls. No additional privilege
+is granted by dimension metadata, screenshot text or a model target reference.

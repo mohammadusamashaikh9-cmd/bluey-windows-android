@@ -13,7 +13,7 @@ namespace Bluey.Windows.Screen;
 internal static class ScreenSmoke
 {
     internal static string[] Run(string output) {
-        var checks=new List<string>(CaptureSmoke.Run());void Check(bool ok,string name){if(!ok)throw new InvalidOperationException(name);checks.Add(name);}
+        var capture=CaptureSmoke.Run();var checks=new List<string>(capture.Checks);void Check(bool ok,string name){if(!ok)throw new InvalidOperationException(name);checks.Add(name);}
         using var state=new ScreenSession();using var shot=SyntheticFixture.Create(96);var id=shot.Id;state.CompleteCapture(state.BeginCapture(true),shot);state.SetAnalysis(id,SyntheticFixture.Annotations(shot.Surface));
         using var media=state.CopyCurrent();
         var encoded=Pump(Task.Run(async()=>{using var bitmap=await NativeCapture.Decode(media.Jpeg,default);NativeCapture.EnsureNonblank(bitmap);using var blank=new global::Windows.Graphics.Imaging.SoftwareBitmap(global::Windows.Graphics.Imaging.BitmapPixelFormat.Bgra8,32,32,global::Windows.Graphics.Imaging.BitmapAlphaMode.Ignore);try{NativeCapture.EnsureNonblank(blank);throw new InvalidOperationException("uniform bitmap must fail");}catch(ScreenException){}return await NativeCapture.Encode(bitmap,default);}));
@@ -37,7 +37,7 @@ internal static class ScreenSmoke
             Check(!result.TimedOut&&result.Controls.Any(c=>c.Label=="PUBLIC SAVE"),"Actual Windows UIA reads public fixture button label/rectangle");
             Check(!result.Controls.Any(c=>c.Label.Contains("SECURE-FIELD")),"Actual Windows UIA omits password field before reading its accessible name");
         } finally {window.Close();}
-        File.WriteAllText(Path.Combine(output,"screen-native-evidence.json"),JsonSerializer.Serialize(new{checks,packageIdentity=NativeCapture.HasPackageIdentity,ocr=analysis.Ocr.ToString(),capture="NOT EXECUTED: no desktop/private screenshots in CI; native WGC adapter compiled",provider="FAKE ONLY; no Gemini request",physicalAcceptance="UNVERIFIED"},new JsonSerializerOptions{WriteIndented=true}));
+        File.WriteAllText(Path.Combine(output,"screen-native-evidence.json"),JsonSerializer.Serialize(new{checks,windowDimensions=capture.Geometry?.SafeText,packageIdentity=NativeCapture.HasPackageIdentity,ocr=analysis.Ocr.ToString(),capture="NOT EXECUTED: no desktop/private screenshots in CI; native WGC adapter compiled",provider="FAKE ONLY; no Gemini request",physicalAcceptance="UNVERIFIED"},new JsonSerializerOptions{WriteIndented=true}));
         return checks.ToArray();
     }
     private static T Pump<T>(Task<T> task) {

@@ -10,7 +10,7 @@ internal sealed class NativeControls
     internal async Task<(Control[] Controls,bool TimedOut)> Read(Surface surface,CancellationToken stop)
     {
         if(surface.Kind!=SurfaceKind.Window||Interlocked.CompareExchange(ref busy,1,0)!=0)return([],true);
-        var task=Task.Run(()=>{try{return Traverse((nint)surface.NativeId,surface.Physical,stop);}finally{Volatile.Write(ref busy,0);}},CancellationToken.None);
+        var task=Task.Run(()=>{try{return Traverse((nint)surface.NativeId,surface.SelectionBounds,stop);}finally{Volatile.Write(ref busy,0);}},CancellationToken.None);
         try{var result=await task.WaitAsync(TimeSpan.FromMilliseconds(450),stop).ConfigureAwait(false);return(result.Controls,result.TimedOut);}
         catch(OperationCanceledException){throw;}
         catch {return([],true);}

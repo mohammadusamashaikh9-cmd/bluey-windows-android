@@ -26,6 +26,7 @@ public static class Targets
         return output.ToString().Trim();
     }
     public static Target[] Extract(Surface surface,Analysis analysis) {
+        surface.RequireMapping();
         var found=new List<Target>(1140);int l=0,w=0,c=0;
         void Add(string id,string text,string role,Box box)=>found.Add(new(id,text,role,box,surface.ImageToPhysical(box),surface.ImageToDip(box),surface.Normalized(box)));
         foreach(var line in analysis.Lines.Take(400).Where(t=>surface.Image.Contains(t.Bounds)).OrderBy(t=>t.Bounds.Y).ThenBy(t=>t.Bounds.X)) {
@@ -36,7 +37,7 @@ public static class Targets
                 Add("W"+(++w),text,"word",word.Bounds);
             }
         }
-        foreach(var control in analysis.Controls.Take(5000).Where(t=>t.Visible&&!t.Secure&&surface.Physical.Contains(t.PhysicalBounds)).OrderBy(t=>t.PhysicalBounds.Y).ThenBy(t=>t.PhysicalBounds.X).Take(140)) {
+        foreach(var control in analysis.Controls.Take(5000).Where(t=>t.Visible&&!t.Secure&&surface.SelectionBounds.Contains(t.PhysicalBounds)).OrderBy(t=>t.PhysicalBounds.Y).ThenBy(t=>t.PhysicalBounds.X).Take(140)) {
             var text=Clean(control.Label,128);var role=Clean(control.Role,32);if(text.Length==0||role.Length==0)continue;Add("C"+(++c),text,role,surface.PhysicalToImage(control.PhysicalBounds));
         }
         return found.ToArray();

@@ -1,10 +1,15 @@
 namespace Bluey.Screen;
 public enum CaptureStage { Selection,Support,ActivationFactory,CreateWindowItem,CreateMonitorItem,ItemProjection,ItemSize,D3DDevice,DxgiDevice,DeviceProjection,FramePool,CaptureSession,StartSession,FirstFrame,SurfaceCopy,JpegEncode,JpegDecode,GeometryValidation,BlankValidation,Complete }
 public enum CaptureOutcome { Succeeded,Canceled,TimedOut,Unsupported,InvalidSelection,Changed,BlankOrProtected,NativeFailure }
-public sealed record CaptureReport(long Attempt,SurfaceKind Kind,CaptureStage Stage,CaptureOutcome Outcome,long ElapsedMs,int? NativeHresult)
+public sealed record CaptureDimensions(int DwmWidth,int DwmHeight,int WgcWidth,int WgcHeight,int? FrameWidth,int? FrameHeight,double Dpi,CaptureMapping? Mapping)
 {
-    public string SafeText=>$"capture#{Attempt} {Kind} {Stage} {Outcome} HR={(NativeHresult is {} hr?"0x"+hr.ToString("X8"):"none")} {ElapsedMs}ms";
+    public string SafeText=>$"DWM={DwmWidth}x{DwmHeight} WGC={WgcWidth}x{WgcHeight} delta={Math.Abs((long)WgcWidth-DwmWidth)}x{Math.Abs((long)WgcHeight-DwmHeight)} Win32={FrameWidth?.ToString()??"?"}x{FrameHeight?.ToString()??"?"} dpiScale={(Dpi/96).ToString("0.###",System.Globalization.CultureInfo.InvariantCulture)} map={Mapping?.ToString()??"unresolved"}";
+}
+public sealed record CaptureReport(long Attempt,SurfaceKind Kind,CaptureStage Stage,CaptureOutcome Outcome,long ElapsedMs,int? NativeHresult,CaptureDimensions? Dimensions=null)
+{
+    public string SafeText=>$"capture#{Attempt} {Kind} {Stage} {Outcome} HR={(NativeHresult is {} hr?"0x"+hr.ToString("X8"):"none")} {ElapsedMs}ms"+(Dimensions is {} d?" "+d.SafeText:"");
     public string UserMessage=>Outcome switch {
+        CaptureOutcome.Succeeded when Dimensions?.Mapping==CaptureMapping.PreviewOnly=>"Preview only: coordinate mapping is unverified. Pointing and screen sharing are disabled.",
         CaptureOutcome.Succeeded=>"Windows returned a bounded local image. Review the current preview before sharing.",
         CaptureOutcome.Canceled=>"Capture canceled or its outer deadline was reached. No snapshot retained.",
         CaptureOutcome.TimedOut=>"Capture timed out waiting for Windows. Check the selected surface and try manually again.",
@@ -27,7 +32,7 @@ public sealed class CaptureDiagnostics
     private readonly object gate=new();private readonly Queue<CaptureReport> reports=new();private long next;
     public CaptureReport[] Reports{get{lock(gate)return reports.ToArray();}}
     public string Text=>string.Join(Environment.NewLine,Reports.Select(r=>r.SafeText));
-    public CaptureReport Record(SurfaceKind kind,CaptureStage stage,CaptureOutcome outcome,long elapsed,Exception? cause=null) {
-        lock(gate){var report=new CaptureReport(++next,kind,stage,outcome,Math.Clamp(elapsed,0,60000),cause?.HResult);if(reports.Count==8)reports.Dequeue();reports.Enqueue(report);return report;}
+    public CaptureReport Record(SurfaceKind kind,CaptureStage stage,CaptureOutcome outcome,long elapsed,Exception? cause=null,CaptureDimensions? dimensions=null) {
+        lock(gate){var report=new CaptureReport(++next,kind,stage,outcome,Math.Clamp(elapsed,0,60000),cause?.HResult,dimensions);if(reports.Count==8)reports.Dequeue();reports.Enqueue(report);return report;}
     }
 }

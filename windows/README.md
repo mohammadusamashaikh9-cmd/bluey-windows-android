@@ -415,3 +415,14 @@ and elapsed ms. No titles, handles, images, OCR/private text or credentials are 
 these records; they are memory-only. On failure, copy only that row. Stop/discard
 remains available. Primary-display and Notepad physical checks are in project/QA.md;
 OCR package identity is separate and unchanged. Keep cloud sharing OFF for retest.
+
+
+ItemSize correction: WGC item dimensions now size the frame pool directly, within
+16Mi pixels and bounded extents. A separate coordinate policy matches the item to
+DWM visible bounds or a measured physical GetWindowRect with small contained border
+padding; it never stretches DWM bounds to fit by assumption. Snapshot freshness
+retains both rectangles. Unknown bounded mappings can show PREVIEW ONLY, with local
+analysis/pointing/screen sharing blocked in UI and core. Do not treat preview as a
+coordinate-accuracy pass. Safe diagnostics include DWM/WGC/Win32 width/height,
+absolute deltas, DPI scale and mapping mode, with no title/pixels/private text.
+Actual laptop dimensions and first-frame/preview/point accuracy need physical QA.

@@ -26,4 +26,10 @@ public sealed class CaptureDiagnosticsTests
         Assert.Contains("timed out",timeout.UserMessage,StringComparison.OrdinalIgnoreCase);Assert.Contains("select",changed.UserMessage,StringComparison.OrdinalIgnoreCase);
         Assert.NotEqual(timeout.UserMessage,canceled.UserMessage);
     }
+    [Fact] public void DimensionSummaryShowsMeasuredExtentsAndDeltasWithNoPositionOrPrivateContent() {
+        var d=new CaptureDiagnostics();var extent=new CaptureDimensions(1000,600,1016,608,1016,608,144,CaptureMapping.WindowFrame);
+        for(int i=0;i<20;i++)d.Record(SurfaceKind.Window,CaptureStage.ItemSize,CaptureOutcome.Succeeded,10,dimensions:extent);
+        Assert.Contains("DWM=1000x600",d.Text);Assert.Contains("WGC=1016x608",d.Text);Assert.Contains("delta=16x8",d.Text);
+        Assert.Contains("dpiScale=1.5",d.Text);Assert.Contains("map=WindowFrame",d.Text);Assert.Equal(8,d.Reports.Length);Assert.True(d.Text.Length<4096);
+    }
 }
