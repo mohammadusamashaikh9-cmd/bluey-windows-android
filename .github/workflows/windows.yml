@@ -47,6 +47,7 @@ jobs:
             throw "Native smoke failed ($($process.ExitCode))"
           }
           Get-Content artifacts/native-evidence/native-smoke.json
+          Get-Content artifacts/native-evidence/screen-native-evidence.json
       - name: Development instructions and SHA-256 sums
         run: |
           Copy-Item README.md artifacts/bluey-win-x64/README.md
