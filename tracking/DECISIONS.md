@@ -573,3 +573,13 @@ mapping mode to the existing eight in-memory records; never title/text/pixels/ke
 No screenshot sharing, point effect or trust can be authorized by dimension hints.
 Physical WGC frame acquisition and transform accuracy remain pending retest; CI
 uses pure examples and native metadata/public generated images, not private captures.
+
+
+ItemSize source references: [Windows screen capture](https://learn.microsoft.com/en-us/windows/apps/develop/media-authoring-processing/screen-capture),
+[DWM attributes](https://learn.microsoft.com/en-us/windows/win32/api/dwmapi/ne-dwmapi-dwmwindowattribute),
+[GetWindowRect](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowrect),
+[thread DPI context](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setthreaddpiawarenesscontext).
+Observed native CI public window has DWM=WGC306x203,Win32320x210 at1x; only exact
+mapping is native-measured here. It is not evidence of the laptop's dimensions or
+border mismatch. Pure examples validate the border branch and preview-only denial.
+No WGC frame acquisition was performed in CI; physical target accuracy stays open.

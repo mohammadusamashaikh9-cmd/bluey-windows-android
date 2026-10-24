@@ -974,3 +974,34 @@ remains unverified; do not call this complete laptop capture acceptance. Current
 QA has separate primary and Notepad local tests. Tracking-only closeout changes no
 application bytes. Next: developer performs that local-only retest, cloud OFF, and
 reports safe diagnostics on failure. Keep PR6/7 unmerged.
+
+
+## F4-C ItemSize repair / 2026-10-25 Asia/Karachi
+
+Read uploaded request; clean cc122d0 verified on existing branch, fetched refs,
+PR7 correct base and PR6 unchanged4b38029/open. Read authority and Microsoft capture/
+DWM/GetWindowRect/DPI docs. Physical evidence confirms premature ItemSize rejection
+before frames, not actual dimensions. Old gate conflates independent API extents.
+Test-first old equality policy:13 cases,7 failures/6 pass. Implement bounded WGC
+allocation and explicit measured transforms; persist selection/frame bounds, scope
+physical GetWindowRect DPI context. Preview-only denies converters/targets/analysis/
+screen approval even with reviewed image. UI labels/disables those paths. Dimension
+metadata stays numeric and bounded8 records. Verified-Surface test first failed on
+unproven frame acceptance, then passed after constructor guard. Full source tests
+pass, with final Screen53; retained Core27/Link141 pass. Native WPF build clean.
+
+Source a1132b7/42ebf5c CI passes, initial42 artifact download blocked at sa14. Add
+one safe native JSON line to existing Windows CI for observable numeric dimensions,
+not new capture. Final app df1eb62d52ea325a16fda67d2e9624097c4e1303: Windows40133905687/Android40133905040
+and PR40133910135/40133909958 pass. Windows221 unit tests/44 native checks/self-
+contained x64/WPF0 warnings/errors; Android111/lint0 errors18 warnings/signature.
+Final app/evidence downloaded successfully; rehash413 Windows entries + EXE. Exact
+hashes/artifacts/24 paths in STATUS. Native public measurement306x203 DWM/WGC vs
+320x210 Win32 at1x selectsVisibleBounds. It does NOT reproduce laptop mismatch;
+synthetic border/DPI/aspect examples test policy separately. Public1920x1080 bitmap
+JPEG encodes1100x619. CI never starts WGC/read desktop pixels. Actual dimensions,
+frame capture/preview/point accuracy/performance unverified. No Gemini/key/private
+capture, original source/Android/link/motion changes, packaging or new backend.
+Keep installed Android APK; optional debug signer differs. Final closeout tracking
+only; PR7 updated in place, neither PR merged. Next: developer single offline
+Notepad capture/pointing retest, cloud OFF; preview-only cannot authorize points.

@@ -123,3 +123,22 @@ first-frame/preview remains UNVERIFIED. OCR package identity remains separately
 BLOCKED; no packaging/provider/F5 or PR6 modification/merge. Last8 safe diagnostics
 contain no title/pixels/private text/credentials. Canonical QA gives one local-only
 retest; next is developer physical primary and Notepad checks with cloud OFF.
+
+
+## F4-C ItemSize geometry repair / 2026-10-25 Asia/Karachi
+
+Developer-reported Unicode fix accepted; two Notepad attempts fail ItemSize/Changed
+before frames, no preview, cloud OFF. Actual laptop sizes are unobserved; no capture/
+OCR/pointing physical pass. Old API-extents equality is removed as an allocation
+precondition, not replaced with a guessed coordinate scale. WGC bounds the pool;
+measured rectangles and DPI context govern verified mapping, unknowns preview-only
+with all coordinate/target/share paths blocked. Freshness retains both bounds.
+
+Final app df1eb62d52ea325a16fda67d2e9624097c4e1303: Windows40133905687 Core27/Screen53/Link141,44 native
+checks/WPF0 warnings-errors pass; Android40133905040 111 tests/lint0 errors18 warnings.
+Matching artifacts/manifests uploaded; finalWindows413 entries/EXE rehashed. STATUS
+contains24 paths/hashes/links. CI public window DWM=WGC306x203,Win32320x210,1x,exact
+mapping; border mismatch cases are synthetic. No native frame acquisition in CI.
+First-frame/preview/physical point accuracy remains UNVERIFIED; OCR identity and F4-B
+provider gates stay separate. PR6/7 open, unmerged. Next is one local Notepad retest,
+cloud OFF, preserving preview-only denial and reporting only safe geometry metadata.

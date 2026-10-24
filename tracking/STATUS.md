@@ -1,4 +1,122 @@
-# Current F4-C capture repair — PR #7
+# Current F4-C ItemSize geometry repair — PR #7
+
+2026-10-25 Asia/Karachi. Clean start cc122d02ec07a6844b2bedd3d8e5cd43968c276c on
+port/screen-understanding. PR7 still targets port/live-ai-voice; PR6 remains open
+at4b38029, unchanged. Neither PR merged. No new branch, provider request, OCR
+packaging or F5 action. Original Apple/Android/link/animation/key code unchanged.
+
+Developer physical evidence: Unicode picker titles are fixed (NOTEPAD.txt - Notepad).
+Two real window attempts stop before frames at ItemSize/Changed/HRnone (203/110ms),
+with no preview/snapshot and cloud OFF. Actual laptop dimensional values are unknown.
+Source confirms the premature gate: WGC width/height must exactly equal cached DWM
+visible bounds, with all differences classified as Changed before frame acquisition.
+Microsoft distinguishes visible DWM bounds from DPI-virtualized Win32 rectangles
+that may include invisible borders. The gate is invalid; whether this laptop's
+specific mismatch is borders, DPI or an actual geometry change remains unverified.
+
+Correction: positive WGC item dimensions (<=16384/axis,16Mi pixels, bounded aspect/
+relative extents) size the frame pool. CaptureGeometry resolves an explicit image/
+physical/DIP transform only for exact visible extents or a matching measured physical
+Win32 rectangle containing the DWM selection, bounded per-edge padding<=32DIP and
+primary containment. GetWindowRect scopes/restores per-monitor-v2 thread awareness.
+Keep both rectangles for freshness; recheck before/after capture, frame content,
+bitmap and encoded sizes. Never stretch DWM bounds or infer origins from DPI ratios.
+
+Unknown but bounded capture geometries can show PREVIEW ONLY. Coordinate converters,
+target extraction, analysis, point resolution and screenshot approval reject such
+mappings; relevant UI controls are disabled. A preview is not coordinate authority.
+Verified Surface aspect/bounds constraints remain and verified frame modes require
+matching measured bounds. Stop/expiry/movement/resize/close/DPI/disconnect invalidate
+pixels, targets and approval. No crop/warp, backend or input API was added.
+
+Diagnostics keep8 memory-only records and now include DWM/WGC/Win32 width/height,
+absolute deltas, DPI scale and mapping mode. No titles, origins/handles, screenshot
+pixels, OCR/private text or credentials are logged. Existing screenshot review,
+F3 one-question authorization, protected keys and cloud-OFF defaults are unchanged.
+
+Final tested application **df1eb62d52ea325a16fda67d2e9624097c4e1303** (geometry source42ebf5c plus
+Windows-CI-only safe report output). Later closeout changes tracking only.
+
+| Evidence | Actual result / matching artifact |
+| --- | --- |
+| Local .NET10.0.402 |Screen53 pass; retained Core27/Link141 pass after geometry/guard integration; WPF0 warnings/errors |
+| [Windows40133905687](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40133905687) |Core27/Screen53/Link141 (221 total), zero failed/skipped;44 native checks; WPF0 warnings/errors; self-contained unsigned x64 |
+| Windows ZIP + SHA256SUMS |[artifact12575917352](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40133905687/artifacts/12575917352); no separate desktop runtime |
+| Windows TRX/native/public fixture evidence |[artifact12576071997](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40133905687/artifacts/12576071997) |
+| [Android40133905040](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40133905040) |111 tests, zero failed/errors/skips; lint0 errors18 warnings; signature verified, same application revision |
+| Optional unchanged Android regression APK |[artifact12576037203](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40133905040/artifacts/12576037203); [test/lint/bitmap evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40133905040/artifacts/12575892345) |
+| Stacked PR checks |Windows40133910135 and Android40133909958 also pass |
+
+Downloaded final Windows app/evidence, rehashed all413 manifest entries and verified
+EXE hash against actual CI output. Native JSON has44 checks. Earlier42ebf5c artifact
+downloads were policy-blocked at sa14; those superseded bytes were not locally
+rehashed. The final df1eb62 artifact downloaded normally. No proxy bypass/policy
+change was used. Artifacts retain14 days from upload.
+
+| File | SHA-256 |
+| --- | --- |
+| Bluey.Windows.exe |`d8c15c6c28390ca0e7526ce63af8339663497c5f86e831c7fcc0c8553914b966` |
+| Bluey.Windows.dll |`01ff39f65d7acd00a7387972c53ba5ad111bac0f2cbac15065d09412604bcc2b` |
+| Windows SHA256SUMS.txt |`adce7dc1940e3454ef4e4efae336087dc1be862545ee233353b36ab6e42cd648` |
+| Windows ZIP upload digest |`4bdd3806885cc9a4d7d6dd4d81ffa648f08cb4955beb152167dc6dfe96b78bf4` |
+| Optional app-debug.apk (CI hash) |`e6fd63d71819154abdac16bec7953d2cb6971e2621d1ac79eb431ccfbcb7f0ae` |
+
+Native CI public window: DWM306x203, WGC306x203, Win32320x210, delta0x0,
+dpiScale1, mapVisibleBounds. This is an exact-match native case, NOT the developer's
+Notepad dimensions or a reproduced native WGC/DWM mismatch. Synthetic tests cover
+measured border differences, unknown DPI/aspect, verified DIP/grid math, allocation
+limits, moved/resized bounds, preview-only denial and stale/canceled cleanup.
+Native generated1920x1080 image encodes/decodes1100x619, consistent with the transform.
+CI NEVER starts WGC capture or reads desktop pixels. First-frame/real preview,
+actual laptop dimension values, coordinate accuracy, driver/DPI/exclusion/performance
+remain UNVERIFIED. Native OCR package identity and F4-B provider acceptance remain
+separate pending checkpoints. No live Gemini/OpenAI request/key/personal image used.
+
+Initial old-equality policy regression:13 focused cases,7 failed/6 passed. Added
+verified-Surface proof test failed (unproven frame accepted), then passed after guard.
+Final53 screen cases pass. No final CI failures. Only retained Android lint18 warnings.
+24 repair paths below; preserved Mac/iOS/Shared/assets, Android app, Bluey.Core/
+OverlayArt, Bluey.Link, API-key storage and original history checked unchanged.
+
+Android app/protocol unchanged: retain installed APK for this Windows test. New
+optional debug signer b7a970ec096261849730d320fe82c440666db3d1aac0bc119554585a7a932cd9
+differs from prior builds; conscious reinstall loses Keystore identity and needs
+re-pair/revoke. No silent identity deletion or Windows protected-data removal.
+
+Exact24 changed paths against cc122d0:
+
+```text
+.github/workflows/windows.yml
+project/QA.md
+project/SECURITY.md
+tracking/CHECKPOINTS.md
+tracking/DECISIONS.md
+tracking/HANDOFF.md
+tracking/SESSION-LOG.md
+tracking/STATUS.md
+windows/Bluey.Screen.Tests/CaptureDiagnosticsTests.cs
+windows/Bluey.Screen.Tests/CaptureGeometryTests.cs
+windows/Bluey.Screen.Tests/WorkflowTests.cs
+windows/Bluey.Screen/CaptureDiagnostics.cs
+windows/Bluey.Screen/CaptureGeometry.cs
+windows/Bluey.Screen/Geometry.cs
+windows/Bluey.Screen/ScreenSession.cs
+windows/Bluey.Screen/ScreenWorkflow.cs
+windows/Bluey.Screen/Targets.cs
+windows/Bluey.Windows/Screen/CaptureSmoke.cs
+windows/Bluey.Windows/Screen/NativeAnalysis.cs
+windows/Bluey.Windows/Screen/NativeCapture.cs
+windows/Bluey.Windows/Screen/ScreenCoordinator.cs
+windows/Bluey.Windows/Screen/ScreenSmoke.cs
+windows/Bluey.Windows/Screen/ScreenWindow.cs
+windows/README.md
+```
+
+One next action: developer performs the single local Notepad capture/pointing retest
+in project/QA.md with cloud OFF; report only safe dimensions/mapping/stage/outcome
+if preview or mapping fails. Never force pointing on PREVIEW ONLY.
+
+# Earlier F4-C native capture repair (retained evidence)
 
 2026-10-24 Asia/Karachi. Resumed from clean ad5f7aac4f3cbb006aac74d837fca7d1d805e6f6
 on port/screen-understanding. Execution now works in the repository subdirectory;
