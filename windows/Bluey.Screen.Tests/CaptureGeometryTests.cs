@@ -59,4 +59,9 @@ public sealed class CaptureGeometryTests
         Assert.False(state.IsValid(approved));Assert.Throws<ScreenException>(()=>state.PointAtTarget(shot.Id,"L1"));Assert.Throws<ScreenException>(()=>state.PointAtSpot(shot.Id,500,500));
         state.Invalidate();Assert.True(approved.Stop.IsCancellationRequested);Assert.All(approved.Jpeg.ToArray(),b=>Assert.Equal(0,b));
     }
+    [Fact] public void SurfaceCannotClaimVerifiedFrameMappingWithoutMatchingMeasuredBounds() {
+        Assert.Throws<ScreenException>(()=>new Surface(SurfaceKind.Window,1,Frame,Primary,96,96,1016,608,CaptureMapping.WindowFrame,Visible,null));
+        Assert.Throws<ScreenException>(()=>new Surface(SurfaceKind.Window,1,Frame,Primary,96,96,1016,608,CaptureMapping.VisibleBounds,Visible,Frame));
+        Assert.Throws<ScreenException>(()=>new Surface(SurfaceKind.Window,1,Frame,Primary,96,96,1016,608,CaptureMapping.WindowFrame,new(2000,100,100,100),Frame));
+    }
 }

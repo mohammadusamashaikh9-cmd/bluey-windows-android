@@ -19,6 +19,7 @@ public sealed record Surface
     public double DpiX{get;}public double DpiY{get;}public int ImageWidth{get;}public int ImageHeight{get;}
     public Surface(SurfaceKind kind,long nativeId,Box physical,Box primary,double dpiX,double dpiY,int imageWidth,int imageHeight,CaptureMapping mapping=CaptureMapping.VisibleBounds,Box? selectionBounds=null,Box? windowFrameBounds=null) {
         var selected=selectionBounds??physical;var verified=mapping!=CaptureMapping.PreviewOnly;
+        if(mapping==CaptureMapping.VisibleBounds&&physical!=selected||mapping==CaptureMapping.WindowFrame&&(kind!=SurfaceKind.Window||windowFrameBounds!=physical||!physical.Contains(selected)))throw new ScreenException("geometry");
         if(!Enum.IsDefined(kind)||!Enum.IsDefined(mapping)||!primary.Contains(selected)||!physical.Valid||verified&&!primary.Contains(physical)||!verified&&physical!=selected||windowFrameBounds is {} frame&&!frame.Valid||!double.IsFinite(dpiX+dpiY)||dpiX is <48 or >768||dpiY is <48 or >768||imageWidth is <1 or >1100||imageHeight is <1 or >1100||verified&&Math.Abs(physical.Width/physical.Height-(double)imageWidth/imageHeight)>.02||!verified&&(double)imageWidth/imageHeight is <.03125 or >32)throw new ScreenException("geometry");
         Mapping=mapping;SelectionBounds=selected;WindowFrameBounds=windowFrameBounds;Kind=kind;NativeId=nativeId;Physical=physical;Primary=primary;DpiX=dpiX;DpiY=dpiY;ImageWidth=imageWidth;ImageHeight=imageHeight;
     }
