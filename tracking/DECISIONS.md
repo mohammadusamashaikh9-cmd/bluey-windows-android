@@ -667,3 +667,14 @@ Official references inspected200: [Windows.Media.Ocr identity requirement](https
 [AllowExternalContent](https://learn.microsoft.com/en-us/uwp/schemas/appxpackage/uapmanifestschema/element-uap10-allowexternalcontent),
 [Developer Mode](https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development),
 [known-folder redirection flags](https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/ne-shlobj_core-known_folder_flag).
+
+D014 observed validation /6da4132:239unit/2manifest/47native/14package checks and
+111Android tests pass (lint0errors18warnings). Microsoft SDK actually builds sparse
+MSIX and extracts matching embedded identity; portable EXE has no sparse metadata.
+WhatIf/approval-denied paths leave package count0; no certificates or registration.
+An initial Windows PowerShell5.1 Get-FileHash/WhatIf incompatibility was reproduced
+and repaired with read-only .NET hashing, preserving WhatIf and all gates. OCR
+without registration correctly returns UnavailableIdentity/0words. Registered native
+OCR/Notepad remains unverified until developer approval and laptop testing; no
+alternate engine or unsupported unpackaged workaround. Existing full-trust WGC
+interop is unchanged; package identity does not authorize a new capture or share.

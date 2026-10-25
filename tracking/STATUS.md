@@ -22,15 +22,107 @@ CI builds and checks these boundaries without registering any package. Exact
 four-line real-engine self-test is available only after explicit local registration;
 CI unregistered mode must report0 recognized words/lines, never fake success.
 
-Local identity manifest contracts first failed2cases before implementation and
-now pass. Both WPF variants compile; full Windows/native/Android evidence follows
-source push. Deterministic pending-capture Stop no longer polls wall-clock time;
-a pending-OCR Stop regression also rejects late targets. Native OCR on the actual
-laptop remains UNVERIFIED, including installed-language availability, word boxes,
-reading order and pointing. No Gemini call, external OCR/NPU dependency or F5.
+Manifest contracts first failed2cases before implementation and now pass.
+Pending-capture Stop uses controlled completion and no timing poll; pending-OCR
+Stop also rejects late targets/preview/sharing. Final actual evidence follows.
+
+Tested application/bundle revision **6da41321de73c18b7fafe0889ab6ee05a0530d22**.
+Later closeout changes tracking only; use the artifacts explicitly tied to6da4132.
+
+| Evidence | Actual result |
+| --- | --- |
+| Local .NET10.0.402 |239 C# tests (Core27/Screen71/Link141),2 manifest contracts pass; both WPF profiles compile0warnings/errors |
+| [Windows40231453791](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40231453791) |239unit,2Python identity contracts,47native checks,14built-package/approval checks pass; both self-contained variants publish |
+| [Android40231454103](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40231454103) |111tests,0failure/error/skip; lint0errors18retained warnings; debug signature verified |
+| Stacked PR checks |Windows40231458418 and Android40231458451 pass at6da4132 |
+| Prior failure |Windows40230706897/41ec1c8 built both variants, then failed Windows PowerShell5.1 WhatIf/Get-FileHash;19bd1d3 corrected read-only .NET hashing and both19bd/final6da CI pass |
+| Static |18 canonical/Windows Markdown files,220 local links/anchors and3 JSONL fixture collections pass; protected-path diff and git diff --check pass |
+
+Artifacts retain14days:
+
+- [OCR developer bundle: app, unsigned sparse MSIX/loose manifest, approval helpers, README and SHA256SUMS](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40231453791/artifacts/12612952571)
+- [Portable Windows fallback + SHA256SUMS](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40231453791/artifacts/12613710856)
+- [Windows TRX/native/PE-manifest/package evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40231453791/artifacts/12612842983)
+- [Optional unchanged Android APK/manifest/signer](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40231454103/artifacts/12613217384) and [test/lint evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40231454103/artifacts/12612798287)
+
+| File | CI SHA-256 |
+| --- | --- |
+| OCR bundle ZIP upload digest |`fa63ba8d31e4ca3f2832b4ebe210acdd67e8e3f2dda1712b7aef767c224c7ba6` |
+| OCR app/Bluey.Windows.exe |`040ff33d162d41e4cda7f879bc274ebca9a777b2b4bd68bfbc234d22c0dba94a` |
+| OCR app/Bluey.Windows.dll |`6542b06f7c57dcd24b27cf13899edf83a70f0ac6d9a562a7bac7a5c788a0c59d` |
+| Bluey.Ocr.Dev.msix (unsigned identity-only) |`c8a3bc060b00f65accccd33e7ed7047e03176ea880d2e69f2d727d0fb0e00eeb` |
+| OCR SHA256SUMS.txt |`7e0a7b456500b3496482250de76bc87255bd25e4a17d5f08f7ff29cac29bbd71` |
+| Portable ZIP upload digest |`3bd77bc35f3c26604ea837ac43bcb11a4fbb8b31c5727e8e87079e782fea1946` |
+| Portable Bluey.Windows.exe |`37a26bcc637adf9c8a227e7ee3bf0a5bf0b2af92eae12a0adb188f25d1ac3e06` |
+| Portable Bluey.Windows.dll |`92d6716c0112744d4794af1d3b5235daa0c2d436d066701608437d4e533d96df` |
+| Portable SHA256SUMS.txt |`9bba7718a4e4b1a55185b1237ba5cf4a04b04a27aa6047327587b3998a380138` |
+| Optional app-debug.apk |`82e97b2a7115216c2d4b273226511f0469f6517cecfb1106173c1d2983a6a668` |
+
+All bundle entries verified on the Windows runner. Native SDK mt.exe extracted
+actual portable/OCR PE manifests and confirmed different matching profiles; MakeAppx
+produced an unsigned identity/assets-only package. Approval-absent registration/
+removal fail; Windows PowerShell5.1 WhatIf validates hashes and leaves package
+count0. No package-signing certificate creation/import/trust or registration occurred. OCR executable
+without identity exits3/UnavailableIdentity with0 lines/words. Thus registered
+identity/native OCR has NOT been demonstrated in CI; no synthetic annotation pass.
+
+The explicit --ocr-self-test, only after developer registration, uses real
+NativeAnalysis on generated public four-line pixels and checks exact L1-L4/W1-W9,
+word reading order/bounds, existing pure flight, Home, Stop, expiry and no unapproved
+sharing. It was compiled, not run with identity here. Real Notepad OCR, installed
+language, word positions/pointing and registered-profile data-path behavior remain
+UNVERIFIED until the developer approves registration and tests on the laptop.
+Visible Notepad chrome may precede the document's L IDs; never force/fabricate IDs.
+
+Attempts to download final app/portable/evidence archives were policy-blocked at
+productionresultssa14 (superseded19bd artifacts atsa13). Hashes/content evidence are
+actual CI/API results, not independent local-byte rehashes. No proxy bypass or
+network-policy change. CI retains the existing setup-android Node20/forced24
+annotation and18lint warnings; no final failing checks. No provider request/key,
+private capture/text, input injection, alternate OCR/NPU engine or new PR.
+
+Android unchanged: keep the installed APK for this Windows-only offline test.
+Optional fresh CI signer6b8ed14ac3dc2c722de58af0e52da5197546f481f128377c31cf82fbd0c92a2c
+may differ from the installed app; reinstall would lose Android Keystore identity
+and require explicit re-pair/revocation. Do not replace it unnecessarily. Existing
+Windows DPAPI/Link/AI/settings locations, original Apple/Android source, accepted
+WGC/JPEG, NativeAnalysis/Targets, F3/provider and animation files are unchanged.
 
 One next action: review the OCR developer bundle and, only with developer approval,
 follow its explicit registration and one harmless Notepad OCR/point/Home/Stop test.
+
+Exact28 paths changed against ff6115282a1d0505bf4c0455ce075a7a4e415980:
+
+```text
+.github/workflows/windows.yml
+project/ARCHITECTURE.md
+project/IMPLEMENTATION.md
+project/PORTING-MAP.md
+project/QA.md
+project/SECURITY.md
+tracking/CHECKPOINTS.md
+tracking/DECISIONS.md
+tracking/HANDOFF.md
+tracking/SESSION-LOG.md
+tracking/STATUS.md
+windows/Bluey.Screen.Tests/WorkflowTests.cs
+windows/Bluey.Windows/Bluey.Windows.csproj
+windows/Bluey.Windows/NativeSmoke.cs
+windows/Bluey.Windows/Program.cs
+windows/Bluey.Windows/Screen/OcrIdentity.cs
+windows/Bluey.Windows/Screen/OcrSmoke.cs
+windows/Bluey.Windows/Screen/ScreenCoordinator.cs
+windows/Bluey.Windows/app.ocr.manifest
+windows/README.md
+windows/packaging/Build-OcrPackage.ps1
+windows/packaging/OcrPackage.ps1
+windows/packaging/README.md
+windows/packaging/Register-OcrIdentity.ps1
+windows/packaging/Test-OcrPackage.ps1
+windows/packaging/Unregister-OcrIdentity.ps1
+windows/packaging/identity/AppxManifest.xml
+windows/packaging/test_package.py
+```
 
 # Accepted F4-C capture repair — retained physical evidence
 

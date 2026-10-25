@@ -234,3 +234,16 @@ registration/removal and portable fallback is implemented. No CI/app registratio
 certificate trust/policy change or credential/identity migration. CI evidence to
 follow. Real native OCR/Notepad word geometry remains UNVERIFIED until developer
 explicitly registers and tests. Deterministic Stop coverage replaces manual timing.
+
+D014 final automated evidence at6da41321de73c18b7fafe0889ab6ee05a0530d22:
+Windows40231453791 passes239C#tests,2manifest contracts,47native and14built-package/
+approval checks; portable and separate OCR self-contained artifacts published.
+Android40231454103 passes111tests/lint0errors18warnings; matching optional APK.
+Stacked PR40231458418/40231458451 pass. Initial41ec WhatIf/Get-FileHash failure
+fixed19bd and regression passes without disabling WhatIf. Native PE metadata and
+unsigned MSIX contents/checksums actually validated on Windows. No cert/trust,
+registration or registered-native OCR execution. Unregistered app exits3 with0
+lines/words. Real Notepad OCR/word boxes and registered data paths remain UNVERIFIED.
+Full artifact links/CI hashes and28-path scope in STATUS; local downloads blockedsa14.
+Developer approval is required before local Developer Mode/registration; no automatic
+setup, cloud call, new engine or F5. Accepted capture/pointing evidence retained.

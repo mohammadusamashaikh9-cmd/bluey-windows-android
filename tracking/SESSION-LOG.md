@@ -1130,3 +1130,18 @@ passed unit/native/schema checks, then correctly failed its new Windows PowerShe
 No registration occurred. Replace that read-only checksum calculation with .NET
 SHA256 stream hashing; do not disable outer WhatIf or weaken approval. Same CI
 regression will validate the corrected behavior. Initial failed logs retained.
+
+D014 closeout6da4132: actual Windows40231453791/PR40231458418 and Android40231454103/
+PR40231458451 pass.239C#tests+2manifest contracts+47native+14package gates; Android
+111tests/lint0errors18warnings. Built actual sparse-identity app/MSIX plus portable
+fallback with SDK tools, validated embedded identities, unsigned contents, checksums,
+approval refusal and nonmutating WhatIf. Added explicit real-engine self-test word
+text/order and W1-W9 checks; actual OCR run awaits developer registration, not fake.
+Initial41ec WhatIf failure corrected19bd; no hidden test failure or disabled approval.
+Final6da artifact downloads blockedsa14 (earlier19bd sa13); CI hashes observed but
+no local rehash claim. No certificates/packages registered, key/profile migration,
+provider requests, user pixels/text, original/Android/WGC/OCR adapter/F3/animation
+changes.28 exact paths/hashes/links in STATUS. Native API/language/Notepad geometry
+and registered-profile behavior still unverified; next is reviewed manual developer
+registration plus single offline Notepad OCR/point/Home/Stop/expiry test. Both PRs
+remain unmerged; PR6 unchanged. Portable fallback and installed Android retained.
