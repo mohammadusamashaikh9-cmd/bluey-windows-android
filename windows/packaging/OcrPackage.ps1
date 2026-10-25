@@ -18,7 +18,13 @@ function Assert-OcrBundle {
         if ([IO.Path]::IsPathRooted($relative) -or ($relative -split '[/\\]') -contains '..') { throw 'ocr-package-checksum-path' }
         if ($relative.StartsWith('app/')) { $path = Join-Path $appPath $relative.Substring(4) }
         else { $path = Join-Path $rootPath $relative }
-        if (!(Test-Path -LiteralPath $path -PathType Leaf) -or (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expected) { throw 'ocr-package-checksum-mismatch' }
+        if (!(Test-Path -LiteralPath $path -PathType Leaf)) { throw 'ocr-package-checksum-mismatch' }
+        # Windows PowerShell 5.1 Get-FileHash internals inherit WhatIf and may
+        # produce no hash. Direct read-only .NET hashing preserves outer WhatIf.
+        $stream = [IO.File]::OpenRead($path); $hash = [Security.Cryptography.SHA256]::Create()
+        try { $actual = [BitConverter]::ToString($hash.ComputeHash($stream)).Replace('-','').ToLowerInvariant() }
+        finally { $hash.Dispose(); $stream.Dispose() }
+        if ($actual -ne $expected) { throw 'ocr-package-checksum-mismatch' }
     }
     return $appPath
 }

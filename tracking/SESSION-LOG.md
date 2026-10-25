@@ -1123,3 +1123,10 @@ capture/OCR Stop tests. Two manifest-contract tests failed before implementation
 then passed; both WPF variants compile. NativeAnalysis/Targets/WGC/F3/protected data
 and original/Android/animation code remain. Full CI evidence follows push. Actual
 laptop OCR remains unverified; no provider calls, input actions or OCR alternative.
+
+Initial OCR bundle CI41ec1c8/Windows40230706897 built portable and sparse variants,
+passed unit/native/schema checks, then correctly failed its new Windows PowerShell
+5.1 WhatIf regression: Get-FileHash's inherited WhatIf returned no Hash property.
+No registration occurred. Replace that read-only checksum calculation with .NET
+SHA256 stream hashing; do not disable outer WhatIf or weaken approval. Same CI
+regression will validate the corrected behavior. Initial failed logs retained.
