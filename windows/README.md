@@ -443,3 +443,12 @@ FramePoolResize identify their native HRESULT boundaries. On Stop, publication i
 canceled immediately; an already-running native copy retains resources until its
 completion and then discards the result. New capture is blocked during that cleanup.
 Real WGC first-frame capture still requires the physical Notepad retest in QA.md.
+
+
+Optional native OCR: [developer identity bundle instructions](packaging/README.md).
+The portable ZIP retains accepted capture/UIA/pointing and no package identity.
+The separate unsigned developer bundle uses manual approval-gated sparse/external
+registration, with no certificate, installer, policy change or API call. It keeps
+the existing Windows user/data paths; the OCR variant refuses redirected profiles.
+Native OCR still needs an installed Windows language and actual laptop validation.
+No Android APK update or new pairing identity is needed for this offline OCR test.

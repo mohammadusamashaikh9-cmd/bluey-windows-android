@@ -125,3 +125,14 @@ inferred from compile/fake tests. Local Screen29/Link140 tests and WPF build pas
 Native capture and geometry still need physical QA; Microsoft-supported native OCR
 is blocked in the current portable distribution by package identity. No installer,
 identity registration, model call or F5 action is added to hide that constraint.
+
+
+F4-C OCR identity follow-up (D014): developer accepts real capture/preview,
+VisibleBounds125%DPI,500/500 overlay-only pointing, Home/discard on63d7269. Keep that
+implementation unchanged. A separate developer sparse-identity variant and manual
+approval-gated registration/removal bundle enable the existing Windows.Media.Ocr
+path; portable fallback remains. CI builds/validates manifests, unsigned MSIX and
+approval denial without registration or certificate trust. Actual engine/Notepad
+recognition stays unverified until the developer approves registration and tests.
+Deterministic pending-capture/analysis Stop tests reject late pixels/targets without
+manual subsecond timing. No cloud OCR, NPU dependency, F5 or provider request.

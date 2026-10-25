@@ -225,3 +225,12 @@ F4-C **active**: this is functional laptop evidence with explicit developer visu
 confirmation, not comprehensive animation/DPI/performance/cancellation acceptance.
 One next check is active-capture Stop/no-late-publication timing; packaged OCR and
 F4-B provider acceptance remain separately pending. Both PRs stay unmerged.
+
+2026-10-26 D014 OCR identity checkpoint: developer accepts actual63d7269 capture,
+preview,125%DPI VisibleBounds, center overlay pointing/stationary real mouse and
+Home/discard across three Notepad captures. Preserve accepted implementation.
+A separate sparse/external developer identity build plus manual approval-gated
+registration/removal and portable fallback is implemented. No CI/app registration,
+certificate trust/policy change or credential/identity migration. CI evidence to
+follow. Real native OCR/Notepad word geometry remains UNVERIFIED until developer
+explicitly registers and tests. Deterministic Stop coverage replaces manual timing.

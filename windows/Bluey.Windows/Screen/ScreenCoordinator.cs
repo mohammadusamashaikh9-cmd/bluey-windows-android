@@ -43,7 +43,7 @@ internal sealed class ScreenCoordinator : IDisposable
         try{await workflow.Analyze(new Reader(analysis));}catch{Status="Local OCR: Failed/canceled — no recognition result published";if(State.Info is {} failed)State.SetAnalysis(failed.Id,new([],[],false,OcrStatus.Failed));throw;}
         Status=State.Info?.Ocr switch {
             OcrStatus.Ready=>"Local OCR: Ready · trusted word rectangles · UIA labels only",
-            OcrStatus.UnavailableIdentity=>"Local OCR: Unavailable — Microsoft requires package identity. Portable build has none. UIA targets, if available, are listed separately.",
+            OcrStatus.UnavailableIdentity=>"Local OCR: Unavailable — portable build has no package identity. The separate OCR developer package requires your explicit registration; see its README. UIA targets are separate.",
             OcrStatus.UnavailableLanguage=>"Local OCR: No installed OCR language available. No language/model download was started.",
             _=>"Local OCR: Failed/unavailable — no fabricated recognition results"
         };

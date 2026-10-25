@@ -5,6 +5,8 @@
     <UseWPF>true</UseWPF>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationManifest Condition="'$(BlueyOcrIdentity)' == 'true'">app.ocr.manifest</ApplicationManifest>
+    <DefineConstants Condition="'$(BlueyOcrIdentity)' == 'true'">$(DefineConstants);OCR_IDENTITY</DefineConstants>
     <AssemblyName>Bluey.Windows</AssemblyName>
     <RootNamespace>Bluey.Windows</RootNamespace>
     <PublishTrimmed>false</PublishTrimmed>

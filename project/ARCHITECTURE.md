@@ -133,3 +133,17 @@ app deliberately reports UnavailableIdentity instead of invoking unsupported OCR
 no package registration/installer is silently added. Real capture/UIA/spot pointing
 are independent; declared synthetic annotation demos never masquerade as native OCR.
 A supported identity deployment remains necessary for the full native OCR gate.
+
+
+## Optional OCR developer identity (D014)
+
+The separate self-contained OCR variant embeds the matching sparse identity;
+portable app.manifest remains unchanged. An unsigned identity-only MSIX and loose
+manifest keep executable/dependencies external. Only explicitly approved per-user
+developer registration enables identity; no app/build/CI self-registration,
+certificate trust, policy or language download. win32App/mediumIL and
+unvirtualizedResources retain existing process/data behavior; startup checks exact
+identity and original LocalAppData before opening settings/trust/keys. User data is
+not moved/migrated. NativeAnalysis/Targets remain the same Windows OCR and coordinate
+pipeline. Explicit --ocr-self-test uses only generated public pixels and bounded
+status/count metadata. Laptop native OCR acceptance remains pending registration.

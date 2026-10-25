@@ -50,11 +50,20 @@ public sealed class WorkflowTests
         state.Invalidate();Assert.Null(state.Info);Assert.True(shot.Disposed);Assert.True(preview.Stop.IsCancellationRequested);
     }
     [Fact] public async Task StopDuringPendingNativeCopyCannotPublishLatePreviewAndKeepsOwnershipUntilCompletion() {
-        using var state=new ScreenSession(()=>0);var workflow=new ScreenWorkflow(state);var source=new Source{Pending=new(TaskCreationOptions.RunContinuationsAsynchronously)};
+        // ExecuteSynchronously cleanup plus an explicitly completed source makes this
+        // deterministic: no wall-clock delay or impractical manual Stop timing.
+        using var state=new ScreenSession(()=>0);var workflow=new ScreenWorkflow(state);var source=new Source{Pending=new()};
         var pending=workflow.Capture(true,source);state.Invalidate();await Assert.ThrowsAnyAsync<OperationCanceledException>(()=>pending);
         Assert.Null(state.Info);Assert.True(workflow.Busy);await Assert.ThrowsAsync<ScreenException>(()=>workflow.Capture(true,source));
         var late=Shot();source.Pending.SetResult(late);
-        using(var deadline=new CancellationTokenSource(5000))while(!late.Disposed||workflow.Busy)await Task.Delay(1,deadline.Token);
         Assert.True(late.Disposed);Assert.Null(state.Info);Assert.False(workflow.Busy);
+    }
+    [Fact] public async Task StopDuringOcrRejectsLateLinesAndPreventsAnyTargetPointOrSharing() {
+        using var state=new ScreenSession(()=>0);var workflow=new ScreenWorkflow(state);await workflow.Capture(true,new Source());
+        var reader=new Reader{Pending=new()};var pending=workflow.Analyze(reader);state.Invalidate();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(()=>pending);Assert.True(workflow.Busy);
+        reader.Pending.SetResult(new([new("late",new(0,0,40,20),[])],[],true,OcrStatus.Ready));
+        Assert.False(workflow.Busy);Assert.Null(state.Info);Assert.All(reader.Borrowed.ToArray(),b=>Assert.Equal(0,b));
+        Assert.Throws<ScreenException>(()=>state.PointAtSpot("old",500,500));Assert.Null(state.TakeForQuestion("tls","c","a","turn"));
     }
 }

@@ -266,3 +266,18 @@ and measured frame bounds. Unknown scale/aspect origins remain preview-only; cor
 coordinate methods, target extraction, analysis and screenshot approval reject
 unverified mappings independently of disabled UI controls. No additional privilege
 is granted by dimension metadata, screenshot text or a model target reference.
+
+
+D014 OCR developer identity is separate from screen/cloud consent. Package identity
+permits Windows.Media.Ocr but never authorizes capture, sharing, host start or OS
+input. Optional unsigned developer registration requires manual Developer Mode
+approval and an explicit helper switch; WhatIf changes nothing. No certificate,
+policy modification, auto-registration/all-users provisioning or data migration.
+Sparse win32App/mediumIL/unvirtualizedResources keeps existing file locations; the
+OCR startup guard refuses a missing/wrong identity or redirected LocalAppData before
+constructing protected trust/key services. Removal preserves external/Bluey/BlueyPort
+data. Keep portable mode available without identity. UIA still excludes password
+and hidden controls before reading labels; OCR of approved visible pixels is not
+password redaction and must never be described as such. No API key/audio/screenshot
+is bundled or sent to CI/cloud. Generated public-image OCR diagnostics record only
+status/stage/HRESULT/counts and fixed checks, not recognized private text or pixels.

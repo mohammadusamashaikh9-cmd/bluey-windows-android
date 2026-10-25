@@ -1110,3 +1110,16 @@ limits. Scope is seven paths including the necessary Windows workflow installer
 pin. F4-C remains active for active-capture Stop timing,broaderDPI/driver/performance
 and packagedOCR; F4-B provider acceptance remains separate. Next exact task:
 measure Stop during active harmless Notepad capture and prove no late publication.
+
+2026-10-26 Asia/Karachi — resumedff61152 after fetching/fast-forwarding existing
+PR7; PR6 remains4b38029. Accepted developer63d7269 WGC/JPEG/preview/125%DPI pointing
+and Home/discard evidence retained. Read Microsoft OCR identity, sparse/desktop
+manifest, Register/ExternalLocation, Developer Mode and known-folder documentation.
+D014 before implementation selects unsigned developer sparse identity with explicit
+manual approval/WhatIf and no certificate/policy/CI registration. Added separate
+app profile/startup identity/data-path guard, self-contained bundle, unchanged
+portable fallback, real-engine public four-line self-test and deterministic pending
+capture/OCR Stop tests. Two manifest-contract tests failed before implementation,
+then passed; both WPF variants compile. NativeAnalysis/Targets/WGC/F3/protected data
+and original/Android/animation code remain. Full CI evidence follows push. Actual
+laptop OCR remains unverified; no provider calls, input actions or OCR alternative.

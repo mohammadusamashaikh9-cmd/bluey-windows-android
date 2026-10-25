@@ -1,4 +1,38 @@
-# Current F4-C laptop capture repair — physical functional retest passed
+# Current F4-C native OCR developer identity — PR #7
+
+2026-10-26 Asia/Karachi. Started clean atff6115282a1d0505bf4c0455ce075a7a4e415980
+on port/screen-understanding, stacked on unchanged port/live-ai-voice/PR6 at4b38029.
+Both PRs stay unmerged. Developer accepts actual63d7269 Notepad WGC/JPEG/preview,
+VisibleBounds125%DPI,500/500 visual pointing with stationary OS mouse, Home/discard
+(three real captures). That gate is retained; no NativeCapture/JPEG repair reopened.
+
+D014 selects an optional unsigned sparse/external identity developer build to
+unlock existing Windows.Media.Ocr. Portable ZIP/app.manifest stay the fallback.
+Only matching identity metadata, win32App/mediumIL,runFullTrust/unvirtualizedResources
+are added. Startup refuses wrong/missing identity or redirected LocalAppData before
+trust/key services. No protected data paths, pairing identities, keys, F3/provider,
+geometry or animation code are changed. No data migration or installer.
+
+Bundle includes self-contained app, unsigned identity-only MSIX/loose manifest,
+public assets, checksums and explicit approval/WhatIf registration/removal helpers.
+No certificate creation/import/trust, Developer Mode/policy modification, auto-
+registration, all-users provisioning, app start or language download. Developer
+must separately review/enable Developer Mode and approve per-user registration.
+CI builds and checks these boundaries without registering any package. Exact
+four-line real-engine self-test is available only after explicit local registration;
+CI unregistered mode must report0 recognized words/lines, never fake success.
+
+Local identity manifest contracts first failed2cases before implementation and
+now pass. Both WPF variants compile; full Windows/native/Android evidence follows
+source push. Deterministic pending-capture Stop no longer polls wall-clock time;
+a pending-OCR Stop regression also rejects late targets. Native OCR on the actual
+laptop remains UNVERIFIED, including installed-language availability, word boxes,
+reading order and pointing. No Gemini call, external OCR/NPU dependency or F5.
+
+One next action: review the OCR developer bundle and, only with developer approval,
+follow its explicit registration and one harmless Notepad OCR/point/Home/Stop test.
+
+# Accepted F4-C capture repair — retained physical evidence
 
 2026-10-26 Asia/Karachi. Existing PR #7 remains open, unmerged and stacked on
 `port/live-ai-voice`; PR #6 stays unchanged at4b380294e883e669d29000cd844962db88439e58.

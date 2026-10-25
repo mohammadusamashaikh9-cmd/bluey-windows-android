@@ -533,3 +533,40 @@ preview; another capture stays blocked until owned native work finishes. Optiona
 repeat once with Primary display to distinguish that adapter path. No Gemini call
 or OCR packaging is part of this test. CI policy tests, native Recreate calls and
 synthetic JPEGs are not real WGC first-frame or physical coordinate proof.
+
+
+### F4-C OCR developer identity and real text gate
+
+Capture/preview/VisibleBounds125%DPI/500,500 pointing/stationary mouse/Home/discard
+are developer-accepted on63d7269. Do not repeat capture repairs. D014 builds a
+separate OCR developer bundle and keeps portable mode. Follow the exact reviewed
+[registration/removal and Notepad sequence](../windows/packaging/README.md).
+No certificate trust, package registration or Developer Mode change is performed
+by CI or application startup. The developer must explicitly approve local setup.
+
+CI checks source privileges, matching actual PE/package identities, no packaged
+app binaries/signing material, all checksums, denied approval and nonmutating
+WhatIf. The OCR test executable without registration must report UnavailableIdentity
+and0 recognized lines/words, never synthetic annotations. After manual registration,
+--ocr-self-test must use real Windows OCR on generated public text: exact L1-L4,
+nine word targets, bounded word/line rectangles, reading order/125%DPI transforms,
+existing pure flight, no unapproved share, Stop and60s expiry. It does not capture
+Notepad or prove physical pointing. No OCR success is claimed before laptop tests.
+
+On actual harmless Notepad capture, Analyze must report Ready and real recognized
+text/word boxes; select document L/W targets and verify visual pointing accurately,
+without moving the OS mouse. Window chrome may itself be recognized and shift L
+IDs; never drop or fabricate lines merely to force document IDs1-4. The controlled
+four-line fixture separately checks exact IDs. Record actual text/IDs/bounds locally;
+share only sanitized counts/status if needed. Confirm Home/Stop/expiry invalidate
+media/targets and cloud sharing remains OFF. UIA secure/hidden-field exclusion has
+existing native/public PasswordBox checks; never use sensitive fields as a test.
+
+Pending-capture Stop and pending-OCR Stop are deterministic C# regressions with
+manually completed injected tasks. They assert cancellation, late-pixel disposal,
+no restored preview/targets, blocked sharing and ownership until cleanup. No
+subsecond manual clicking or GPU instantaneous-cancellation claim is required.
+UnavailableLanguage requires the developer to review installed Windows OCR languages;
+no automatic language/model download. If sparse identity/actual API fails, retain
+sanitized stage/HRESULT and demonstrate that blocker before proposing an alternate
+lightweight offline engine. Gemini/F5/background capture remain excluded.

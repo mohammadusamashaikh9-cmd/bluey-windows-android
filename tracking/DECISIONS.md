@@ -618,3 +618,52 @@ succeed on the runner, without StartCapture/WGC pixel acquisition. Synthetic pol
 examples passed after the old terminal behavior failed9of11regression cases.
 The developer laptop's null-versus-size condition and successful capture remain
 unconfirmed; CI and safe source correction do not close that physical gate.
+
+## D014 / 2026-10-26 Asia/Karachi — Explicit developer OCR identity
+
+Developer accepts real Notepad capture/preview, VisibleBounds at125%DPI,500/500
+animated pointing with stationary OS mouse, Home and discard on63d7269. Do not
+reopen WGC/JPEG. Windows.Media.Ocr remains documented as requiring desktop package
+identity. Reuse NativeAnalysis/Targets and actual Windows OCR word rectangles.
+
+Add an OPTIONAL self-contained WPF developer variant with Microsoft's embedded
+msix identity and sparse/external-location AppxManifest. Keep the ordinary portable
+ZIP/manifest unchanged as fallback. Windows.Desktop min22000,win32App/mediumIL,
+runFullTrust and unvirtualizedResources preserve the existing full-trust process
+and LocalAppData paths. An OCR-variant startup guard validates the exact expected
+identity and compares LocalAppData with SHGetKnownFolderPath(NO_PACKAGE_REDIRECTION)
+before constructing settings/trust/key services. Never migrate/reset identities or
+credentials. The application still never starts a listener without existing consent.
+
+Publish an unsigned identity-only MSIX, loose manifest/assets and developer app
+folder. Supported Add-AppxPackage -Register -ExternalLocation is a developer-only
+path requiring Developer Mode, which the developer must review/enable manually.
+Registration/removal helpers require explicit approval switches and support WhatIf;
+they never change Developer Mode/policy, install/trust a certificate, self-register,
+provision all users, start Bluey or remove application data. No signing key/certificate
+is needed or shipped. Signed deployment would require a separate explicit trust
+choice and is outside this developer checkpoint. Keep extraction location stable;
+close Bluey and explicitly unregister before replacing/moving a registered build.
+
+CI builds/validates both manifests, actual embedded PE metadata and unsigned MSIX;
+it DOES NOT register a package or alter certificate trust/developer settings. Tests
+exercise denial/WhatIf, deterministic pending-capture Stop/late completion and all
+existing regressions. Add an explicit local --ocr-self-test using generated public
+four-line pixels, real NativeAnalysis and bounded result metadata after approved
+registration; no captures, user text, keys, listener or provider requests. Runtime
+identity/OCR success and actual Notepad recognition remain UNVERIFIED until the
+developer runs the artifact. Do not substitute annotations for recognized lines.
+
+Alternatives: full MSIX would move binaries and expand deployment changes; signed
+sparse installation would add certificate trust to a developer test; external OCR
+adds engines/models before any demonstrated sparse-identity blocker. None is needed
+for this smallest supported attempt. If actual registration/OCR fails, record its
+sanitized stage/HRESULT and compare a lightweight offline alternative before coding
+one. No cloud OCR/NPU dependency or fallback has been introduced.
+
+Official references inspected200: [Windows.Media.Ocr identity requirement](https://learn.microsoft.com/en-us/uwp/api/windows.media.ocr),
+[sparse identity/desktop manifest and unvirtualizedResources](https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/grant-identity-to-nonpackaged-apps),
+[Add-AppxPackage Register/ExternalLocation parameter set](https://learn.microsoft.com/en-us/powershell/module/appx/add-appxpackage),
+[AllowExternalContent](https://learn.microsoft.com/en-us/uwp/schemas/appxpackage/uapmanifestschema/element-uap10-allowexternalcontent),
+[Developer Mode](https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development),
+[known-folder redirection flags](https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/ne-shlobj_core-known_folder_flag).

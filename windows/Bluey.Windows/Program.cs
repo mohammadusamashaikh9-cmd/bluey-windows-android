@@ -8,6 +8,9 @@ internal static class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        if(args.Length==2&&args[0]=="--ocr-self-test") {
+            _=new Application{ShutdownMode=ShutdownMode.OnExplicitShutdown};return Screen.OcrSmoke.Run(args[1]);
+        }
         if (args.Length == 2 && args[0] == "--self-test")
         {
             System.IO.Directory.CreateDirectory(args[1]);
@@ -16,6 +19,13 @@ internal static class Program
             _ = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
             return NativeSmoke.Run(args[1]);
         }
+#if OCR_IDENTITY
+        // Before settings, DPAPI trust or key services: never create a second redirected profile.
+        try {Screen.OcrIdentity.Require();}
+        catch {
+            MessageBox.Show("The OCR developer build needs its explicitly registered Bluey OCR identity and original Windows data paths. Close Bluey, follow the OCR package README, or use the portable fallback. No trust or credential profile was opened.","Bluey OCR identity unavailable");return 3;
+        }
+#endif
         var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
         var timer = Stopwatch.StartNew(); var settings = SettingsStore.Load(); var random = new Random();
         var engine = new CursorEngine(settings, () => timer.Elapsed.TotalSeconds, random.NextDouble);

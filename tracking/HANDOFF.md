@@ -1,3 +1,29 @@
+# F4-C OCR identity handoff
+
+2026-10-26 Asia/Karachi. Existing PR7/port/screen-understanding, base
+port/live-ai-voice; PR6 unchanged4b38029, both unmerged. Startff61152.
+Capture/preview/VisibleBounds125%DPI/center pointing/stationary mouse/Home/discard
+are developer-accepted on63d7269 and are not reopened.
+
+D014 adds a separate self-contained OCR developer identity build and unsigned
+sparse MSIX/loose manifest. Portable fallback retained. Registration/removal require
+explicit approval switches, WhatIf and manually reviewed Windows Developer Mode;
+no automatic certificate/policy/package action in app/CI. Original LocalAppData,
+DPAPI keys/pairing/settings preserved; OCR startup guard fails closed on identity
+or profile mismatch. Existing NativeAnalysis/Targets remain authoritative.
+
+Both variants compile locally, manifest contracts pass after2initial failures;
+Windows/native/Android CI will record exact evidence after source push. New
+--ocr-self-test runs real native OCR only after approved registration on generated
+public four-line pixels, no user capture/network. CI must not claim registered OCR.
+Deterministic pending-capture/OCR Stop tests cover late results without manual
+click timing. Real laptop text/word geometry remains unverified.
+
+One next action: review artifact/instructions and, only if approving developer
+registration, run the single harmless Notepad OCR/word pointing/Home/Stop/expiry
+sequence in windows/packaging/README.md. Keep cloud OFF, Android unchanged and
+both PRs unmerged. No Gemini call, alternate engine, input action or data reset.
+
 # F4-C laptop capture repair handoff
 
 2026-10-26 Asia/Karachi. PR #7 stays open/unmerged on port/screen-understanding,
