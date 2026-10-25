@@ -1,4 +1,83 @@
-# F4-C local laptop diagnosis and JPEG option repair
+# Current F4-C laptop capture repair — physical functional retest passed
+
+2026-10-26 Asia/Karachi. Existing PR #7 remains open, unmerged and stacked on
+`port/live-ai-voice`; PR #6 stays unchanged at4b380294e883e669d29000cd844962db88439e58.
+Tested application/CI revision **63d7269fac56dd8a02ce7d6a6a1caf427a83ee02**.
+JPEG correction7b35434; later63d7269 changes Windows CI SDK installation only.
+Primary Android checkout remains untouched. Work continues in a managed detached
+worktree at the published PR #7 revision, with no branch switch/reset/history rewrite.
+
+**Actual physical root cause:** JpegEncode/0x88982F41 after successful WGC frame
+acquisition and SoftwareBitmap copy. ImageQuality was incorrectly written as frame
+metadata. Move existing Single0.72 into BitmapEncoder.CreateAsync options instead;
+no capture backend, geometry/retry/consent/provider/animation change was required.
+Independent native codec probe reproduced the old error and passed the correction.
+
+**Corrected laptop evidence:** developer-triggered harmless Notepad captures
+complete in687ms,265ms and281ms. All report578x557 content/buffer/pool after one
+Recreate from594x565, final VisibleBounds, DPI1.25, HRnone. Developer explicitly
+confirmed a genuine Notepad preview. Direct GUI reads confirm Preview ready,
+578x557 Window,11 real UIA targets and mapping VisibleBounds. Labels include window
+buttons and Notepad status text. Portable OCR correctly remains UnavailableIdentity;
+this demonstrates accessible UIA labels, not OCR of the document body.
+
+Developer explicitly confirmed500/500 center animation, stationary real mouse,
+Return Home and Stop/discard clearing all passed. Subsequent direct GUI read shows
+capture OFF, Snapshot:none and analysis/point/share actions disabled. Final status
+retains prior local-analysis text, so the read alone does not distinguish Stop
+from60s expiry; Stop clearing is developer-reported, not independently timed.
+A prior capture also discarded after a selected-window geometry change.
+No image/screenshot file, private text or provider data was retained in Git.
+Only text diagnostics/UI accessibility were inspected by the agent; no screenshot
+upload or Gemini request was performed. Cloud screen sharing stayed OFF.
+
+| Fresh evidence | Result |
+| --- | --- |
+| [Windows40226759821](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40226759821) |238 unit tests (Core27/Screen70/Link141), zero failed/skipped;46 native checks including laptop-sized and scaled JPEG round trips; WPF0 warnings/errors; self-contained x64 |
+| [PR Windows40226763230](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40226763230) |Also passes at63d7269 |
+| [Android40226763197](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40226763197) |111 tests, zero failures/errors/skips; workflow passes; existing installed APK retained |
+| Local artifact verification |ZIP digest matches GitHub; all413 manifest files plus EXE/DLL/manifest hashes match; matching TRX/native evidence downloaded and read |
+| Local static |Exact seven-path scope, protected paths unchanged, historical tracking retained, git diff --check passes |
+
+[Windows application artifact12611119362](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40226759821/artifacts/12611119362)
+and [native/TRX evidence12611084399](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40226759821/artifacts/12611084399).
+Local verified executable:
+`D:\Development\bluey-windows-android\build\f4c-native-debug\ci-63d7269\app\Bluey.Windows.exe`.
+
+| File | SHA-256 |
+| --- | --- |
+| Bluey.Windows.exe |5043e7adf10d9d1f683ef8506ddcb75de1196dce872e6fede5826338eda8efd4 |
+| Bluey.Windows.dll |4b25e16d87d1a5ff423efc28b6094db2ba82a591c6ed49b19bfeb9e42dc435d9 |
+| SHA256SUMS.txt |48e6d1e1c4ebf594e21c67d5351a9f5f0dc50f0070596c832569658af41b5588 |
+| Application ZIP |2f8ad638ba570aeb92f4262b7213672b35500884fe80c4c055a56fab43f5a141 |
+| Evidence ZIP |010ea63870bb65ef6a34c7a45f867dd68718596eea09c7653e13c8180c7d8fd3 |
+
+Build prerequisite handling: no local SDK/Visual Studio installation. Initial CI
+7b35434 failed before compilation because setup-dotnet followed latestPatch to an
+unavailable10.0.403 archive (HTTP409). Installer is now pinned to the already-declared
+10.0.402 baseline; global.json remains unchanged. setup-dotnet still warns about
+its optional latest-LTS runtime download, but exact SDK setup and build pass.
+GitHub CLI artifact download stalled at0bytes; normal GitHub connector download
+succeeded, archive hash matched before extraction. No network-policy change.
+
+Authorized commit/push used the GitHub public no-reply identity after GH007 rejected
+publishing a protected private email. Rejected local commit was preserved in an
+archived managed worktree; remote history was only fast-forwarded. No account
+privacy setting changed. Required closeout documentation follows the tested app.
+
+F4-C remains active for broader physical robustness: DPI/driver/performance,
+active-capture cancellation timing and packaged OCR are not accepted by this test.
+F4-B provider acceptance remains separate. No F5, autonomous input or merge.
+**One next task:** on this same verified artifact and harmless Notepad window,
+measure Stop during an active capture and confirm no late preview is published;
+keep cloud OFF and both PRs unmerged.
+
+Exact seven paths changed from reviewed91c9d3f:
+`.github/workflows/windows.yml`, `windows/Bluey.Windows/Screen/NativeCapture.cs`,
+`windows/Bluey.Windows/Screen/CaptureSmoke.cs`, and the four tracking files
+`STATUS.md`, `CHECKPOINTS.md`, `HANDOFF.md`, `SESSION-LOG.md`.
+
+# Earlier initial local diagnosis (before CI authorization)
 
 2026-10-26 Asia/Karachi. PR #7 remains open/unmerged at reviewed head
 `91c9d3f46d0d31fe0e39d7d1db2b932a391574c9`, targeting `port/live-ai-voice`.

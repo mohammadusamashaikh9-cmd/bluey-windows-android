@@ -187,3 +187,41 @@ Microsoft references: [WIC error codes](https://learn.microsoft.com/en-us/window
 [BitmapEncoder](https://learn.microsoft.com/en-us/uwp/api/windows.graphics.imaging.bitmapencoder).
 No Gemini request/upload, fallback capture or toolchain installation. Preserve
 previous CI evidence as historical; it does not validate this unbuilt repair.
+
+## F4-C corrected laptop functional retest / 2026-10-26 Asia/Karachi
+
+Application63d7269fac56dd8a02ce7d6a6a1caf427a83ee02. JPEG repair7b35434 moves
+ImageQuality Single0.72 to encoder creation, leaving capture/geometry/consent
+unchanged. CI-only installer pin avoids unavailable10.0.403; no local SDK install.
+
+| Acceptance / tier | Actual evidence |
+| --- | --- |
+| Genuine Notepad preview, physical | Developer explicitly confirmed genuine image. Agent read Preview ready/Window578x557/VisibleBounds in the running verified app; no screenshots uploaded or saved by agent. |
+| Geometry, physical + numeric | Three successful attempts687/265/281ms. DWM578x557/Win32594x565/DPI1.25; non-null content578x557 needs one Recreate from594x565 to exact578x557 buffer/pool. Developer confirms500/500 center placement. Other DPI/driver configurations unverified. |
+| Accessible local text | Agent directly read11 UIA targets including buttons and status fields. Portable OCR UnavailableIdentity correctly retained; no OCR document-body claim. |
+| Animated pointing / mouse | Developer explicitly confirmed center flight with stationary real mouse and Return Home. No input API added/called by capture repair. No frame-by-frame motion or OS-cursor telemetry recorded. |
+| Stop/discard | Developer explicitly confirmed clearing. Final direct UI read: capture OFF, Snapshot:none, analysis/point/share disabled, no target rows. Its retained prior-analysis status does not independently distinguish Stop from expiry; active-capture Stop timing remains unverified. |
+| Privacy | Cloud screen sharing OFF throughout GUI reads; no Gemini/provider request or screenshot upload performed; only harmless Notepad capture requested. No fallback/display capture, private images/text or credentials committed. |
+| CI | Windows40226759821 + PR40226763230 pass;238unit (27/70/141),46native, WPF0warnings/errors. Android40226763197:111tests,0failure/error/skip, workflow passes. |
+| Downloaded artifacts | Application12611119362 and evidence12611084399. Both archive digests match; all413 application manifest entries, primary binary hashes, native46pass/0fail and TRX238pass/0fail/0skip independently checked. Full URLs/hashes in STATUS. |
+
+Safe successful records (no HWND, origins, titles, recognized text or pixels):
+
+```text
+capture#1 Window Complete Succeeded HR=none 687ms DWM=578x557 WGC=578x557 delta=0x0 Win32=594x565 dpiScale=1.25 map=VisibleBounds initial=594x565 frames=2 recreates=1 [f1 null=False content=578x557 buffer=594x565 pool=594x565 item=594x565 Recreate 500ms; f2 null=False content=578x557 buffer=578x557 pool=578x557 item=594x565 Accepted 515ms]
+capture#2 Window Complete Succeeded HR=none 265ms DWM=578x557 WGC=578x557 delta=0x0 Win32=594x565 dpiScale=1.25 map=VisibleBounds initial=594x565 frames=2 recreates=1 [f1 null=False content=578x557 buffer=594x565 pool=594x565 item=594x565 Recreate 234ms; f2 null=False content=578x557 buffer=578x557 pool=578x557 item=594x565 Accepted 250ms]
+capture#3 Window Complete Succeeded HR=none 281ms DWM=578x557 WGC=578x557 delta=0x0 Win32=594x565 dpiScale=1.25 map=VisibleBounds initial=594x565 frames=2 recreates=1 [f1 null=False content=578x557 buffer=594x565 pool=594x565 item=594x565 Recreate 235ms; f2 null=False content=578x557 buffer=578x557 pool=578x557 item=594x565 Accepted 250ms]
+```
+
+Reproduction: open same harmless Notepad fully inside primary display; choose it
+in Screen Understanding and capture once while still. Previous verified artifact
+fails JpegEncode0x88982F41; corrected artifact shows the real preview. Analyze
+locally lists actual UIA labels,500/500 spot points at its center, Home/Stop clears.
+The target-list button requires a selected row; one select-target UI message was
+user selection state, not another capture failure. A geometry change discarded an
+earlier snapshot as designed. No broader capture backend was needed.
+
+F4-C **active**: this is functional laptop evidence with explicit developer visual
+confirmation, not comprehensive animation/DPI/performance/cancellation acceptance.
+One next check is active-capture Stop/no-late-publication timing; packaged OCR and
+F4-B provider acceptance remain separately pending. Both PRs stay unmerged.

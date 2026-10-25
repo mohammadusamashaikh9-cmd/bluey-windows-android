@@ -1063,3 +1063,50 @@ provider/animation/Apple/Android changes. Updated current tracking while retaini
 historical evidence. SDK10.0.402 missing locally; production build/unit/native
 smoke and corrected preview UNRUN. No tools installed or Gemini request/upload.
 No commit/push/merge; next is approved existing-PR CI build then physical retest.
+
+### F4-C authorized CI and physical closeout, 2026-10-26 Asia/Karachi
+
+User explicitly authorized committing/pushing the six-file repair to existing
+PR #7 and CI/laptop retest. Initial local commit de27600 was rejected by GH007
+because of private-email protection. Preserved that local commit; created an
+identical file tree with verified public GitHub no-reply identity as7b35434 and
+fast-forward pushed. No privacy-setting change, force push or history rewrite.
+Moved work to a fresh managed worktree at the public commit; old worktree archived
+recoverably. Primary Android checkout never switched or edited.
+
+Initial Windows40226535448/40226539219 failed before compilation: setup-dotnet
+mapped latestPatch to10.0.403 and its archive returned409. Minimum CI-only change
+pins installer to already-declared10.0.402 (global.json unchanged), committed and
+pushed63d7269. Optional LTS runtime fetch still warns; exact SDK/build work. No
+local SDK/Visual Studio installed. User authorization covers existing-PR build
+and retest only; no new PR, F5, provider call, OCR packaging or merge.
+
+Windows40226759821 and PR40226763230 pass238unit/46native, WPF0warnings/errors.
+Downloaded matching TRX/native evidence:27core+70screen+141link,0failed/skipped;
+native46pass/0fail. Android40226763197 passes111tests,0failure/error/skip. Existing
+installed APK retained. Native smoke still uses generated pixels, never physical
+WGC acquisition. It does not replace the following laptop observations.
+
+CLI artifact transfer stalled at0bytes and was stopped. Normal GitHub connector
+returned downloadable app/evidence files; both archive digests verified. App
+artifact12611119362 rehashed413/413 files and EXE/DLL/manifest, all match CI.
+Evidence12611084399 read locally. Exact URLs/hashes in STATUS. No policy bypass.
+Developer closed old app; agent launched verified self-contained executable at
+primary checkout build/f4c-native-debug/ci-63d7269/app through Computer Use.
+
+Developer initiated harmless Notepad captures; actual diagnostics Complete/
+Succeeded687/265/281ms,578x557 VisibleBounds,DPI1.25,2nonnullframes/1Recreate each.
+Developer explicitly confirmed genuine Notepad preview. Direct text-only GUI
+reads show Preview ready,11 UIA targets,OCR UnavailableIdentity,cloudOFF. Earlier
+geometry change discarded snapshot. User clicked target-list pointing without
+selection once (select-target), then used500/500 spot button. Developer explicitly
+confirmed center animation,stationary real mouse,Home andStop clearing all passed.
+Final direct read showsOFF/no snapshot/disabled actions; retained local-analysis
+status means Stop vs expiry timing is not independently established. No screenshot
+uploaded/saved by agent, private text committed or Gemini request made.
+
+Updated four current tracking files with source/CI/artifact/physical evidence and
+limits. Scope is seven paths including the necessary Windows workflow installer
+pin. F4-C remains active for active-capture Stop timing,broaderDPI/driver/performance
+and packagedOCR; F4-B provider acceptance remains separate. Next exact task:
+measure Stop during active harmless Notepad capture and prove no late publication.

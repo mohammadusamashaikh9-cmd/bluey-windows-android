@@ -1,29 +1,31 @@
-# F4-C laptop JPEG failure handoff
+# F4-C laptop capture repair handoff
 
-2026-10-26 Asia/Karachi. Existing PR #7/reviewed head91c9d3f only; no merge or
-PR #6 change. Primary Android checkout preserved; repair is in a managed detached
-worktree. No commit/push yet; AGENTS prohibits unattended pushes.
+2026-10-26 Asia/Karachi. PR #7 stays open/unmerged on port/screen-understanding,
+base port/live-ai-voice. PR #6 remains unchanged4b38029. Tested app/CI63d7269;
+JPEG correction7b35434, CI-only baseline installer pin63d7269. Primary checkout
+preserved; active managed worktree contains the published repair.
 
-Actual running artifact fully rehashed413/413, EXE78d0eeb4. Developer Notepad
-capture's safe diagnostics show frame1 content578x557/buffer594x565, successful
-Recreate, frame2 accepted578x557 with VisibleBounds at391ms, then
-JpegEncode/NativeFailure/0x88982F41 at516ms. WGC through bitmap copy works on this
-attempt. Snapshot/preview did not publish. No need to replace capture backend.
+Physical failure was JPEG metadata0x88982F41 after successful WGC acquisition,
+not a remaining FirstFrame failure. ImageQuality Single0.72 now goes to encoder
+creation. No geometry/retry/consent/backend/provider/F3/animation/Apple/Android changes.
 
-Independent local WinRT codec probe reproduces the metadata error and passes
-with ImageQuality Single0.72 supplied at encoder creation. Generated round trips:
-578x557 unchanged and1920x1080=>1100x619; decoded black/white contrast preserved.
-Production patch changes that option call only; native smoke adds the laptop
-extent alongside existing scaled coverage. No provider, consent or geometry changes.
+Real Notepad capture succeeds687/265/281ms,578x557 VisibleBounds at125%DPI after
+one pool recreation. Developer confirmed genuine preview and500/500 center flight
+with stationary OS mouse;11 UIA targets directly observed. Portable OCR correctly
+UnavailableIdentity. Developer confirmed Home/Stop clearing; direct final read
+shows no snapshot and disabled actions, without independently timing Stop vs expiry.
+Cloud stayed OFF; no Gemini call or screenshot upload.
 
-.NET SDK10.0.402 is absent locally; no heavyweight tools installed. Production
-build/unit/native checks and corrected application preview remain unverified.
-No Gemini request/uploads. Portable OCR identity remains a separate limitation.
+Windows40226759821/40226763230 pass238unit/46native, WPF0warnings/errors.
+Android40226763197 passes111tests, no failure/error/skip; APK unchanged locally.
+Application artifact12611119362/evidence12611084399 downloaded, ZIP hashes and all
+413 app files verified. Local app folder is primary checkout's ignored
+build/f4c-native-debug/ci-63d7269/app. Full links/hashes and failed setup evidence
+are in STATUS/CHECKPOINTS. No local .NET SDK/Visual Studio installed.
 
-One next task: authorize commit/push of the scoped patch to port/screen-understanding
-for CI, verify the resulting Windows artifact, then developer-triggered Notepad
-capture, local UIA analysis,500/500 animated pointing with stationary real mouse,
-and Stop/discard clearing. Keep cloud OFF and both PRs unmerged.
+One next task: explicitly test Stop during active Notepad capture and measure
+that late pixels never republish. Keep cloud OFF, preserve identities and both
+open PRs; no F5 or OCR packaging. Broader DPI/driver/performance QA stays pending.
 
 # F4-C FirstFrame capture handoff
 
