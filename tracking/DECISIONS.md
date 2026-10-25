@@ -583,3 +583,31 @@ Observed native CI public window has DWM=WGC306x203,Win32320x210 at1x; only exac
 mapping is native-measured here. It is not evidence of the laptop's dimensions or
 border mismatch. Pure examples validate the border branch and preview-only denial.
 No WGC frame acquisition was performed in CI; physical target accuracy stays open.
+
+D013 FirstFrame correction / 2026-10-25 Asia/Karachi: developer reports five
+real Notepad FirstFrame/Changed failures. Safe physical measurements are now
+DWM578x557, WGC=Win32594x565, DPI1.25, WindowFrame. This resolves the preceding
+ItemSize gate; it does not identify whether TryGetNextFrame returned null or
+ContentSize differed. Source confirms both cases prematurely terminate acquisition.
+
+Use one sequential frame consumer; FrameArrived only signals a bounded queue.
+Within the existing eight-second deadline allow at most six acquisitions and two
+frame-pool recreations. Retire each frame before supported Recreate. Copy only
+when content, surface buffer and current pool extents agree, with positive bounded
+allocation. Re-resolve the final image transform from unchanged measured window
+bounds; never infer it from aspect similarity. Genuine movement/resizing remains
+rejected. Unknown bounded transforms remain PreviewOnly with coordinates, OCR and
+cloud sharing disabled. No user-visible automatic retry or second capture session.
+
+Record only first/last and bounded per-frame numeric/enum metadata (null/content,
+surface/pool/initial extents, count, elapsed); no titles, positions, pixels or text.
+Await the sole consumer/copy before disposing native resources. Cancellation must
+prevent publication, including a late copy completion. No change to provider, F3,
+OCR packaging, animation, cloud consent or OS input behavior.
+
+References: [Microsoft capture/frame processing and Recreate guidance](https://learn.microsoft.com/en-us/windows/uwp/audio-video-camera/screen-capture),
+[Recreate API](https://learn.microsoft.com/en-us/uwp/api/windows.graphics.capture.direct3d11captureframepool.recreate),
+[ContentSize](https://learn.microsoft.com/en-us/uwp/api/windows.graphics.capture.direct3d11captureframe.contentsize),
+[Microsoft desktop capture sample](https://github.com/microsoft/Windows.UI.Composition-Win32-Samples/blob/master/cpp/ScreenCaptureforHWND/ScreenCaptureforHWND/SimpleCapture.cpp).
+All retrieved successfully during this repair. Physical null-versus-size cause
+and successful capture remain pending new safe diagnostics/device retest.

@@ -142,3 +142,11 @@ mapping; border mismatch cases are synthetic. No native frame acquisition in CI.
 First-frame/preview/physical point accuracy remains UNVERIFIED; OCR identity and F4-B
 provider gates stay separate. PR6/7 open, unmerged. Next is one local Notepad retest,
 cloud OFF, preserving preview-only denial and reporting only safe geometry metadata.
+
+F4-C FirstFrame repair /2026-10-25 Asia/Karachi: developer reports five real
+FirstFrame/Changed failures; DWM578x557/WGC=Win32594x565/DPI1.25/WindowFrame confirms
+prior ItemSize mapping, not capture success. Source latch conflates null and size
+mismatch. Bounded sequential acquisition/Recreate and safe frame diagnostics now
+implemented; local regression tests pass. Windows/native and Android CI pending
+source push. Real preview/pointing remains UNVERIFIED; OCR packaging and F4-B live
+provider gate remain separate. No cloud call or input operation authorized/run.

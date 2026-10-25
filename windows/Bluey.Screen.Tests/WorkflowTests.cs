@@ -49,4 +49,12 @@ public sealed class WorkflowTests
         await Assert.ThrowsAsync<ScreenException>(()=>workflow.Analyze(reader));Assert.Equal(0,reader.Calls);Assert.False(workflow.Busy);
         state.Invalidate();Assert.Null(state.Info);Assert.True(shot.Disposed);Assert.True(preview.Stop.IsCancellationRequested);
     }
+    [Fact] public async Task StopDuringPendingNativeCopyCannotPublishLatePreviewAndKeepsOwnershipUntilCompletion() {
+        using var state=new ScreenSession(()=>0);var workflow=new ScreenWorkflow(state);var source=new Source{Pending=new(TaskCreationOptions.RunContinuationsAsynchronously)};
+        var pending=workflow.Capture(true,source);state.Invalidate();await Assert.ThrowsAnyAsync<OperationCanceledException>(()=>pending);
+        Assert.Null(state.Info);Assert.True(workflow.Busy);await Assert.ThrowsAsync<ScreenException>(()=>workflow.Capture(true,source));
+        var late=Shot();source.Pending.SetResult(late);
+        using(var deadline=new CancellationTokenSource(5000))while(!late.Disposed||workflow.Busy)await Task.Delay(1,deadline.Token);
+        Assert.True(late.Disposed);Assert.Null(state.Info);Assert.False(workflow.Busy);
+    }
 }

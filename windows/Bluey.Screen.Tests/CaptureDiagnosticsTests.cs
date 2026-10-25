@@ -32,4 +32,13 @@ public sealed class CaptureDiagnosticsTests
         Assert.Contains("DWM=1000x600",d.Text);Assert.Contains("WGC=1016x608",d.Text);Assert.Contains("delta=16x8",d.Text);
         Assert.Contains("dpiScale=1.5",d.Text);Assert.Contains("map=WindowFrame",d.Text);Assert.Equal(8,d.Reports.Length);Assert.True(d.Text.Length<4096);
     }
+    [Fact] public void SafeFrameDiagnosticsDistinguishNullFromSizeMismatchAndRemainBounded() {
+        var plan=CaptureGeometry.Resolve(SurfaceKind.Window,new(100,100,578,557),new(0,0,1920,1080),new(92,100,594,565),594,565,120);
+        var f=new CaptureFrames(plan);var d=new CaptureDiagnostics();
+        for(int n=1;n<CaptureFrames.MaxFrames;n++)f.Observe(null,null,new(594,565),plan.Selection,plan.WindowFrame,n);
+        Assert.Throws<ScreenException>(()=>f.Observe(null,null,new(594,565),plan.Selection,plan.WindowFrame,6));
+        for(int n=0;n<20;n++)d.Record(SurfaceKind.Window,CaptureStage.FirstFrame,CaptureOutcome.FramesUnstable,7,frames:f.Trace);
+        Assert.Contains("frames=6",d.Text);Assert.Contains("null=True content=none buffer=none",d.Text);
+        Assert.Equal(8,d.Reports.Length);Assert.True(d.Text.Length<12000);Assert.Contains("stable complete frame",d.Reports[^1].UserMessage);
+    }
 }

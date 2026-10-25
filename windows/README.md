@@ -426,3 +426,20 @@ analysis/pointing/screen sharing blocked in UI and core. Do not treat preview as
 coordinate-accuracy pass. Safe diagnostics include DWM/WGC/Win32 width/height,
 absolute deltas, DPI scale and mapping mode, with no title/pixels/private text.
 Actual laptop dimensions and first-frame/preview/point accuracy need physical QA.
+
+FirstFrame correction: one consumer now acquires up to six frames and performs at
+most two supported frame-pool recreations, within the same eight-second capture.
+A null/empty first frame is not a terminal geometry error. Frames are released
+before Recreate; copy requires exact content/buffer/pool agreement. Final mapping
+is re-resolved against unchanged measured bounds. Window movement/resizing, blank
+or protected images, allocation limits, expiry and Stop still fail closed. Unknown
+mapping stays PreviewOnly. No continuous recording or automatic second capture.
+
+Safe records now distinguish null frames, content size, surface-buffer size, pool
+size, initial/current item extents, counts/recreations and elapsed time. The last
+eight attempts remain memory-only. `FramesUnstable` means no complete stable frame
+within those limits; try manually with the selected window still. FrameSurface and
+FramePoolResize identify their native HRESULT boundaries. On Stop, publication is
+canceled immediately; an already-running native copy retains resources until its
+completion and then discards the result. New capture is blocked during that cleanup.
+Real WGC first-frame capture still requires the physical Notepad retest in QA.md.

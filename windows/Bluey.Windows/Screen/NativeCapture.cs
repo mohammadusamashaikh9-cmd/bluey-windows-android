@@ -1,6 +1,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Channels;
 using Bluey.Screen;
 using Windows.Graphics.Capture;
 using Windows.Graphics.DirectX;
@@ -47,10 +48,10 @@ internal sealed class NativeCapture
     {
         if(Interlocked.CompareExchange(ref busy,1,0)!=0)throw new ScreenException("capture-busy");
         var started=Environment.TickCount64;var kind=choice.Monitor?SurfaceKind.PrimaryDisplay:SurfaceKind.Window;
-        int stage=(int)CaptureStage.Selection;bool succeeded=false;CaptureDimensions? dimensions=null;
+        int stage=(int)CaptureStage.Selection;bool succeeded=false;CaptureDimensions? dimensions=null;CaptureFrames? acquisition=null;
         void At(CaptureStage value)=>Volatile.Write(ref stage,(int)value);
         CaptureFailure Fail(CaptureOutcome outcome,Exception? cause=null,CaptureStage? at=null) {
-            succeeded=false;return new(Diagnostics.Record(kind,at??(CaptureStage)Volatile.Read(ref stage),outcome,Environment.TickCount64-started,cause,dimensions));
+            succeeded=false;return new(Diagnostics.Record(kind,at??(CaptureStage)Volatile.Read(ref stage),outcome,Environment.TickCount64-started,cause,dimensions,acquisition?.Trace));
         }
         using var deadline=new CancellationTokenSource(TimeSpan.FromSeconds(8));
         try {
@@ -66,42 +67,71 @@ internal sealed class NativeCapture
             if(!choice.Monitor&&(!TryBounds(choice.Handle,out var visible)||visible!=choice.Physical))throw new ScreenException("capture-changed");
             var geometry=CaptureGeometry.Resolve(kind,choice.Physical,choice.Primary,windowFrame,size.Width,size.Height,choice.Dpi);
             dimensions=dimensions with {Mapping=geometry.Mapping};
+            acquisition=new(geometry);var selectedSurface=geometry.ToSurface((long)choice.Handle);
             At(CaptureStage.D3DDevice);using var device=CreateDevice();
             At(CaptureStage.FramePool);using var pool=Direct3D11CaptureFramePool.CreateFreeThreaded(device,DirectXPixelFormat.B8G8R8A8UIntNormalized,1,size);
-            At(CaptureStage.CaptureSession);var session=pool.CreateCaptureSession(item);session.IsCursorCaptureEnabled=false;
-            bool captureActive=true;long capturedAt=0;DateTimeOffset capturedUtc=default;
-            var frameResult=new TaskCompletionSource<SoftwareBitmap>(TaskCreationOptions.RunContinuationsAsynchronously);int taken=0;
-            async void Frame(Direct3D11CaptureFramePool sender,object args) {
-                if(Interlocked.Exchange(ref taken,1)!=0)return;
-                var frameStage=CaptureStage.FirstFrame;
-                try {
-                    At(frameStage);using var frame=sender.TryGetNextFrame();
-                    if(frame==null||frame.ContentSize.Width!=size.Width||frame.ContentSize.Height!=size.Height)throw new ScreenException("capture-changed");
-                    capturedAt=Environment.TickCount64;capturedUtc=DateTimeOffset.UtcNow;
-                    frameStage=CaptureStage.SurfaceCopy;At(frameStage);
-                    var bitmap=await SoftwareBitmap.CreateCopyFromSurfaceAsync(frame.Surface,BitmapAlphaMode.Ignore).AsTask(cancel).ConfigureAwait(false);
-                    if(!frameResult.TrySetResult(bitmap))bitmap.Dispose();
-                } catch(OperationCanceledException){frameResult.TrySetCanceled(cancel);}
-                catch(ScreenException e){frameResult.TrySetException(e);}
-                catch(Exception e){frameResult.TrySetException(new NativeStep(frameStage,e.HResult));}
-            }
-            void Closed(GraphicsCaptureItem _,object args)=>frameResult.TrySetException(new ScreenException("window-closed"));
-            pool.FrameArrived+=Frame;item.Closed+=Closed;SoftwareBitmap? image=null;byte[]? jpeg=null;
+            bool captureActive=true;long capturedAt=0;DateTimeOffset capturedUtc=default;int closed=0;
+            // The event never owns a frame or performs async work. One consumer owns every
+            // acquisition/copy/Recreate and finishes before pool/session/device disposal.
+            var arrivals=Channel.CreateBounded<bool>(new BoundedChannelOptions(1){FullMode=BoundedChannelFullMode.DropWrite,SingleReader=true,SingleWriter=false});
+            void Frame(Direct3D11CaptureFramePool sender,object args)=>arrivals.Writer.TryWrite(true);
+            void Closed(GraphicsCaptureItem _,object args){Interlocked.Exchange(ref closed,1);arrivals.Writer.TryComplete();}
+            bool frameSubscribed=false,closedSubscribed=false;SoftwareBitmap? image=null;byte[]? jpeg=null;
+            At(CaptureStage.CaptureSession);var session=pool.CreateCaptureSession(item);
             try {
+                session.IsCursorCaptureEnabled=false;
+                pool.FrameArrived+=Frame;frameSubscribed=true;item.Closed+=Closed;closedSubscribed=true;
                 cancel.ThrowIfCancellationRequested();At(CaptureStage.StartSession);session.StartCapture();
-                // A free-threaded callback may already be copying; never overwrite its later stage.
-                Interlocked.CompareExchange(ref stage,(int)CaptureStage.FirstFrame,(int)CaptureStage.StartSession);
-                image=await frameResult.Task.WaitAsync(cancel).ConfigureAwait(false);
-                session.Dispose();captureActive=false;pool.FrameArrived-=Frame;
-                At(CaptureStage.JpegEncode);jpeg=await Encode(image,cancel).ConfigureAwait(false);
+                while(image==null) {
+                    At(CaptureStage.FirstFrame);
+                    try {await arrivals.Reader.ReadAsync(cancel).ConfigureAwait(false);}
+                    catch(ChannelClosedException){throw new ScreenException("window-closed");}
+                    cancel.ThrowIfCancellationRequested();if(Volatile.Read(ref closed)!=0)throw new ScreenException("window-closed");
+                    FrameDisposition decision;
+                    using(var frame=pool.TryGetNextFrame()) {
+                        var itemNow=item.Size;FrameSize? content=null,buffer=null;
+                        if(frame!=null) {var c=frame.ContentSize;content=new(c.Width,c.Height);At(CaptureStage.FrameSurface);var d=frame.Surface.Description;buffer=new(d.Width,d.Height);At(CaptureStage.FirstFrame);}
+                        Box? currentFrame=null;var currentVisible=choice.Physical;
+                        if(!choice.Monitor) {
+                            if(!TryBounds(choice.Handle,out currentVisible))throw new ScreenException("capture-changed");
+                            if(TryWindowBounds(choice.Handle,out var measuredNow))currentFrame=measuredNow;
+                        }
+                        // Record the actual frame before failing a changed display/window.
+                        decision=acquisition.Observe(content,buffer,new(itemNow.Width,itemNow.Height),currentVisible,currentFrame,Environment.TickCount64-started);
+                        if(!Matches(selectedSurface))throw new ScreenException("capture-changed");
+                        if(decision==FrameDisposition.Accept) {
+                            geometry=acquisition.Accepted!;dimensions=dimensions with {WgcWidth=geometry.Width,WgcHeight=geometry.Height,Mapping=geometry.Mapping};
+                            capturedAt=Environment.TickCount64;capturedUtc=DateTimeOffset.UtcNow;At(CaptureStage.SurfaceCopy);
+                            // Await native completion even if Stop arrives. This keeps the frame,
+                            // pool and device alive until the copy releases their resources.
+                            image=await SoftwareBitmap.CreateCopyFromSurfaceAsync(frame!.Surface,BitmapAlphaMode.Ignore).AsTask().ConfigureAwait(false);
+                            cancel.ThrowIfCancellationRequested();
+                        }
+                    } // Return the checked-out frame BEFORE Recreate, as Microsoft specifies.
+                    if(decision==FrameDisposition.Recreate) {
+                        cancel.ThrowIfCancellationRequested();At(CaptureStage.FramePoolResize);
+                        while(arrivals.Reader.TryRead(out _)){} // Retire notifications for discarded buffers.
+                        var extent=acquisition.PoolSize;
+                        pool.Recreate(device,DirectXPixelFormat.B8G8R8A8UIntNormalized,1,new(){Width=extent.Width,Height=extent.Height});
+                    }
+                }
+                session.Dispose();captureActive=false;pool.FrameArrived-=Frame;frameSubscribed=false;
                 At(CaptureStage.GeometryValidation);var surface=geometry.ToSurface((long)choice.Handle);
-                if(image.PixelWidth!=geometry.Width||image.PixelHeight!=geometry.Height||item.Size.Width!=geometry.Width||item.Size.Height!=geometry.Height||!Matches(surface))throw new ScreenException("capture-changed");
+                if(image.PixelWidth!=geometry.Width||image.PixelHeight!=geometry.Height||!Matches(surface)||Volatile.Read(ref closed)!=0)throw new ScreenException("capture-changed");
+                At(CaptureStage.JpegEncode);jpeg=await Encode(image,cancel).ConfigureAwait(false);
                 At(CaptureStage.JpegDecode);using(var decoded=await Decode(jpeg,cancel).ConfigureAwait(false)) {if(decoded.PixelWidth!=surface.ImageWidth||decoded.PixelHeight!=surface.ImageHeight)throw new ScreenException("capture-changed");At(CaptureStage.BlankValidation);EnsureNonblank(decoded);}
+                At(CaptureStage.GeometryValidation);if(!Matches(surface)||Volatile.Read(ref closed)!=0)throw new ScreenException("capture-changed");
                 cancel.ThrowIfCancellationRequested();var shot=new Snapshot(surface,jpeg,capturedAt,capturedUtc);jpeg=null;succeeded=true;return shot;
             } finally {
-                pool.FrameArrived-=Frame;item.Closed-=Closed;if(captureActive)session.Dispose();frameResult.TrySetCanceled();
-                if(image!=null)image.Dispose();else if(frameResult.Task.IsCompletedSuccessfully)frameResult.Task.Result.Dispose();
-                if(jpeg!=null)System.Security.Cryptography.CryptographicOperations.ZeroMemory(jpeg);
+                try {if(frameSubscribed)pool.FrameArrived-=Frame;}
+                finally {
+                    try {if(closedSubscribed)item.Closed-=Closed;}
+                    finally {
+                        arrivals.Writer.TryComplete();
+                        try {if(captureActive)session.Dispose();}
+                        finally {try{image?.Dispose();}finally{if(jpeg!=null)System.Security.Cryptography.CryptographicOperations.ZeroMemory(jpeg);}}
+                    }
+                }
             }
         } catch(CaptureFailure){succeeded=false;throw;}
         catch(OperationCanceledException) {
@@ -109,10 +139,10 @@ internal sealed class NativeCapture
             if(deadline.IsCancellationRequested)throw failure;throw;
         }
         catch(NativeStep e){throw Fail(CaptureOutcome.NativeFailure,e,e.Stage);}
-        catch(ScreenException e){throw Fail(e.Code switch {"blank-or-protected"=>CaptureOutcome.BlankOrProtected,"capture-geometry" or "capture-changed" or "window-closed" or "geometry"=>CaptureOutcome.Changed,_=>CaptureOutcome.InvalidSelection});}
+        catch(ScreenException e){throw Fail(e.Code switch {"blank-or-protected"=>CaptureOutcome.BlankOrProtected,"capture-unstable"=>CaptureOutcome.FramesUnstable,"capture-timeout"=>CaptureOutcome.TimedOut,"capture-geometry" or "capture-changed" or "window-closed" or "geometry"=>CaptureOutcome.Changed,_=>CaptureOutcome.InvalidSelection});}
         catch(Exception e){throw Fail(CaptureOutcome.NativeFailure,e);}
         finally {
-            if(succeeded)Diagnostics.Record(kind,CaptureStage.Complete,CaptureOutcome.Succeeded,Environment.TickCount64-started,dimensions:dimensions);
+            if(succeeded)Diagnostics.Record(kind,CaptureStage.Complete,CaptureOutcome.Succeeded,Environment.TickCount64-started,dimensions:dimensions,frames:acquisition?.Trace);
             Volatile.Write(ref busy,0);
         }
     }

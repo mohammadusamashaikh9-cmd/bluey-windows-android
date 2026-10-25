@@ -36,7 +36,7 @@ internal sealed class ScreenWindow:Window
         Text("Google free-tier content may improve its products. Avoid sensitive conversations/screens. Project Free Tier eligibility is not verified by the app. No paid fallback, second request, tools, grounding or input actions.");
         panel.Children.Add(phones);panel.Children.Add(reviewed);
         Button("Share THIS reviewed snapshot for ONE authorized phone question",()=>{if(previewId==null||reviewed.IsChecked!=true||phones.SelectedItem is not PhoneRow row||row.Peer.ConsentId==null)throw new ScreenException("review-and-select-current-phone");host.Live.ApproveScreen(row.Peer.Lease,row.Peer.ConsentId,previewId,true);reviewed.IsChecked=false;return Task.CompletedTask;},true);
-        panel.Children.Add(status);Text("Safe local capture diagnostics — last8 completed attempts; stages/HRESULT, dimensions, DPI and timing only. Select/copy this box when reporting a failure. No titles or pixels.");panel.Children.Add(diagnostics);choices.ItemsSource=coordinator.Choices();choices.SelectedIndex=0;
+        panel.Children.Add(status);Text("Safe local capture diagnostics — last8 attempts; stage/HRESULT, null frames, content/buffer sizes, frame count, DPI and timing. Select/copy this box when reporting a failure. No titles or pixels.");panel.Children.Add(diagnostics);choices.ItemsSource=coordinator.Choices();choices.SelectedIndex=0;
         timer.Tick+=(_,_)=>Refresh();timer.Start();Closed+=(_,_)=>{timer.Stop();coordinator.Stop();ClearPreview();};Refresh();
     }
     private void ClearPreview(){preview.Source=null;previewId=null;targets.ItemsSource=null;reviewed.IsChecked=false;}

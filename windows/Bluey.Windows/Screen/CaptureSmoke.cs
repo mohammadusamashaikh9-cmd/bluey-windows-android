@@ -60,6 +60,15 @@ internal static class CaptureSmoke
                     using var session=pool.CreateCaptureSession(item);session.IsCursorCaptureEnabled=false;
                     // No StartCapture: metadata/interop proof only, not screenshot/first-frame proof.
                 });
+                Probe("WGC_D3D_POOL_RECREATE",()=>{
+                    using var device=(IDirect3DDevice)Private("CreateDevice").Invoke(null,null)!;
+                    using var pool=Direct3D11CaptureFramePool.CreateFreeThreaded(device,DirectXPixelFormat.B8G8R8A8UIntNormalized,1,new(){Width=320,Height=210});
+                    var item=(GraphicsCaptureItem)Private("CreateItem").Invoke(null,[hwnd,false])!;
+                    using var session=pool.CreateCaptureSession(item);
+                    pool.Recreate(device,DirectXPixelFormat.B8G8R8A8UIntNormalized,1,new(){Width=480,Height=270});
+                    pool.Recreate(device,DirectXPixelFormat.B8G8R8A8UIntNormalized,1,new(){Width=320,Height=210});
+                    // Supported native resize calls only. No WGC frame has been acquired in CI.
+                });
             });
             var frame=new DispatcherFrame();var dispatcher=Dispatcher.CurrentDispatcher;
             _=task.ContinueWith(_=>dispatcher.BeginInvoke(()=>frame.Continue=false),TaskScheduler.Default);Dispatcher.PushFrame(frame);task.GetAwaiter().GetResult();

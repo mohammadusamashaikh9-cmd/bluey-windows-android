@@ -505,3 +505,31 @@ numeric diagnostic fields; do not share window titles, screenshot pixels or text
 A moved/resized/closed window, display/DPI change, expiry or Stop must invalidate
 prior targets and approval. Cancel must not restore a late image. No cloud/model
 request is authorized by this retest. CI cannot replace this physical observation.
+
+### F4-C FirstFrame bounded-acquisition retest
+
+Developer now reports five actual Window/FirstFrame/Changed failures. Latest:
+156ms, DWM578x557, WGC=Win32594x565, DPI1.25, WindowFrame. ItemSize mapping is
+physically demonstrated; successful acquisition/preview and the exact null versus
+ContentSize mismatch are not. Preserve that distinction when recording results.
+
+Use the new complete Windows folder, retain the existing Android APK, and keep
+cloud sharing OFF. Put the same harmless four-line Notepad test wholly inside the
+primary monitor, away from edges. Refresh selection and Capture ONCE, keeping the
+window still. The same capture session can inspect at most six frames and recreate
+the pool twice within the existing eight-second deadline. It must produce a real
+preview or a safe, specific failure, without a second user-visible capture attempt.
+Diagnostics include initial dimensions and up to six numeric observations:
+null/content/buffer/pool/item extents, acquisition number, elapsed ms and disposition.
+`null=True` differs from `Recreate` with different content/buffer extents. Share
+only those safe records; never the title, pixels, recognized/private text or keys.
+
+Only if the final map is VisibleBounds or WindowFrame, point at500,500 and verify
+Bluey's animated overlay arrives at the corresponding preview center while the OS
+mouse stays put. Return Home, Stop/discard; image/approval must clear. PreviewOnly
+must disable coordinate analysis, pointing and cloud sharing. A moved/resized or
+closed selected window must fail. Stop during capture must never restore a late
+preview; another capture stays blocked until owned native work finishes. Optionally
+repeat once with Primary display to distinguish that adapter path. No Gemini call
+or OCR packaging is part of this test. CI policy tests, native Recreate calls and
+synthetic JPEGs are not real WGC first-frame or physical coordinate proof.

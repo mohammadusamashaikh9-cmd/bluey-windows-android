@@ -1005,3 +1005,15 @@ capture, original source/Android/link/motion changes, packaging or new backend.
 Keep installed Android APK; optional debug signer differs. Final closeout tracking
 only; PR7 updated in place, neither PR merged. Next: developer single offline
 Notepad capture/pointing retest, cloud OFF; preview-only cannot authorize points.
+
+2026-10-25 Asia/Karachi — F4-C FirstFrame repair, start2fb8760, existing PR7 only.
+Read AGENTS, source-porting/QA skills and Microsoft ContentSize/Recreate guidance
+and desktop sample. Developer's five physical rejections resolve the prior ItemSize
+mapping but do not identify null-versus-size failure. Extracted old first-frame
+policy reproduced9fail/2pass across11 cases. Replaced callback latch with bounded
+notification/one-consumer acquisition, six frames/two recreations/eight seconds,
+exact complete-buffer checks, unchanged-bounds/final-map validation, PreviewOnly
+privilege denial and safe per-frame numeric diagnostics. Local screen70pass;
+full native Windows and Android CI follow source push. Kept PR6, original sources,
+F3/animations/keys/provider code unchanged; no live API request. Physical capture
+and accurate overlay pointing remain pending; do not claim CI proves either.

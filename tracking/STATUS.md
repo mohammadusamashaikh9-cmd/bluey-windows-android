@@ -1,4 +1,42 @@
-# Current F4-C ItemSize geometry repair — PR #7
+# Current F4-C FirstFrame acquisition repair — PR #7
+
+2026-10-25 Asia/Karachi. Started clean on2fb87600341ea4b429470dfbc16a03ec44b77fee,
+port/screen-understanding; PR7 targets port/live-ai-voice. PR6 remains unchanged
+at4b380294e883e669d29000cd844962db88439e58. Both remain unmerged.
+
+Developer physical evidence: five Notepad attempts reach FirstFrame/Changed, latest
+156ms, DWM578x557, WGC=Win32594x565, DPI1.25, WindowFrame. Prior ItemSize blocker is
+resolved. No real preview yet. Old code commits to the first callback and rejects
+null OR ContentSize != initial item.Size without a second frame. Those are confirmed
+source defects; which condition the laptop encounters remains unknown.
+
+Correction: FrameArrived only signals a capacity-one bounded channel. A single
+consumer acquires <=6 frames and recreates the pool <=2 times, all within the
+existing8s deadline. Every frame is disposed before Recreate. Copy requires exact
+positive bounded content/buffer/pool agreement, never assumed aspect equivalence.
+Final coordinates resolve from unchanged DWM/physical Win32 bounds, with explicit
+PreviewOnly denial for unknown mappings. Movement, actual resize, blank/protected
+frames, invalid bounds and stale/canceled publication remain rejected. No background
+recording, second capture session or user-visible automatic retry.
+
+Diagnostics add per-frame null/content/surface/pool/current-item extents, initial
+item size, counts, recreations and elapsed ms to the existing8-attempt memory ring.
+No titles/positions/handles, images, OCR/private text or keys. Event handlers never
+copy/own frames; the consumer finishes before disposal. Stop cancels publication;
+already-running native copy keeps its dependencies alive, then discards late pixels.
+New capture stays blocked until cleanup completes. Consent/F3/provider/animation
+code and original Apple/Android source remain untouched. No model request made.
+
+Evidence so far: extracted legacy policy regression11 cases had9fail/2pass before
+repair; current screen suite70pass. Native Windows CI and Android CI are pending
+this source commit; this Linux workspace cannot execute WGC. New native check
+exercises Recreate without StartCapture. Physical null-versus-mismatch diagnosis,
+real WGC preview/point accuracy and OCR package identity remain open.
+
+Next: run one offline physical Notepad capture, inspect safe frame diagnostics,
+and point500,500 only if the final map is verified; Return Home/Stop must clear it.
+
+# Earlier F4-C ItemSize geometry repair — retained evidence
 
 2026-10-25 Asia/Karachi. Clean start cc122d02ec07a6844b2bedd3d8e5cd43968c276c on
 port/screen-understanding. PR7 still targets port/live-ai-voice; PR6 remains open
