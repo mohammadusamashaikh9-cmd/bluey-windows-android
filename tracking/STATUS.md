@@ -1,3 +1,60 @@
+# F4-C local laptop diagnosis and JPEG option repair
+
+2026-10-26 Asia/Karachi. PR #7 remains open/unmerged at reviewed head
+`91c9d3f46d0d31fe0e39d7d1db2b932a391574c9`, targeting `port/live-ai-voice`.
+Primary checkout was clean on `port/android-face` at `a9be517`; preserved in place.
+Work is isolated at the reviewed PR #7 head in a managed detached worktree.
+No commit, push, PR #6 change, provider request, tool installation or merge.
+
+**Physical failure observed:** the running verified application reaches
+`JpegEncode / NativeFailure / 0x88982F41`, not FirstFrame. Its safe diagnostic shows
+non-null content578x557 in buffer594x565, then one successful pool recreation and
+accepted content=buffer=pool578x557. DWM578x557/Win32594x565, DPI1.25, final
+VisibleBounds, frame2 accepted391ms; JPEG failure516ms. Selection, WGC item, D3D
+session, frame acquisition, recreation and SoftwareBitmap copy completed. No
+Snapshot or WPF preview was published. This attempt supplies no evidence of window
+movement, null frames or an unresolved frame-pool fault.
+
+The existing complete Windows folder at `D:\Development\F4 C FirstFrame Capture Rejection`
+was reused. All413 SHA256SUMS entries independently match, including EXE
+`78d0eeb41540bcf36b616ee3e83a3d41058f10d879822ae7abd96e82d03cd483`, DLL
+`5515303fa5317b14b7537675a3311ad98a8e1737797d5ce11f6661b924be536a` and manifest
+`8cebb8aa5022011ce43ab58ef1ecdb41029f053d46b989a65dfd25e4ac599c0f`.
+Computer Use read the existing Bluey diagnostic after the developer's GUI capture;
+only the harmless Notepad window was requested, cloud sharing remained OFF.
+
+Root cause: `ImageQuality` was sent to `BitmapProperties.SetPropertiesAsync`, a
+metadata writer. It is an encoder option. The local installed Windows WinRT codec
+independently reproduces `0x88982F41` (`WINCODEC_ERR_PROPERTYNOTSUPPORTED`) with the
+old metadata call. Passing Single0.72 to `BitmapEncoder.CreateAsync` instead encodes
+and decodes generated black/white images:578x557=>578x557/6916bytes and
+1920x1080=>1100x619/12637bytes; decoded contrast passes. No desktop pixels, files,
+network service or SDK installation are involved in that independent codec probe.
+Probe scripts remain local under the primary checkout's ignored
+`build/f4c-native-debug/`; they are not production application build evidence.
+
+Minimal correction: move the existing quality option into encoder creation;
+remove the invalid metadata write. Native smoke coverage now calls production
+Encode/Decode for the exact laptop extent and existing scaled extent, checking
+size and nonblank image. Capture policy/geometry/consent/provider/animation/F3 and
+Apple/Android code are unchanged. No GDI fallback or broader capture is needed:
+this physical attempt demonstrates WGC acquisition through bitmap copy.
+
+Local build prerequisite missing: .NET SDK10.0.402 (`windows/global.json`). No
+dotnet/MSBuild/cl compiler on PATH or dotnet in standard install locations;
+legacy .NET Framework csc/Windows WinMetadata are present but cannot build this
+net10 WPF application. No Visual Studio/SDK installed. Full application build,
+unit/native smoke execution and corrected-binary physical preview remain UNRUN.
+
+F4-C stays active: genuine corrected preview, visual geometry/point accuracy,
+UIA accessible text, animated pointing with stationary OS mouse, and snapshot
+clearing still need physical acceptance. Portable OCR package identity remains
+unavailable by design. No Gemini API call or screenshot upload was performed.
+
+Exact next task: approve committing/pushing this scoped repair to the existing
+PR #7 branch for Windows CI, verify/download its self-contained artifact, then
+repeat the harmless Notepad GUI capture and local analysis/point/Home/Stop checks.
+
 # Current F4-C FirstFrame acquisition repair — PR #7
 
 2026-10-25 Asia/Karachi. Started clean on2fb87600341ea4b429470dfbc16a03ec44b77fee,

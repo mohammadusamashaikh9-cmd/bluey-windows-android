@@ -37,12 +37,9 @@ internal static class CaptureSmoke
                     if(plan.Width!=item.Size.Width||plan.Height!=item.Size.Height||!plan.Matches(visible,raw,item.Size.Width,item.Size.Height))throw new InvalidOperationException("Invalid capture plan");
                     geometryEvidence=new((int)visible.Width,(int)visible.Height,plan.Width,plan.Height,(int)raw.Width,(int)raw.Height,plan.Dpi,plan.Mapping);
                 });
-                Probe("PUBLIC_LARGE_JPEG_GEOMETRY",()=>{
-                    var pixels=new byte[1920*1080*4];for(int i=0;i<pixels.Length;i+=4){pixels[i]=255;pixels[i+3]=255;}
-                    using var writer=new global::Windows.Storage.Streams.DataWriter();writer.WriteBytes(pixels);
-                    using var bitmap=new global::Windows.Graphics.Imaging.SoftwareBitmap(global::Windows.Graphics.Imaging.BitmapPixelFormat.Bgra8,1920,1080,global::Windows.Graphics.Imaging.BitmapAlphaMode.Ignore);bitmap.CopyFromBuffer(writer.DetachBuffer());
-                    var bytes=NativeCapture.Encode(bitmap,default).GetAwaiter().GetResult();try {using var decoded=NativeCapture.Decode(bytes,default).GetAwaiter().GetResult();if(decoded.PixelWidth!=1100||decoded.PixelHeight!=619)throw new InvalidOperationException("JPEG scale differs from validated transform");}finally{System.Security.Cryptography.CryptographicOperations.ZeroMemory(bytes);System.Security.Cryptography.CryptographicOperations.ZeroMemory(pixels);}
-                });
+                // Real Windows codecs, including the unscaled extent observed on the laptop.
+                Probe("PUBLIC_WINDOW_JPEG_OPTIONS",()=>JpegRoundTrip(578,557,578,557));
+                Probe("PUBLIC_LARGE_JPEG_GEOMETRY",()=>JpegRoundTrip(1920,1080,1100,619));
                 Probe("WGC_PRIMARY_ITEM",()=>{var monitor=MonitorFromPoint(default,1);var item=(GraphicsCaptureItem)Private("CreateItem").Invoke(null,[monitor,true])!;if(item.Size.Width<1||item.Size.Height<1)throw new InvalidOperationException("Empty primary item");});
                 Probe("INVALID_WINDOW_STAGE_AND_HRESULT",()=>{
                     var native=new NativeCapture();var primary=Native.PrimaryBounds();
@@ -75,6 +72,20 @@ internal static class CaptureSmoke
         } finally {fixture.Close();}
         if(failures.Count>0)throw new InvalidOperationException("Capture contracts: "+string.Join("; ",failures));
         return new(checks.ToArray(),geometryEvidence);
+    }
+    private static void JpegRoundTrip(int width,int height,int expectedWidth,int expectedHeight)
+    {
+        var pixels=new byte[checked(width*height*4)];byte[]? jpeg=null;
+        try {
+            // Public black/white halves exercise nonblank decoding as well as geometry.
+            for(int i=0;i<pixels.Length;i+=4){if(i/4%width>=width/2)pixels[i]=pixels[i+1]=pixels[i+2]=255;pixels[i+3]=255;}
+            using var writer=new global::Windows.Storage.Streams.DataWriter();writer.WriteBytes(pixels);
+            using var bitmap=new global::Windows.Graphics.Imaging.SoftwareBitmap(global::Windows.Graphics.Imaging.BitmapPixelFormat.Bgra8,width,height,global::Windows.Graphics.Imaging.BitmapAlphaMode.Ignore);
+            bitmap.CopyFromBuffer(writer.DetachBuffer());jpeg=NativeCapture.Encode(bitmap,default).GetAwaiter().GetResult();
+            using var decoded=NativeCapture.Decode(jpeg,default).GetAwaiter().GetResult();
+            if(decoded.PixelWidth!=expectedWidth||decoded.PixelHeight!=expectedHeight)throw new InvalidOperationException("JPEG scale differs from validated transform");
+            NativeCapture.EnsureNonblank(decoded);
+        } finally {System.Security.Cryptography.CryptographicOperations.ZeroMemory(pixels);if(jpeg!=null)System.Security.Cryptography.CryptographicOperations.ZeroMemory(jpeg);}
     }
     private static MethodInfo Private(string name)=>typeof(NativeCapture).GetMethod(name,BindingFlags.NonPublic|BindingFlags.Static)??throw new InvalidOperationException("Native boundary unavailable");
     [DllImport("user32.dll")]private static extern nint MonitorFromPoint(Native.Point point,uint flags);

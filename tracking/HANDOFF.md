@@ -1,3 +1,30 @@
+# F4-C laptop JPEG failure handoff
+
+2026-10-26 Asia/Karachi. Existing PR #7/reviewed head91c9d3f only; no merge or
+PR #6 change. Primary Android checkout preserved; repair is in a managed detached
+worktree. No commit/push yet; AGENTS prohibits unattended pushes.
+
+Actual running artifact fully rehashed413/413, EXE78d0eeb4. Developer Notepad
+capture's safe diagnostics show frame1 content578x557/buffer594x565, successful
+Recreate, frame2 accepted578x557 with VisibleBounds at391ms, then
+JpegEncode/NativeFailure/0x88982F41 at516ms. WGC through bitmap copy works on this
+attempt. Snapshot/preview did not publish. No need to replace capture backend.
+
+Independent local WinRT codec probe reproduces the metadata error and passes
+with ImageQuality Single0.72 supplied at encoder creation. Generated round trips:
+578x557 unchanged and1920x1080=>1100x619; decoded black/white contrast preserved.
+Production patch changes that option call only; native smoke adds the laptop
+extent alongside existing scaled coverage. No provider, consent or geometry changes.
+
+.NET SDK10.0.402 is absent locally; no heavyweight tools installed. Production
+build/unit/native checks and corrected application preview remain unverified.
+No Gemini request/uploads. Portable OCR identity remains a separate limitation.
+
+One next task: authorize commit/push of the scoped patch to port/screen-understanding
+for CI, verify the resulting Windows artifact, then developer-triggered Notepad
+capture, local UIA analysis,500/500 animated pointing with stationary real mouse,
+and Stop/discard clearing. Keep cloud OFF and both PRs unmerged.
+
 # F4-C FirstFrame capture handoff
 
 2026-10-25 Asia/Karachi. PR7 on port/screen-understanding remains stacked on

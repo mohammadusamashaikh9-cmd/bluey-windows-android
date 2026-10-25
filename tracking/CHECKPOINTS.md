@@ -159,3 +159,31 @@ rehash413manifest entries; EXE78d0eeb41540bcf36b616ee3e83a3d41058f10d879822ae7ab
 Native Recreate is exercised without StartCapture; no real first frame in CI.
 Exact physical null-versus-size diagnosis, successful preview/500,500 pointing,
 Stop cleanup/exclusion/DPI/performance remain UNVERIFIED. No cloud provider calls.
+
+## F4-C physical laptop JPEG diagnosis / 2026-10-26 Asia/Karachi
+
+Gate remains **active**, successful real preview **not observed**. PR #7 head
+91c9d3f; application artifact f3856770 (same binary as reviewed head). Existing
+Windows folder verified against413 manifest entries, all match. See STATUS for
+full binary hashes, paths and current build limitation.
+
+Safe diagnostic read directly from the running Bluey GUI after the requested
+harmless Notepad test (cloud OFF; no screenshot retained in the repository):
+
+```text
+capture#1 Window JpegEncode NativeFailure HR=0x88982F41 516ms DWM=578x557 WGC=578x557 delta=0x0 Win32=594x565 dpiScale=1.25 map=VisibleBounds initial=594x565 frames=2 recreates=1 [f1 null=False content=578x557 buffer=594x565 pool=594x565 item=594x565 Recreate 359ms; f2 null=False content=578x557 buffer=578x557 pool=578x557 item=594x565 Accepted 391ms]
+```
+
+| Evidence tier | Observed result |
+| --- | --- |
+| Physical application pipeline | Selected HWND/WGC item/D3D/session/frame/recreation/bitmap copy succeed; first failing stage is JpegEncode. No Snapshot/WPF preview. No null frame or movement failure in this attempt. |
+| Independent local native codec | Invalid ImageQuality metadata call reproduces0x88982F41. Correct encoder-creation option yields578x557 and1100x619 JPEG round trips with generated contrast preserved. No screen capture or production assembly executed by probe. |
+| Local source correction | ImageQuality moved to CreateAsync options; production native smoke adds laptop-sized nonblank round trip. No geometry/consent/provider/capture-backend changes. |
+| Corrected production build/tests | UNRUN: .NET SDK10.0.402 absent; CI requires approved push to existing PR #7. |
+| Corrected physical acceptance | UNVERIFIED: real preview, coordinate accuracy, UIA text, stationary-mouse pointing and Stop/discard. Portable OCR identity unavailable. |
+
+Microsoft references: [WIC error codes](https://learn.microsoft.com/en-us/windows/win32/wic/-wic-codec-error-codes),
+[encoding options](https://learn.microsoft.com/en-us/windows/apps/develop/media-authoring-processing/bitmapencoder-options-reference),
+[BitmapEncoder](https://learn.microsoft.com/en-us/uwp/api/windows.graphics.imaging.bitmapencoder).
+No Gemini request/upload, fallback capture or toolchain installation. Preserve
+previous CI evidence as historical; it does not validate this unbuilt repair.

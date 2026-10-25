@@ -1032,3 +1032,34 @@ paths unchanged. Native WGC frames remain unexecuted in CI; physical capture QA 
 Artifacts/hashes/exact15paths in STATUS. No automatic approval, provider request,
 new PR/branch, OCR packaging, input action or PR6 change. Next is the single offline
 Notepad capture/diagnostic/verified-center/Home/Stop test in QA.
+
+## 2026-10-26 — F4-C laptop JPEG diagnosis and scoped local repair
+
+Started clean primary checkout port/android-face/a9be517; remote origin matches.
+Verified open PR #7 head91c9d3f, base port/live-ai-voice. Created managed detached
+worktree at that exact head; no branch switch/reset or unrelated edits. Read
+AGENTS, checkpoint/animation skills, STATUS/HANDOFF, capture/UI/geometry/analysis,
+QA/implementation/tool policy. No delegation. Fully rehashed the running Windows
+artifact's413 manifest entries plus EXE/DLL/manifest, all match reviewed evidence.
+
+Requested one developer-triggered harmless Notepad GUI capture, kept cloud OFF.
+Restored Bluey and read sanitized diagnostic via Computer Use, without capturing
+other windows. Actual first failure: JpegEncode/0x88982F41/516ms after a non-null
+578x557 frame stabilized in a resized pool. Exact safe record is in CHECKPOINTS.
+WGC item/session/frame and bitmap-copy success are observed; no real preview yet.
+
+Microsoft documents PROPERTYNOTSUPPORTED and encoder-creation ImageQuality.
+Using installed Windows PowerShell5.1/WinRT (no SDK install), independently
+reproduced old metadata-call failure and passed generated JPEG options round
+trips578x557=>578x557 and1920x1080=>1100x619, with contrast and byte bounds checked.
+Initial probe setup hit PowerShell WinRT dictionary/async reflection binding
+errors; corrected before interpreting codec results. Local scripts are ignored
+build/f4c-native-debug in the primary checkout. No screen pixels persisted.
+
+Moved Single0.72 option to BitmapEncoder.CreateAsync; removed invalid metadata
+write. Native smoke adds production round-trip coverage for the laptop size and
+nonblank validation for both sizes. No capture-backend/geometry/retry/consent/F3/
+provider/animation/Apple/Android changes. Updated current tracking while retaining
+historical evidence. SDK10.0.402 missing locally; production build/unit/native
+smoke and corrected preview UNRUN. No tools installed or Gemini request/upload.
+No commit/push/merge; next is approved existing-PR CI build then physical retest.

@@ -149,12 +149,14 @@ internal sealed class NativeCapture
     internal static async Task<byte[]> Encode(SoftwareBitmap image,CancellationToken stop)
     {
         if(image.PixelWidth<1||image.PixelHeight<1||image.PixelWidth*(long)image.PixelHeight>MaxPixels)throw new ScreenException("image-size");
-        using var stream=new InMemoryRandomAccessStream();var encoder=await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId,stream).AsTask(stop);
+        using var stream=new InMemoryRandomAccessStream();
+        // ImageQuality is an encoder option, not writable frame metadata.
+        var options=new BitmapPropertySet{{"ImageQuality",new BitmapTypedValue(.72f,global::Windows.Foundation.PropertyType.Single)}};
+        var encoder=await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId,stream,options).AsTask(stop);
         var scale=Math.Min(1,1100.0/Math.Max(image.PixelWidth,image.PixelHeight));
         encoder.BitmapTransform.ScaledWidth=(uint)Math.Round(image.PixelWidth*scale);encoder.BitmapTransform.ScaledHeight=(uint)Math.Round(image.PixelHeight*scale);
         encoder.BitmapTransform.InterpolationMode=BitmapInterpolationMode.Fant;encoder.SetSoftwareBitmap(image);
-        var properties=new BitmapPropertySet{{"ImageQuality",new BitmapTypedValue(.72f,global::Windows.Foundation.PropertyType.Single)}};
-        await encoder.BitmapProperties.SetPropertiesAsync(properties).AsTask(stop);await encoder.FlushAsync().AsTask(stop);
+        await encoder.FlushAsync().AsTask(stop);
         if(stream.Size is <5 or >Snapshot.MaxJpegBytes)throw new ScreenException("jpeg-size");
         var bytes=new byte[(int)stream.Size];stream.Seek(0);using var reader=new DataReader(stream.GetInputStreamAt(0));await reader.LoadAsync((uint)bytes.Length).AsTask(stop);reader.ReadBytes(bytes);return bytes;
     }
