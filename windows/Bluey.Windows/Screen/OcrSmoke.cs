@@ -39,6 +39,9 @@ internal static class OcrSmoke
             Check(actual.Select(t=>t.Text).SequenceEqual(expected),"Four expected native OCR lines in reading order");
             Check(actual.Select(t=>t.Id).SequenceEqual(new[]{"L1","L2","L3","L4"}),"Stable L1-L4 IDs");
             Check(words==9,"Nine actual OCR word targets");
+            var wordTargets=targets.Where(t=>t.Role=="word").ToArray();
+            Check(wordTargets.Select(t=>t.Text).SequenceEqual(expected.SelectMany(t=>t.Split(' '))),"Actual OCR words match public text in reading order");
+            Check(wordTargets.Select(t=>t.Id).SequenceEqual(Enumerable.Range(1,9).Select(i=>"W"+i)),"Stable W1-W9 IDs");
             for(int i=0;i<actual.Length;i++)Check(new Box(30,20+i*75,800,65).Contains(actual[i].ImageBounds),"Line rectangle within generated text band "+i);
             Check(targets.All(t=>surface.Image.Contains(t.ImageBounds)&&surface.Physical.Contains(t.PhysicalBounds)&&t.DipBounds.Valid),"OCR rectangles survive image/physical/DIP conversion");
             var p=state.PointAtTarget(shot.Id,"W1");var engine=new CursorEngine(new(),()=>0,()=>.5);engine.Step(0,default,new(1920,1080));engine.SetMode(CursorMode.Pinned,new(p.Position.X,p.Position.Y));engine.Step(.01,default,new(1920,1080));

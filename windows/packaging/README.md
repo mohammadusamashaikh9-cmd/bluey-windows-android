@@ -31,7 +31,9 @@ There are **no certificates to install or trust** and no signing private key.
    their Properties dialog or `Unblock-File -LiteralPath .\Register-OcrIdentity.ps1`
    (also OcrPackage.ps1 and Unregister-OcrIdentity.ps1). Do not bypass execution
    policy globally. Windows PowerShell 5.1 is already present on Windows 11; use
-   it for Appx commands, not a new PowerShell/SDK installation.
+   it for Appx commands, not a new PowerShell/SDK installation. Run registration
+   and Bluey under the same Windows account as your existing paired application;
+   do not switch to a different administrator account.
 3. Preview the registration, which validates all bundle file hashes but changes
    nothing. In Windows PowerShell, from the extracted bundle root:
 
@@ -99,7 +101,8 @@ Get-Content .\ocr-evidence\ocr-native-evidence.json
 ```
 
 Exit0 means real Windows OCR recognized the generated public four-line fixture,
-L1-L4/nine words and bounded rectangles, pure animated pointing, Stop and expiry.
+L1-L4/W1-W9, exact word reading order and bounded rectangles, pure animated pointing,
+Stop and expiry.
 Exit3 means identity/language unavailable; exit1 is a sanitized native/validation
 failure. The file contains only status, stage/HRESULT, counts and check names,
 never user pixels, recognized user text, paths, keys or provider data. No capture,
