@@ -1017,3 +1017,18 @@ privilege denial and safe per-frame numeric diagnostics. Local screen70pass;
 full native Windows and Android CI follow source push. Kept PR6, original sources,
 F3/animations/keys/provider code unchanged; no live API request. Physical capture
 and accurate overlay pointing remain pending; do not claim CI proves either.
+
+FirstFrame closeout evidence: application f3856770710d789cb7396e6080c13d7950c4c8b2.
+Local/Windows238unit pass,45native checks including supported Recreate calls,
+WPF0warnings/errors. Windows40222661491 and Android40222661934 successful; Android
+111tests/lint0errors18warnings. Stacked PR checks40222665650/40222665604 pass.
+Downloaded Windows artifacts and rehashed all413 entries/EXE/DLL. Matching Android
+APK CI hash0a491e94132872aca857ae72cdc43c56b970f179c036a796571af20953363bb1;
+Android download policy-blocked atsa10, not locally rehashed. New debug signer
+requires informed reinstall/re-pair only if APK replacement desired; Android app
+unchanged and existing APK retained for offline capture test. All17Markdown files/
+218local links and3JSONL fixture collections pass. Original/Android/animation/F3/key
+paths unchanged. Native WGC frames remain unexecuted in CI; physical capture QA open.
+Artifacts/hashes/exact15paths in STATUS. No automatic approval, provider request,
+new PR/branch, OCR packaging, input action or PR6 change. Next is the single offline
+Notepad capture/diagnostic/verified-center/Home/Stop test in QA.

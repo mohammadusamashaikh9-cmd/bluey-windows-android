@@ -16,9 +16,18 @@ remain PreviewOnly, with coordinates/OCR/sharing blocked. Stop cannot publish a
 late bitmap; native copy resources stay alive until completion. Diagnostics retain
 only bounded numeric/enum frame metadata and stage/HRESULT, never private content.
 
-Local screen70pass after a red9fail/2pass regression; native Windows/Android CI
-results will be recorded after the source push. No provider call/key, OS input,
-OCR packaging, original Apple/Android/animation/F3 code changes.
+Tested app f3856770710d789cb7396e6080c13d7950c4c8b2; closeout tracking-only.
+Local/Windows238unit pass;45 native checks including actual Recreate setup calls,
+without WGC frame acquisition. Android111pass/lint0errors18warnings; both workflows
+and stacked PR checks pass. Downloaded Windows app/evidence and rehashed413 files.
+EXE78d0eeb41540bcf36b616ee3e83a3d41058f10d879822ae7abd96e82d03cd483.
+[Windows folder/manifest](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40222661491/artifacts/12610415501).
+Matching optional Android APK/signature and all CI/log/hash links are in STATUS.
+Android unchanged: keep installed APK; optional new signer differs and reinstall
+would lose phone identity. Android download policy-blocked; its hash is CI-only.
+Native fixture DWM=WGC306x203,Win32320x210,DPI1 does not reproduce the laptop failure.
+No Gemini/OpenAI call, F5/input, OCR packaging or protected-source change. Physical
+acquisition, exact first-frame condition, mapping and Stop timing remain unverified.
 
 One next action: use the new complete Windows artifact folder, keep cloud OFF,
 capture the harmless four-line Notepad window once while still; inspect preview

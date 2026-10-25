@@ -150,3 +150,12 @@ mismatch. Bounded sequential acquisition/Recreate and safe frame diagnostics now
 implemented; local regression tests pass. Windows/native and Android CI pending
 source push. Real preview/pointing remains UNVERIFIED; OCR packaging and F4-B live
 provider gate remain separate. No cloud call or input operation authorized/run.
+
+FirstFrame final automated gate: application f3856770710d789cb7396e6080c13d7950c4c8b2;
+Windows40222661491 succeeds with238unit/45native checks, clean WPF and self-contained
+x64 artifact; Android40222661934 succeeds with111tests/lint0errors18warnings/APK.
+Stacked PR40222665650/40222665604 checks also pass. Downloaded Windows/evidence and
+rehash413manifest entries; EXE78d0eeb41540bcf36b616ee3e83a3d41058f10d879822ae7abd96e82d03cd483.
+Native Recreate is exercised without StartCapture; no real first frame in CI.
+Exact physical null-versus-size diagnosis, successful preview/500,500 pointing,
+Stop cleanup/exclusion/DPI/performance remain UNVERIFIED. No cloud provider calls.

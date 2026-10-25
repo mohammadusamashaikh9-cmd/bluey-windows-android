@@ -611,3 +611,10 @@ References: [Microsoft capture/frame processing and Recreate guidance](https://l
 [Microsoft desktop capture sample](https://github.com/microsoft/Windows.UI.Composition-Win32-Samples/blob/master/cpp/ScreenCaptureforHWND/ScreenCaptureforHWND/SimpleCapture.cpp).
 All retrieved successfully during this repair. Physical null-versus-size cause
 and successful capture remain pending new safe diagnostics/device retest.
+
+FirstFrame automated evidence at f3856770: Windows238unit/45native checks and
+Android111tests pass; clean WPF/lint0errors18warnings. Actual native Recreate calls
+succeed on the runner, without StartCapture/WGC pixel acquisition. Synthetic policy
+examples passed after the old terminal behavior failed9of11regression cases.
+The developer laptop's null-versus-size condition and successful capture remain
+unconfirmed; CI and safe source correction do not close that physical gate.

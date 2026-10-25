@@ -27,14 +27,80 @@ already-running native copy keeps its dependencies alive, then discards late pix
 New capture stays blocked until cleanup completes. Consent/F3/provider/animation
 code and original Apple/Android source remain untouched. No model request made.
 
-Evidence so far: extracted legacy policy regression11 cases had9fail/2pass before
-repair; current screen suite70pass. Native Windows CI and Android CI are pending
-this source commit; this Linux workspace cannot execute WGC. New native check
-exercises Recreate without StartCapture. Physical null-versus-mismatch diagnosis,
-real WGC preview/point accuracy and OCR package identity remain open.
+Regression evidence: extracted legacy policy11 cases had9fail/2pass before repair.
+The final screen suite70pass covers null then valid, transient/persistent mismatch,
+clipped/undefined buffers, bounded Recreate, movement/resize, timeout/Stop, final
+center mapping, preview-only denial and no unapproved sharing. Native Windows and
+Android results follow. No final failing app tests.
+
+Tested application revision **f3856770710d789cb7396e6080c13d7950c4c8b2**.
+Later closeout changes tracking only; the binaries below contain the final repair.
+
+| Evidence | Actual result |
+| --- | --- |
+| Local .NET10.0.402 |Core27 + Screen70 + Link141 =238pass; WPF0 warnings/errors |
+| [Windows40222661491](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40222661491) |238 unit tests,0failed/skipped;45 native checks; WPF0 warnings/errors; self-contained unsigned Windows x64 |
+| [Android40222661934](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40222661934) |111 tests,0failed/errors/skipped; lint0errors/18warnings; APK signature verified |
+| Stacked PR checks |Windows40222665650 and Android40222665604 also pass at the same application revision |
+| Static |17 canonical/Windows Markdown files,218 local links/anchors and3 JSONL fixture collections pass; protected paths unchanged; git diff --check |
+
+Artifacts (14-day retention, matching application revision):
+
+- [Windows x64 folder + SHA256SUMS](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40222661491/artifacts/12610415501)
+- [Windows TRX/native/synthetic-image evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40222661491/artifacts/12609837506)
+- [Optional unchanged Android APK + manifest/signer](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40222661934/artifacts/12610400668)
+- [Android test/lint/bitmap evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40222661934/artifacts/12610575246)
+
+| File | SHA-256 |
+| --- | --- |
+| Bluey.Windows.exe |`78d0eeb41540bcf36b616ee3e83a3d41058f10d879822ae7abd96e82d03cd483` |
+| Bluey.Windows.dll |`5515303fa5317b14b7537675a3311ad98a8e1737797d5ce11f6661b924be536a` |
+| Windows SHA256SUMS.txt |`8cebb8aa5022011ce43ab58ef1ecdb41029f053d46b989a65dfd25e4ac599c0f` |
+| Windows ZIP upload digest |`da97a08d542b106db02b7511ba93e5259b20ca276a167f1e61c4c99c3cf9181a` |
+| Optional app-debug.apk (CI hash) |`0a491e94132872aca857ae72cdc43c56b970f179c036a796571af20953363bb1` |
+
+Downloaded Windows app and evidence; independently rehashed all413 manifest entries,
+including EXE and DLL. Native JSON has45 checks, including actual supported
+Recreate calls, but never StartCapture or WGC pixel acquisition. Native public
+window dimensions are DWM=WGC306x203,Win32320x210,DPI1,VisibleBounds. Public generated
+JPEG checks and pure frame-policy tests do not prove real laptop first-frame capture.
+Physical preview, exact null-versus-size condition, DPI/point accuracy, exclusion,
+driver/performance and Stop timing remain unverified. OCR package identity and
+F4-B provider physical acceptance remain separate pending gates. No provider request.
+
+Android source/protocol unchanged: retain the installed APK for this Windows test.
+Optional new debug signer60191b84d5221a4195ee8153a7d900f9f24edca6bb061e55e8bdd06a2ab5b1bd
+differs from earlier builds. If deliberately replacing an incompatible-signer APK,
+manual reinstall loses Android Keystore identity and needs F3 re-pair/revoke old
+phone trust. Do not silently delete identities or Windows protected data. Android
+artifact download was blocked by restricted policy at productionresultssa10;
+its hash/signature are verified CI evidence, not locally rehashed bytes. Windows
+download succeeded normally; no proxy bypass or network-policy change. CI also
+retains a setup-android Node20 deprecation annotation (forced Node24), unrelated
+to app behavior; lint18warnings are retained, not new capture regressions.
 
 Next: run one offline physical Notepad capture, inspect safe frame diagnostics,
 and point500,500 only if the final map is verified; Return Home/Stop must clear it.
+
+Exact15 changed paths against2fb8760:
+
+```text
+project/QA.md
+tracking/CHECKPOINTS.md
+tracking/DECISIONS.md
+tracking/HANDOFF.md
+tracking/SESSION-LOG.md
+tracking/STATUS.md
+windows/Bluey.Screen.Tests/CaptureDiagnosticsTests.cs
+windows/Bluey.Screen.Tests/CaptureFramesTests.cs
+windows/Bluey.Screen.Tests/WorkflowTests.cs
+windows/Bluey.Screen/CaptureDiagnostics.cs
+windows/Bluey.Screen/CaptureFrames.cs
+windows/Bluey.Windows/Screen/CaptureSmoke.cs
+windows/Bluey.Windows/Screen/NativeCapture.cs
+windows/Bluey.Windows/Screen/ScreenWindow.cs
+windows/README.md
+```
 
 # Earlier F4-C ItemSize geometry repair — retained evidence
 
