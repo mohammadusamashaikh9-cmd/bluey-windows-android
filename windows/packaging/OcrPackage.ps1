@@ -2,6 +2,10 @@
 Set-StrictMode -Version Latest
 $OcrPackageName = 'Bluey.Port.OcrDev'
 $OcrPublisher = 'CN=Bluey OCR Development'
+function Assert-OcrWindowsVersion {
+    param([Parameter(Mandatory)][version]$Version)
+    if ($Version -lt [version]'10.0.19041.0') { throw 'ocr-windows-build-too-old: sparse identity requires Windows build19041 or later' }
+}
 function Assert-OcrBundle {
     param([Parameter(Mandatory)][string]$Root, [string]$AppDirectory)
     $rootPath = (Resolve-Path -LiteralPath $Root).Path

@@ -247,3 +247,11 @@ lines/words. Real Notepad OCR/word boxes and registered data paths remain UNVERI
 Full artifact links/CI hashes and28-path scope in STATUS; local downloads blockedsa14.
 Developer approval is required before local Developer Mode/registration; no automatic
 setup, cloud call, new engine or F5. Accepted capture/pointing evidence retained.
+
+2026-10-26 D014 Windows10 correction: actual developer laptop Pro Education19045;
+accepted capture/pointing63d7269 remains. Package22000 minimum blocked deployment;
+correct to19041 and declare managed minimum19041 with existing22000 SDK target.
+API/version/metadata/approval checks added. Local manifest regression2fail/1pass
+before fix, now3pass; OCR build clean. Windows/native/package and Android CI pending
+source push.19045 runtime registration/native OCR NOT VERIFIED by newer CI. No
+certificate/trust/policy/OS mutation, new engine, provider call or protected-data move.

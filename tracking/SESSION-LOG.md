@@ -1145,3 +1145,15 @@ changes.28 exact paths/hashes/links in STATUS. Native API/language/Notepad geome
 and registered-profile behavior still unverified; next is reviewed manual developer
 registration plus single offline Notepad OCR/point/Home/Stop/expiry test. Both PRs
 remain unmerged; PR6 unchanged. Portable fallback and installed Android retained.
+
+2026-10-26 Asia/Karachi — Windows10 adaptation, clean e5abe8a, existing PR7 only.
+Developer confirms Pro Education22H2/19045; actual earlier capture acceptance retained.
+Inspected Microsoft sparse19041, OCR/capture/native minima, supported-OS versus TFM,
+registration API/DeveloperMode/unsigned-MSIX distinction and.NET10 lifecycle matrix.
+D014 correction recorded before code. Red manifest tests2fail/1pass then3pass after
+MSIX19041 and explicit managed19041 floor; SDK22000 retained. Clean OCR WPF compile.
+Added version/command preflight and actual-runtime/API metadata, with no capture/
+OCR/geometry/key/F3 rewrite. Separate manual signed procedure requires explicit
+approval; no certificate or package registration in Codex/CI. Full CI/artifacts
+follow source push; actual19045 identity/OCR test stays pending. No OS upgrade,
+alternate engine, Android/Apple changes, provider call or F5.

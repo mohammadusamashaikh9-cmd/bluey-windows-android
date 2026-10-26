@@ -570,3 +570,34 @@ UnavailableLanguage requires the developer to review installed Windows OCR langu
 no automatic language/model download. If sparse identity/actual API fails, retain
 sanitized stage/HRESULT and demonstrate that blocker before proposing an alternate
 lightweight offline engine. Gemini/F5/background capture remain excluded.
+
+
+### F4-C Windows10 build19045 identity/OCR acceptance
+
+Actual developer OS is Windows10 Pro Education22H2/build19045; preceding accepted
+capture/pointing on63d7269 ran there, not on an independently verified Windows11
+laptop. Preserve that evidence. The22000 package minimum is a deployment defect.
+The corrected MSIX/app API floor is19041 with unchanged22000 SDK projection.
+CI verifies declared compiled minima, build/analyzer, package minimum, version gates
+(19040 denied;19041/19045/22000/26100 accepted), API-presence metadata, data-path and
+approval guards. CI runtime is Server2025, not Windows10; no runtime pass is inferred.
+
+One physical sequence: under the same Windows user, keep cloud/live AI OFF and
+Android unchanged. Review the full bundle and checksums; preview registration with
+WhatIf. Only after explicit Developer Mode/per-user approval register the loose
+manifest. Run --ocr-self-test on the actual19045 machine; expect runtime/minimum/
+API-presence metadata plus real L1-L4/W1-W9 public-fixture recognition and geometry.
+Then capture the harmless four-line Notepad window, Analyze, verify actual line/word
+text/rectangles and animated pointing with a stationary OS mouse; Home, Stop/discard,
+and a fresh snapshot's60s expiry must invalidate targets. Window chrome may add L IDs.
+Pending-capture/OCR Stop is already deterministic in CI; do not demand rapid manual
+clicking. No Gemini call, background observation or new OCR engine is authorized.
+
+If registration/activation/OCR fails, stop and retain only sanitized stage/HRESULT,
+OS/API-presence and counts. Do not automatically sign/trust/retry. The optional
+[manual signed route](../windows/packaging/README.md#optional-signed-route--separate-explicit-approval-only)
+requires separate explicit creation/trust/signing/registration approval and tools
+already reviewed; it is not a tested19045 fallback or policy bypass. No certificate
+operation occurs in Codex/CI. Remove the specific current-user identity explicitly;
+preserve external binaries and original Bluey/BlueyPort data. Signed nondevelopment
+removal differs from loose PreserveApplicationData removal; follow the README.

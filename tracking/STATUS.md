@@ -1,4 +1,41 @@
-# Current F4-C native OCR developer identity — PR #7
+# Current F4-C Windows10 build19045 adaptation — PR #7
+
+2026-10-26 Asia/Karachi. Clean start e5abe8a863bae5f100f9bb4ec6ff9e07a81dcc06,
+port/screen-understanding; PR7 still targets port/live-ai-voice/PR6 at4b38029.
+Both remain unmerged. Developer confirms actual OS: Windows10 Pro Education22H2,
+10.0.19045. Earlier accepted63d7269 capture/preview/125%DPI pointing/Home/discard ran
+on this laptop; prior Windows11 assumptions do not establish a second OS test.
+
+Confirmed defect: sparse MSIX MinVersion22000 rejects19045. Set minimum19041 and
+explicit SupportedOSPlatformVersion19041; keep SDK/TFM22000. Warnings-as-errors/
+CA1416 audit direct managed/WinRT calls; Microsoft-documented native/API minima
+fit19041. No WGC/JPEG/OCR engine/target/animation/F3/key changes. Portable fallback
+and profile/identity fail-closed guards retained; no OS upgrade or migration.
+
+Registration now preflights OS version and actual Register/ExternalLocation command
+support. Tests distinguish19040 rejection and19041/19045/Win11 acceptance. Runtime
+OCR metadata exposes actual OS, compiled minimum and required API presence. This
+is diagnostic evidence, not simulated19045 runtime success. Server2025 CI cannot
+prove exact Windows10 sparse activation, installed OCR language or word geometry.
+
+Loose developer registration is a documented Windows10 API distinct from Win11-only
+unsigned-MSIX installation; no AllowUnsigned flag used. Exact19045 activation remains
+unverified. README includes a separately approved manual signed procedure if trust/
+activation fails. No automatic certificate creation/trust/signing, package install,
+Developer Mode/policy mutation, privilege fallback or new OCR library. .NET10's
+maintained OS matrix excludes this Windows edition; target compatibility is not a
+vendor lifecycle claim. Existing application already ran on the developer machine.
+
+Manifest regression first failed2of3cases, exposing both the22000 minimum and
+missing explicit managed floor. Local corrected contracts3pass and OCR WPF build
+passes0warnings/errors. Full Windows/native/package and Android CI follow source
+push. Physical19045 registration/native self-test/Notepad OCR remains UNVERIFIED.
+
+One next action: review the new bundle and run its one explicit19045 registration,
+public-text self-test and harmless Notepad OCR/word pointing/Home/Stop/expiry
+sequence with cloud OFF. Stop on errors; no automatic signing/trust or provider call.
+
+# Previous F4-C OCR developer identity — retained evidence
 
 2026-10-26 Asia/Karachi. Started clean atff6115282a1d0505bf4c0455ce075a7a4e415980
 on port/screen-understanding, stacked on unchanged port/live-ai-voice/PR6 at4b38029.

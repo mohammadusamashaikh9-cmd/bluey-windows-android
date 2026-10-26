@@ -147,3 +147,13 @@ identity and original LocalAppData before opening settings/trust/keys. User data
 not moved/migrated. NativeAnalysis/Targets remain the same Windows OCR and coordinate
 pipeline. Explicit --ocr-self-test uses only generated public pixels and bounded
 status/count metadata. Laptop native OCR acceptance remains pending registration.
+
+
+D014 Windows10 compatibility correction: actual developer OS is Pro Education22H2,
+build19045. MSIX minimum and explicit SupportedOSPlatformVersion are19041 while
+SDK target remains net10.0-windows10.0.22000.0. CA1416/warnings-as-errors audit direct
+API calls; documented P/Invoke minima also fit19041. No capture/OCR/geometry rewrite.
+Loose developer registration uses the documented19041 external-location API, not
+Win11-only unsigned-MSIX installation. Exact19045 activation/native OCR is pending;
+a separate manual signed procedure requires explicit creation/trust/registration
+approval. Neither route is invoked in CI. Windows11 compatibility is retained.

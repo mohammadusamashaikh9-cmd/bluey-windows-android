@@ -452,3 +452,12 @@ registration, with no certificate, installer, policy change or API call. It keep
 the existing Windows user/data paths; the OCR variant refuses redirected profiles.
 Native OCR still needs an installed Windows language and actual laptop validation.
 No Android APK update or new pairing identity is needed for this offline OCR test.
+
+
+Windows10 correction: the developer laptop is Pro Education22H2/build19045. The
+optional OCR bundle now declares package/managed minimum19041 and retains Windows11
+compatibility; the existing22000 SDK target is unchanged. Read the developer bundle
+README for documented API minima, loose-registration limits and a separately
+approved manual signing route. No certificate/policy/registration is automatic.
+Native OCR/identity on19045 remains unverified until actual laptop testing; working
+WGC/JPEG/point geometry, F3/protected data and installed Android remain unchanged.

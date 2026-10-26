@@ -95,6 +95,7 @@ internal static class NativeSmoke
                 Check(displayed==1,"Completed synthetic answer displays exactly once in WPF adapter");
                 Check(actualArt.CurrentCaption==null,"Shared reply caption clears at source reading deadline");
             }
+            Check(string.Equals(System.Reflection.CustomAttributeExtensions.GetCustomAttribute<System.Runtime.Versioning.SupportedOSPlatformAttribute>(typeof(NativeSmoke).Assembly)?.PlatformName,"windows10.0.19041.0",StringComparison.OrdinalIgnoreCase),"Compiled portable assembly explicitly supports Windows10 build19041 API floor");
             Screen.OcrIdentity.RequireDataPath(@"C:\Public\Local",@"c:\public\local\");
             try {Screen.OcrIdentity.RequireDataPath(@"C:\Public\Packages\Local",@"C:\Public\Local");throw new InvalidOperationException("Redirected OCR profile must fail");}
             catch(Bluey.Screen.ScreenException){}

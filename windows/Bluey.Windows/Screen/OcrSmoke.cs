@@ -1,5 +1,7 @@
 using System.Globalization;
 using System.IO;
+using System.Reflection;
+using System.Runtime.Versioning;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Media;
@@ -15,7 +17,13 @@ internal static class OcrSmoke
     {
         Directory.CreateDirectory(output);var checks=new List<string>();int lines=0,words=0;string stage="Identity";
         int Report(int exit,string status,int? hr=null) {
-            File.WriteAllText(Path.Combine(output,"ocr-native-evidence.json"),JsonSerializer.Serialize(new{status,stage,hresult=hr is {} h?"0x"+h.ToString("X8"):null,lines,words,checks,fixture="Generated public four-line image; no capture",physicalNotepad="UNVERIFIED",provider="NONE; no listener/key/cloud work"},new JsonSerializerOptions{WriteIndented=true}));return exit;
+            var api=new Dictionary<string,bool> {
+                ["OcrRecognize"]=global::Windows.Foundation.Metadata.ApiInformation.IsMethodPresent("Windows.Media.Ocr.OcrEngine","RecognizeAsync"),
+                ["FreeThreadedFramePool"]=global::Windows.Foundation.Metadata.ApiInformation.IsMethodPresent("Windows.Graphics.Capture.Direct3D11CaptureFramePool","CreateFreeThreaded"),
+                ["CursorCaptureControl"]=global::Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.Graphics.Capture.GraphicsCaptureSession","IsCursorCaptureEnabled"),
+                ["ExternalLocationRegistration"]=global::Windows.Foundation.Metadata.ApiInformation.IsPropertyPresent("Windows.Management.Deployment.RegisterPackageOptions","ExternalLocationUri")
+            };
+            File.WriteAllText(Path.Combine(output,"ocr-native-evidence.json"),JsonSerializer.Serialize(new{status,stage,runtimeWindows=Environment.OSVersion.Version.ToString(),minimumWindows=typeof(OcrSmoke).Assembly.GetCustomAttribute<SupportedOSPlatformAttribute>()?.PlatformName,apiAvailability=api,hresult=hr is {} h?"0x"+h.ToString("X8"):null,lines,words,checks,fixture="Generated public four-line image; no capture",physicalNotepad="UNVERIFIED",provider="NONE; no listener/key/cloud work"},new JsonSerializerOptions{WriteIndented=true}));return exit;
         }
         void Check(bool condition,string code){if(!condition)throw new ScreenException(code);checks.Add(code);}
         try {

@@ -678,3 +678,47 @@ without registration correctly returns UnavailableIdentity/0words. Registered na
 OCR/Notepad remains unverified until developer approval and laptop testing; no
 alternate engine or unsupported unpackaged workaround. Existing full-trust WGC
 interop is unchanged; package identity does not authorize a new capture or share.
+
+D014 Windows10 correction /2026-10-26 Asia/Karachi: developer confirms actual
+laptop Windows10 Pro Education22H2/build19045. Earlier Windows11 labels were wrong;
+accepted63d7269 capture/pointing actually ran on19045. The22000 sparse-package
+minimum is a confirmed deployment blocker, not evidence of an OCR/capture defect.
+
+Set MSIX MinVersion and explicit managed SupportedOSPlatformVersion to19041.
+Retain net10.0-windows10.0.22000.0 as the compile-time SDK target; Microsoft documents
+using a newer Windows TFM with a lower supported OS. Existing warnings-as-errors
+and CA1416 check direct managed/WinRT API usage against19041. Preserve portable
+fallback, Win11 compatibility, WGC/JPEG, OCR/target logic and original data paths.
+
+Availability verified against Microsoft references: OcrEngine10240; WGC free-threaded
+pool17763; desktop capture interop18362; cursor exclusion/AllowExternalContent/uap10
+win32App/mediumIL/external-location registration19041; no-package-redirection known
+folder flag15063. No post19041 OCR dependency identified. Native P/Invoke calls
+need documented review in addition to analyzer coverage. Keep original identity/
+profile fail-closed checks; add nonsecret runtime/minimum/API-presence metadata.
+
+Loose manifest development registration and ExternalLocation are documented Windows10
+APIs. This is NOT Windows11-only unsigned-MSIX installation (-AllowUnsigned is not
+used). Developer Mode, per-user approval and OS command availability are preflighted;
+no registration/trust/policy mutation runs in CI. Exact sparse Win32 activation and
+OCR on19045 remain physically unverified. Microsoft sparse guidance recommends a
+signed identity package, and PowerToys documents trust-related activation failures;
+therefore document a separate manual signed-package procedure with explicit approval
+for certificate creation/trust/signing/registration, never an automatic fallback.
+No certificate/private key is generated, shipped or trusted by this task. If local
+policy or trust blocks registration, stop and retain sanitized error codes. Do not
+infer that signing bypasses enterprise policy. No new engine without an evidenced
+Windows10 failure and comparison. The default bundle stays unsigned developer-only.
+
+.NET10's current maintained-OS matrix does not list Windows10 Pro Education22H2.
+This targets API/runtime compatibility on the developer's already-working .NET10
+application; it does not claim Microsoft lifecycle/ESU support or authorize an OS
+upgrade/toolchain migration. Server2025 CI cannot prove19045 runtime behavior.
+
+Official references200: [sparse minimum19041 and desktop manifest](https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/grant-identity-to-nonpackaged-apps),
+[Windows SDK target versus supported OS](https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/desktop-to-uwp-enhance),
+[RegisterPackageByUriAsync/ExternalLocation](https://learn.microsoft.com/en-us/uwp/api/windows.management.deployment.packagemanager.registerpackagebyuriasync),
+[Add-AppxPackage Register parameter set](https://learn.microsoft.com/en-us/powershell/module/appx/add-appxpackage),
+[Windows11 unsigned-MSIX distinction](https://learn.microsoft.com/en-us/windows/msix/package/unsigned-package),
+[SignTool](https://learn.microsoft.com/en-us/windows/msix/package/sign-app-package-using-signtool),
+[.NET10 maintained OS matrix](https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md).

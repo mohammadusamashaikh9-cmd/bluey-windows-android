@@ -8,6 +8,12 @@ $portable = (Resolve-Path -LiteralPath $PortableRoot).Path
 New-Item -ItemType Directory -Force $EvidenceRoot | Out-Null
 $evidence = (Resolve-Path -LiteralPath $EvidenceRoot).Path
 . (Join-Path $bundle 'OcrPackage.ps1')
+foreach ($build in @(19041,19045,22000,26100)) {
+    Assert-OcrWindowsVersion -Version ([version]"10.0.$build.0")
+    Check $true ("Version preflight accepts build$build; no runtime claim")
+}
+$denied = $false; try { Assert-OcrWindowsVersion -Version ([version]'10.0.19040.0') } catch { $denied = $_.Exception.Message.StartsWith('ocr-windows-build-too-old') }
+Check $denied 'Version preflight rejects before sparse-package minimum'
 $external = Assert-OcrBundle -Root $bundle
 Check ($external -eq (Join-Path $bundle 'app')) 'Complete developer-bundle checksums match'
 foreach ($action in @(@('Register-OcrIdentity.ps1','ocr-registration-approval-required'),@('Unregister-OcrIdentity.ps1','ocr-removal-approval-required'))) {
@@ -42,11 +48,15 @@ try {
     $reader = [IO.StreamReader]::new($zip.GetEntry('AppxManifest.xml').Open())
     try { [xml]$xml = $reader.ReadToEnd() } finally { $reader.Dispose() }
     Check ($xml.Package.Identity.Name -eq $OcrPackageName) 'Built MSIX manifest matches expected identity'
+    Check ($xml.Package.Dependencies.TargetDeviceFamily.MinVersion -eq '10.0.19041.0') 'Actual MSIX OS floor accepts Windows10 build19045'
 } finally { $zip.Dispose() }
 Check (@(Get-ChildItem $bundle -Recurse -File | Where-Object { $_.Extension -in @('.pfx','.pem','.cer','.key') }).Count -eq 0) 'No signing private key or trust certificate shipped'
 $process = Start-Process -FilePath (Join-Path $external 'Bluey.Windows.exe') -ArgumentList '--ocr-self-test', (Join-Path $evidence 'ocr-unregistered') -PassThru -Wait
 Check ($process.ExitCode -eq 3) 'Unregistered developer OCR test fails closed with exit3'
 $result = Get-Content -LiteralPath (Join-Path $evidence 'ocr-unregistered/ocr-native-evidence.json') -Raw | ConvertFrom-Json
 Check ($result.status -eq 'UnavailableIdentity' -and $result.lines -eq 0 -and $result.words -eq 0) 'Unregistered app reports no fabricated OCR recognition'
+Check ($result.minimumWindows -eq 'windows10.0.19041.0') 'Compiled OCR assembly declares the19041 supported API floor'
+Check (@($result.apiAvailability.PSObject.Properties | Where-Object { !$_.Value }).Count -eq 0) 'Audited APIs are present on CI host; not Windows10 runtime proof'
+Check (![string]::IsNullOrWhiteSpace($result.runtimeWindows)) 'Native evidence identifies actual runtime OS'
 [ordered]@{ checks=$checks; registration='NOT EXECUTED; explicit developer approval required'; certificates='NONE created/imported/trusted'; ocr='NOT EXECUTED with identity; real Notepad gate pending'; provider='NONE' } | ConvertTo-Json -Depth 5 | Set-Content -Encoding utf8NoBOM (Join-Path $evidence 'ocr-package-evidence.json')
 Get-Content -LiteralPath (Join-Path $evidence 'ocr-package-evidence.json')

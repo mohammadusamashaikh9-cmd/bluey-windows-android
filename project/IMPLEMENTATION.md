@@ -136,3 +136,11 @@ approval denial without registration or certificate trust. Actual engine/Notepad
 recognition stays unverified until the developer approves registration and tests.
 Deterministic pending-capture/analysis Stop tests reject late pixels/targets without
 manual subsecond timing. No cloud OCR, NPU dependency, F5 or provider request.
+
+
+D014 actual OS correction: developer laptop is Windows10 Pro Education19045.
+The22000 sparse minimum blocked deployment. Both package and managed supported OS
+floor now19041; newer SDK target retained. Compiled metadata/API-analyzer checks,
+19045/Win11 version preflights and nonsecret actual-runtime/API presence diagnostics
+are added. No OS upgrade, capture backend/engine replacement, key/profile move or
+Android change. Server2025 CI cannot accept19045 runtime registration or OCR.
