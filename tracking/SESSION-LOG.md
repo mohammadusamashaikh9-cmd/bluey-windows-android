@@ -1157,3 +1157,10 @@ OCR/geometry/key/F3 rewrite. Separate manual signed procedure requires explicit
 approval; no certificate or package registration in Codex/CI. Full CI/artifacts
 follow source push; actual19045 identity/OCR test stays pending. No OS upgrade,
 alternate engine, Android/Apple changes, provider call or F5.
+
+Initial Windows10 CI939d23d/40314439701 passed build/unit/native setup, then caught
+a too-specific native command preflight: it required internal ParameterSet.Name
+"Register" rather than testing public Register/ExternalLocation parameters together.
+Changed the predicate to inspect that pair and added an actual Windows PowerShell
+metadata regression. No approval/version/trust gate weakened; no package registered.
+Final corrected CI evidence follows. Earlier failed WhatIf logs retained.

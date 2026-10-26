@@ -8,6 +8,8 @@ $portable = (Resolve-Path -LiteralPath $PortableRoot).Path
 New-Item -ItemType Directory -Force $EvidenceRoot | Out-Null
 $evidence = (Resolve-Path -LiteralPath $EvidenceRoot).Path
 . (Join-Path $bundle 'OcrPackage.ps1')
+$nativeSupport = & powershell.exe -NoProfile -Command '$c = Get-Command Add-AppxPackage; [bool](@($c.ParameterSets | Where-Object { $_.Parameters.Name -contains "Register" -and $_.Parameters.Name -contains "ExternalLocation" }).Count)'
+Check ($LASTEXITCODE -eq 0 -and [string]$nativeSupport -eq 'True') 'Native Windows PowerShell command supports Register/ExternalLocation together'
 foreach ($build in @(19041,19045,22000,26100)) {
     Assert-OcrWindowsVersion -Version ([version]"10.0.$build.0")
     Check $true ("Version preflight accepts build$build; no runtime claim")
