@@ -255,3 +255,13 @@ API/version/metadata/approval checks added. Local manifest regression2fail/1pass
 before fix, now3pass; OCR build clean. Windows/native/package and Android CI pending
 source push.19045 runtime registration/native OCR NOT VERIFIED by newer CI. No
 certificate/trust/policy/OS mutation, new engine, provider call or protected-data move.
+
+Windows10 final automated evidence e36d7619fe03ef02a37af58566b4380979f655bb:
+Windows40315042806 passes239C#/3manifest/48native/24package checks; both variants
+published. Android40315043601 passes111tests/lint0errors18warnings. PR40315048406/
+40315048410 pass. Actual MSIX/assembly minimum19041 and native parameter/API checks
+verified; SDK22000 retained. Initial939d23d preflight failure fixed using public
+Register/ExternalLocation pair. No package registration/signing trust/OS policy
+change or provider call. Actual19045 identity/native OCR/word geometry/profile
+acceptance remains UNVERIFIED; Server2025 cannot establish it. Artifacts/CI hashes/
+18paths in STATUS; local downloads policy-blockedsa2. Portable/keys/F3/WGC retained.

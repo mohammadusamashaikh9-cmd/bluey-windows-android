@@ -1164,3 +1164,16 @@ a too-specific native command preflight: it required internal ParameterSet.Name
 Changed the predicate to inspect that pair and added an actual Windows PowerShell
 metadata regression. No approval/version/trust gate weakened; no package registered.
 Final corrected CI evidence follows. Earlier failed WhatIf logs retained.
+
+Windows10 closeout: e36d761 application, Windows40315042806 and Android40315043601
+pass.239C#/3manifest/48native/24package checks; Android111/lint0errors18warnings;
+PR40315048406/40315048410 pass. Actual MSIX and assembly floor19041, Win10/Win11
+version gates, native command metadata, API-presence/fail-closed output verified.
+939d23d parameter-set-name failure retained and fixed e36d761 by public parameters.
+Built default unsigned developer bundle and portable fallback with CI SHA manifests;
+no registration, developer signer/trust, policy/OS upgrade, cloud call, new engine
+or key/profile migration. Downloadsa2 denied; no independent rehash claimed.
+18paths/evidence/hashes in STATUS. Exact Windows10 registration/sparse activation/
+OCR/language/word pointing/profile remains unverified; keep one explicit physical
+sequence and stop on errors. Original Apple/Android/F3/animation/WGC/OCR files
+unchanged; both PRs remain open. No alternative OCR without actual failure evidence.

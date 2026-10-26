@@ -722,3 +722,11 @@ Official references200: [sparse minimum19041 and desktop manifest](https://learn
 [Windows11 unsigned-MSIX distinction](https://learn.microsoft.com/en-us/windows/msix/package/unsigned-package),
 [SignTool](https://learn.microsoft.com/en-us/windows/msix/package/sign-app-package-using-signtool),
 [.NET10 maintained OS matrix](https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md).
+
+D014 Windows10 observed evidence at e36d761:239unit/3manifest/48native/24package
+checks plus111Android tests pass. Actual package and compiled supported floor19041;
+resolved TargetPlatformMin also19041, SDK22000 preserved. Newer CI APIs present and
+native public parameter pair supported; no19045 runtime/registration/OCR claim.
+Initial preflight used a noncontractual internal parameter-set name and failed CI;
+public Register/ExternalLocation predicate and regression now pass. No certificate
+or package installation, policy mutation, data move, engine swap or cloud request.

@@ -26,14 +26,95 @@ Developer Mode/policy mutation, privilege fallback or new OCR library. .NET10's
 maintained OS matrix excludes this Windows edition; target compatibility is not a
 vendor lifecycle claim. Existing application already ran on the developer machine.
 
-Manifest regression first failed2of3cases, exposing both the22000 minimum and
-missing explicit managed floor. Local corrected contracts3pass and OCR WPF build
-passes0warnings/errors. Full Windows/native/package and Android CI follow source
-push. Physical19045 registration/native self-test/Notepad OCR remains UNVERIFIED.
+Manifest regression first failed2of3cases and now passes3. Both WPF profiles
+compile clean at the lower managed API floor; full observed evidence follows.
+
+Tested application/bundle revision **e36d7619fe03ef02a37af58566b4380979f655bb**.
+Subsequent closeout changes tracking only. Keep this exact revision for physical QA.
+
+| Evidence | Actual result |
+| --- | --- |
+| Local .NET10.0.402 |239C#tests,3manifest contracts pass; portable/OCR profiles compile0warnings/errors |
+| Resolved MSBuild properties |TFM net10.0-windows10.0.22000.0; SupportedOSPlatformVersion and TargetPlatformMinVersion10.0.19041.0 |
+| [Windows40315042806](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40315042806) |239unit (Core27/Screen71/Link141),3manifest,48native,24package/approval/API checks pass; clean WPF and both self-contained variants |
+| [Android40315043601](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40315043601) |111tests,0failure/error/skip; lint0errors18retained warnings; debug signature verified |
+| Stacked PR checks |Windows40315048406 and Android40315048410 also pass at e36d761 |
+| Initial failure |939d23d/Windows40314439701 rejected the native cmdlet's internal parameter-set name; e36d761 checks public Register/ExternalLocation together and actual metadata regression passes |
+| Static |18canonical/Windows Markdown files,221local links/anchors,3JSONL collections parse; protected-source diff and git diff --check pass |
+
+Matching artifacts,14-day retention:
+
+- [Windows10-minimum OCR developer bundle, instructions and SHA256SUMS](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40315042806/artifacts/12646935593)
+- [Portable Windows fallback and SHA256SUMS](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40315042806/artifacts/12646656630)
+- [Windows TRX/native/MSIX/PE/API/approval evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40315042806/artifacts/12646127590)
+- [Optional unchanged Android APK/manifest/signer](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40315043601/artifacts/12645943273) and [test/lint evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40315043601/artifacts/12646522271)
+
+| File | Actual CI SHA-256 |
+| --- | --- |
+| OCR ZIP upload digest |`c73d1c82cbf47fa1a0a64260d63d44fe4fc5057ced995f3d5f51cc505b071c64` |
+| OCR app/Bluey.Windows.exe |`330af7c2fd5212a3619981fa53761623f523e202c0f7e11a2e747d7e4c584e80` |
+| OCR app/Bluey.Windows.dll |`f35bf542703554223a5c8f8ee17340071418ee422f180479652c524e5e999cd5` |
+| Bluey.Ocr.Dev.msix |`0093fe3a2753a6bd1fe2e6d43c5ac57065bff09b300c84ac17d2709d9962d4ea` |
+| OCR SHA256SUMS.txt |`1cbdcdc2b540ea22551f3d39140892fa330c4874ca895033148d9af1e4a18269` |
+| Portable ZIP upload digest |`5118d3a1098518ac2d9fe153ea166c483f6f0034c6afecb1266d3292cfff0986` |
+| Portable Bluey.Windows.exe |`136026ee2b36afb968fce8d85140536be350c406e02b5587a91860f7bd43d204` |
+| Portable Bluey.Windows.dll |`f6ea1c34882adfc66aba3976a27584b844ba9c4a641308b9da1b7fde2b3909dc` |
+| Portable SHA256SUMS.txt |`9daae7858cf5b0b1424d3131407eb4ff770d573d480eb00fcd9402bc3b4f9c76` |
+| Optional app-debug.apk |`61a4635b4c697565a2089ef823759ccd67f0b59de901106636a96bf011d01425` |
+
+Windows CI verifies every bundle hash entry, actual extracted PE profiles, compiled
+19041 minimum, built MSIX19041 minimum, OS gates and native cmdlet parameter support.
+All four audited API-presence flags are true on the CI host; actual runtime OS is
+recorded. CI is Server2025, NOT Windows10/19045. It never registers a package, creates
+or trusts a developer signing certificate, or runs native OCR with identity.
+Unregistered OCR test exits3/UnavailableIdentity/0lines/0words, preserving fail-closed
+behavior. These checks are not physical19045 identity, OCR or profile acceptance.
+
+Final archives could not be downloaded locally because restricted network policy
+blocked productionresultssa2. No policy change or proxy bypass attempted. Hashes and
+content verification are actual CI/API evidence, not independent local-byte rehashes.
+No final failing tests. Android retains18lint warnings and setup-android's existing
+Node20/forced24 annotation. No Gemini/OpenAI request/key, private capture/text,
+input injection, new engine/NPU library, OS upgrade or automatic installation.
+
+Keep the installed Android APK; app/protocol unchanged. Optional CI signer
+`a87396d72d831de34d82c5c41238c910a2d5b1d8490e74fcc74f8573920fb090`
+may differ from installed builds; reinstall loses Keystore identity and needs
+explicit re-pair/revocation. It is unnecessary for this offline Windows test.
+
+Actual19045 registration, Win32 sparse activation, installed OCR language, native
+public-text recognition, Notepad lines/words/coordinates, capture with identity,
+Stop/expiry and registered-profile behavior remain UNVERIFIED. Existing accepted
+capture on19045 is retained, not replaced by CI inference. .NET10's maintained-OS
+matrix omits Pro Education22H2; this is a compatibility build, not a vendor lifecycle
+claim. No unsupported-native-OCR conclusion or alternate engine is justified yet.
 
 One next action: review the new bundle and run its one explicit19045 registration,
 public-text self-test and harmless Notepad OCR/word pointing/Home/Stop/expiry
 sequence with cloud OFF. Stop on errors; no automatic signing/trust or provider call.
+
+Exact18 paths changed against e5abe8a863bae5f100f9bb4ec6ff9e07a81dcc06:
+
+```text
+project/ARCHITECTURE.md
+project/IMPLEMENTATION.md
+project/QA.md
+tracking/CHECKPOINTS.md
+tracking/DECISIONS.md
+tracking/HANDOFF.md
+tracking/SESSION-LOG.md
+tracking/STATUS.md
+windows/Bluey.Windows/Bluey.Windows.csproj
+windows/Bluey.Windows/NativeSmoke.cs
+windows/Bluey.Windows/Screen/OcrSmoke.cs
+windows/README.md
+windows/packaging/OcrPackage.ps1
+windows/packaging/README.md
+windows/packaging/Register-OcrIdentity.ps1
+windows/packaging/Test-OcrPackage.ps1
+windows/packaging/identity/AppxManifest.xml
+windows/packaging/test_package.py
+```
 
 # Previous F4-C OCR developer identity — retained evidence
 
