@@ -334,4 +334,28 @@ public sealed class TlsTests
         server.Revoke(Identity.Fingerprint(cert));Assert.Empty(live.Peers);await Denied(async()=>{using var rejected=await Connect(server,cert);});Assert.Equal(1,fake.Calls);
     }
 
+    private sealed class PendingScreenAnswers:IAudioAnswers,IScreenAudioAnswers {
+        public bool ContractVerified=>true;public bool ScreenContractVerified=>true;
+        public Bluey.Screen.ApprovedScreen? Screen;public TaskCompletionSource Entered=new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource<ScreenReply> Result=new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public Task<string> Answer(ReadOnlyMemory<byte> pcm,CancellationToken stop)=>throw new InvalidOperationException("image expected");
+        public Task<ScreenReply> AnswerWithScreen(ReadOnlyMemory<byte> pcm,Bluey.Screen.ApprovedScreen screen,CancellationToken stop){Screen=screen;Entered.SetResult();return Result.Task;}
+    }
+    [Fact] public async Task ActualMutualTlsRevocationCancelsApprovedScreenAndRejectsLateModelReply() {
+        using var store=new MemoryStore();var fake=new PendingScreenAnswers();var live=new LiveAuthority(new DeniedIssuer(),audioAnswers:fake);live.SelectProvider(VoiceProvider.GeminiFree);
+        await using var server=new LinkServer(store,live:live);server.Start(IPAddress.Loopback,0);using var certificate=Identity.Create("public synthetic screen phone",false);
+        var device=Guid.NewGuid().ToString();store.Add(new(device,"public fixture",Identity.Fingerprint(certificate)));using var client=await Connect(server,certificate);
+        await client.Wire.Send("connect",new{hostId=server.HostId,deviceId=device},default);Assert.Equal("ready",(await client.Wire.Read(default)).Type);
+        var consent=Guid.NewGuid().ToString();await client.Wire.Send("liveConsent",new{consentId=consent,microphone=true,cloud=true,continuous=false},default);
+        for(int i=0;i<100&&!live.Peers.Any(p=>p.ConsentId==consent);i++)await Task.Delay(10);var peer=Assert.Single(live.Peers);
+        var shot=new Bluey.Screen.Snapshot(new(Bluey.Screen.SurfaceKind.Window,1,new(0,0,400,300),new(0,0,1920,1080),96,96,400,300),[255,216,0,255,217],Environment.TickCount64,DateTimeOffset.UtcNow);
+        live.Screens.CompleteCapture(live.Screens.BeginCapture(true),shot);live.Screens.MarkPreviewReady(shot.Id);live.ApproveScreen(peer.Lease,consent,shot.Id,true);
+        var auth=live.AuthorizeAudio(peer.Lease,consent,true);Assert.Equal("audioGrant",(await client.Wire.Read(default)).Type);var turn=Guid.NewGuid().ToString();
+        await client.Wire.Send("audioBegin",new{authorizationId=auth,turnId=turn,format=AudioProtocol.Format},default);
+        for(int i=0;i<5;i++)await client.Wire.Send("audioChunk",new{authorizationId=auth,turnId=turn,index=i,data=Convert.ToBase64String(new byte[960])},default);
+        await client.Wire.Send("audioEnd",new{authorizationId=auth,turnId=turn,chunks=5,bytes=4800},default);await fake.Entered.Task.WaitAsync(TimeSpan.FromSeconds(3));
+        server.Revoke(Identity.Fingerprint(certificate));fake.Result.SetResult(new("late answer",null));Assert.Empty(live.Peers);Assert.Null(live.Screens.Info);Assert.True(shot.Disposed);Assert.All(fake.Screen!.Jpeg.ToArray(),b=>Assert.Equal(0,b));
+        await Denied(async()=>{using var denied=await Connect(server,certificate);});
+    }
+
 }

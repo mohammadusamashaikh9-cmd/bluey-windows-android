@@ -114,3 +114,26 @@ Windows authorization must be repeated. A fresh credential is acquired on that n
 explicit flow; there is no indefinite token refresh loop or transcript replay.
 Elapsed time and provider-reported usage metadata remain visible in memory after
 stop; new Start resets the session counters. No audio/transcript file persistence.
+
+## F4-C screen flow
+
+Open Screen Understanding. Explicitly choose primary display or a wholly contained
+visible window, Capture once, review the in-memory preview, then Analyze locally.
+OCR availability and UIA targets are separate: portable OCR is blocked by the
+Microsoft package-identity requirement. C-targets use visible labels/roles only,
+never field values. Point by a listed ID or validated0..1000 spot; only Bluey's
+vector overlay moves. Home/Stop are reachable; Ctrl+Alt+S cancels screen work.
+Synthetic fixture is explicitly labeled as generated pixels/declared annotations.
+
+For optional cloud context, select GeminiFree and Start current Android consent
+before capture/review. Select the exact current consenting phone in Screen
+Understanding and approve THIS screenshot separately; then authorize one Free Tier
+question in existing AI settings. An existing unused grant can also receive a
+separate image approval before the hold. No capture/analysis/key-save/share button
+sends an API request. A completed authorized audio turn attaches at most one image
+to the same Gemini request. Do not share sensitive pixels; discard/reselect a
+harmless window (no automatic redaction/crop). Replacement, age60s, display/DPI/window
+geometry change, sleep/Stop/background/consent change/disconnect/revocation invalidates
+context. Completion erases media; a validated optional point survives only as
+bounded geometry until its original expiry or Stop. Invalid target leaves an answer
+without pointing. Existing pink/chirp/caption lifecycle remains F4-B.

@@ -113,3 +113,34 @@ Windows/Android status. Shared synthetic response/presentation traces cover fake
 HTTP, real TLS transport, Android controller and actual WPF caption application.
 Offline preview exposes read-only statuses and opens the existing opt-in settings;
 no consent, recording or provider action occurs merely by opening settings.
+
+## F4-C stacked screen slice
+
+D013 starts before F4-B physical acceptance, from4b38029 on port/live-ai-voice. New
+branch port/screen-understanding targets that branch, not main; PR6 stays unchanged.
+Pure snapshot/workflow/target/map/choreography code, native WGC/WinRT/UIA adapters,
+WPF preview/local controls and optional same-request Gemini image context are
+implemented. Android app/protocol unchanged. Real device/provider success is not
+inferred from compile/fake tests. Local Screen29/Link140 tests and WPF build pass.
+Native capture and geometry still need physical QA; Microsoft-supported native OCR
+is blocked in the current portable distribution by package identity. No installer,
+identity registration, model call or F5 action is added to hide that constraint.
+
+
+F4-C OCR identity follow-up (D014): developer accepts real capture/preview,
+VisibleBounds125%DPI,500/500 overlay-only pointing, Home/discard on63d7269. Keep that
+implementation unchanged. A separate developer sparse-identity variant and manual
+approval-gated registration/removal bundle enable the existing Windows.Media.Ocr
+path; portable fallback remains. CI builds/validates manifests, unsigned MSIX and
+approval denial without registration or certificate trust. Actual engine/Notepad
+recognition stays unverified until the developer approves registration and tests.
+Deterministic pending-capture/analysis Stop tests reject late pixels/targets without
+manual subsecond timing. No cloud OCR, NPU dependency, F5 or provider request.
+
+
+D014 actual OS correction: developer laptop is Windows10 Pro Education19045.
+The22000 sparse minimum blocked deployment. Both package and managed supported OS
+floor now19041; newer SDK target retained. Compiled metadata/API-analyzer checks,
+19045/Win11 version preflights and nonsecret actual-runtime/API presence diagnostics
+are added. No OS upgrade, capture backend/engine replacement, key/profile move or
+Android change. Server2025 CI cannot accept19045 runtime registration or OCR.

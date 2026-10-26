@@ -95,6 +95,12 @@ internal static class NativeSmoke
                 Check(displayed==1,"Completed synthetic answer displays exactly once in WPF adapter");
                 Check(actualArt.CurrentCaption==null,"Shared reply caption clears at source reading deadline");
             }
+            Check(string.Equals(System.Reflection.CustomAttributeExtensions.GetCustomAttribute<System.Runtime.Versioning.SupportedOSPlatformAttribute>(typeof(NativeSmoke).Assembly)?.PlatformName,"windows10.0.19041.0",StringComparison.OrdinalIgnoreCase),"Compiled portable assembly explicitly supports Windows10 build19041 API floor");
+            Screen.OcrIdentity.RequireDataPath(@"C:\Public\Local",@"c:\public\local\");
+            try {Screen.OcrIdentity.RequireDataPath(@"C:\Public\Packages\Local",@"C:\Public\Local");throw new InvalidOperationException("Redirected OCR profile must fail");}
+            catch(Bluey.Screen.ScreenException){}
+            Check(true,"OCR developer identity refuses redirected data paths without reading keys or trust");
+            checks.AddRange(Screen.ScreenSmoke.Run(output));
             File.WriteAllText(Path.Combine(output, "native-smoke.json"), JsonSerializer.Serialize(new { passed = checks.Count, failed = 0, checks,
                 platform = Environment.OSVersion.ToString(), desktopAcceptance = "UNVERIFIED: physical click routing, focus, DPI changes, capture, fidelity, pacing, CPU" }, new JsonSerializerOptions { WriteIndented = true }));
             return 0;

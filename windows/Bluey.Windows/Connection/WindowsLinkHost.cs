@@ -3,13 +3,13 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using Bluey.Link;
 namespace Bluey.Windows.Connection;
-internal sealed class WindowsLinkHost
+internal sealed class WindowsLinkHost(Bluey.Screen.ScreenSession? screenSession=null)
 {
     private ProtectedTrust? store; private LinkServer? server; private Advertisement? advertisement; private IPAddress? address;
     internal AI.ProtectedApiKey ApiKey {get;}=new();
     internal AI.ProtectedApiKey GeminiKey {get;}=new(provider:"gemini");
     private Bluey.Link.LiveAuthority? live;private readonly object liveGate=new();
-    internal Bluey.Link.LiveAuthority Live {get{lock(liveGate)return live??=new(new Bluey.Link.DeniedIssuer(),audioAnswers:new Bluey.Link.GeminiAnswers(GeminiKey,Bluey.Link.GeminiAnswers.CreateHttpClient()),openAiEnabled:false);}}
+    internal Bluey.Link.LiveAuthority Live {get{lock(liveGate)return live??=new(new Bluey.Link.DeniedIssuer(),audioAnswers:new Bluey.Link.GeminiAnswers(GeminiKey,Bluey.Link.GeminiAnswers.CreateHttpClient()),openAiEnabled:false,screenSession:screenSession);}}
     internal ConnectionDiagnostics Diagnostics {get;}=new();
     internal LinkServer? Server => Volatile.Read(ref server);
     internal string Status => Server is {} s ? $"TLS host {address}:{s.Port} · {s.Connections} authenticated connection(s)\n{advertisement?.Status}\nHost identity: {s.HostId}\nServer SHA-256: {s.Pin}" : "Secure host stopped";

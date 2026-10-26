@@ -1,3 +1,864 @@
+# Current F4-C Windows10 build19045 adaptation — PR #7
+
+2026-10-26 Asia/Karachi. Clean start e5abe8a863bae5f100f9bb4ec6ff9e07a81dcc06,
+port/screen-understanding; PR7 still targets port/live-ai-voice/PR6 at4b38029.
+Both remain unmerged. Developer confirms actual OS: Windows10 Pro Education22H2,
+10.0.19045. Earlier accepted63d7269 capture/preview/125%DPI pointing/Home/discard ran
+on this laptop; prior Windows11 assumptions do not establish a second OS test.
+
+Confirmed defect: sparse MSIX MinVersion22000 rejects19045. Set minimum19041 and
+explicit SupportedOSPlatformVersion19041; keep SDK/TFM22000. Warnings-as-errors/
+CA1416 audit direct managed/WinRT calls; Microsoft-documented native/API minima
+fit19041. No WGC/JPEG/OCR engine/target/animation/F3/key changes. Portable fallback
+and profile/identity fail-closed guards retained; no OS upgrade or migration.
+
+Registration now preflights OS version and actual Register/ExternalLocation command
+support. Tests distinguish19040 rejection and19041/19045/Win11 acceptance. Runtime
+OCR metadata exposes actual OS, compiled minimum and required API presence. This
+is diagnostic evidence, not simulated19045 runtime success. Server2025 CI cannot
+prove exact Windows10 sparse activation, installed OCR language or word geometry.
+
+Loose developer registration is a documented Windows10 API distinct from Win11-only
+unsigned-MSIX installation; no AllowUnsigned flag used. Exact19045 activation remains
+unverified. README includes a separately approved manual signed procedure if trust/
+activation fails. No automatic certificate creation/trust/signing, package install,
+Developer Mode/policy mutation, privilege fallback or new OCR library. .NET10's
+maintained OS matrix excludes this Windows edition; target compatibility is not a
+vendor lifecycle claim. Existing application already ran on the developer machine.
+
+Manifest regression first failed2of3cases and now passes3. Both WPF profiles
+compile clean at the lower managed API floor; full observed evidence follows.
+
+Tested application/bundle revision **e36d7619fe03ef02a37af58566b4380979f655bb**.
+Subsequent closeout changes tracking only. Keep this exact revision for physical QA.
+
+| Evidence | Actual result |
+| --- | --- |
+| Local .NET10.0.402 |239C#tests,3manifest contracts pass; portable/OCR profiles compile0warnings/errors |
+| Resolved MSBuild properties |TFM net10.0-windows10.0.22000.0; SupportedOSPlatformVersion and TargetPlatformMinVersion10.0.19041.0 |
+| [Windows40315042806](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40315042806) |239unit (Core27/Screen71/Link141),3manifest,48native,24package/approval/API checks pass; clean WPF and both self-contained variants |
+| [Android40315043601](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40315043601) |111tests,0failure/error/skip; lint0errors18retained warnings; debug signature verified |
+| Stacked PR checks |Windows40315048406 and Android40315048410 also pass at e36d761 |
+| Initial failure |939d23d/Windows40314439701 rejected the native cmdlet's internal parameter-set name; e36d761 checks public Register/ExternalLocation together and actual metadata regression passes |
+| Static |18canonical/Windows Markdown files,221local links/anchors,3JSONL collections parse; protected-source diff and git diff --check pass |
+
+Matching artifacts,14-day retention:
+
+- [Windows10-minimum OCR developer bundle, instructions and SHA256SUMS](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40315042806/artifacts/12646935593)
+- [Portable Windows fallback and SHA256SUMS](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40315042806/artifacts/12646656630)
+- [Windows TRX/native/MSIX/PE/API/approval evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40315042806/artifacts/12646127590)
+- [Optional unchanged Android APK/manifest/signer](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40315043601/artifacts/12645943273) and [test/lint evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40315043601/artifacts/12646522271)
+
+| File | Actual CI SHA-256 |
+| --- | --- |
+| OCR ZIP upload digest |`c73d1c82cbf47fa1a0a64260d63d44fe4fc5057ced995f3d5f51cc505b071c64` |
+| OCR app/Bluey.Windows.exe |`330af7c2fd5212a3619981fa53761623f523e202c0f7e11a2e747d7e4c584e80` |
+| OCR app/Bluey.Windows.dll |`f35bf542703554223a5c8f8ee17340071418ee422f180479652c524e5e999cd5` |
+| Bluey.Ocr.Dev.msix |`0093fe3a2753a6bd1fe2e6d43c5ac57065bff09b300c84ac17d2709d9962d4ea` |
+| OCR SHA256SUMS.txt |`1cbdcdc2b540ea22551f3d39140892fa330c4874ca895033148d9af1e4a18269` |
+| Portable ZIP upload digest |`5118d3a1098518ac2d9fe153ea166c483f6f0034c6afecb1266d3292cfff0986` |
+| Portable Bluey.Windows.exe |`136026ee2b36afb968fce8d85140536be350c406e02b5587a91860f7bd43d204` |
+| Portable Bluey.Windows.dll |`f6ea1c34882adfc66aba3976a27584b844ba9c4a641308b9da1b7fde2b3909dc` |
+| Portable SHA256SUMS.txt |`9daae7858cf5b0b1424d3131407eb4ff770d573d480eb00fcd9402bc3b4f9c76` |
+| Optional app-debug.apk |`61a4635b4c697565a2089ef823759ccd67f0b59de901106636a96bf011d01425` |
+
+Windows CI verifies every bundle hash entry, actual extracted PE profiles, compiled
+19041 minimum, built MSIX19041 minimum, OS gates and native cmdlet parameter support.
+All four audited API-presence flags are true on the CI host; actual runtime OS is
+recorded. CI is Server2025, NOT Windows10/19045. It never registers a package, creates
+or trusts a developer signing certificate, or runs native OCR with identity.
+Unregistered OCR test exits3/UnavailableIdentity/0lines/0words, preserving fail-closed
+behavior. These checks are not physical19045 identity, OCR or profile acceptance.
+
+Final archives could not be downloaded locally because restricted network policy
+blocked productionresultssa2. No policy change or proxy bypass attempted. Hashes and
+content verification are actual CI/API evidence, not independent local-byte rehashes.
+No final failing tests. Android retains18lint warnings and setup-android's existing
+Node20/forced24 annotation. No Gemini/OpenAI request/key, private capture/text,
+input injection, new engine/NPU library, OS upgrade or automatic installation.
+
+Keep the installed Android APK; app/protocol unchanged. Optional CI signer
+`a87396d72d831de34d82c5c41238c910a2d5b1d8490e74fcc74f8573920fb090`
+may differ from installed builds; reinstall loses Keystore identity and needs
+explicit re-pair/revocation. It is unnecessary for this offline Windows test.
+
+Actual19045 registration, Win32 sparse activation, installed OCR language, native
+public-text recognition, Notepad lines/words/coordinates, capture with identity,
+Stop/expiry and registered-profile behavior remain UNVERIFIED. Existing accepted
+capture on19045 is retained, not replaced by CI inference. .NET10's maintained-OS
+matrix omits Pro Education22H2; this is a compatibility build, not a vendor lifecycle
+claim. No unsupported-native-OCR conclusion or alternate engine is justified yet.
+
+One next action: review the new bundle and run its one explicit19045 registration,
+public-text self-test and harmless Notepad OCR/word pointing/Home/Stop/expiry
+sequence with cloud OFF. Stop on errors; no automatic signing/trust or provider call.
+
+Exact18 paths changed against e5abe8a863bae5f100f9bb4ec6ff9e07a81dcc06:
+
+```text
+project/ARCHITECTURE.md
+project/IMPLEMENTATION.md
+project/QA.md
+tracking/CHECKPOINTS.md
+tracking/DECISIONS.md
+tracking/HANDOFF.md
+tracking/SESSION-LOG.md
+tracking/STATUS.md
+windows/Bluey.Windows/Bluey.Windows.csproj
+windows/Bluey.Windows/NativeSmoke.cs
+windows/Bluey.Windows/Screen/OcrSmoke.cs
+windows/README.md
+windows/packaging/OcrPackage.ps1
+windows/packaging/README.md
+windows/packaging/Register-OcrIdentity.ps1
+windows/packaging/Test-OcrPackage.ps1
+windows/packaging/identity/AppxManifest.xml
+windows/packaging/test_package.py
+```
+
+# Previous F4-C OCR developer identity — retained evidence
+
+2026-10-26 Asia/Karachi. Started clean atff6115282a1d0505bf4c0455ce075a7a4e415980
+on port/screen-understanding, stacked on unchanged port/live-ai-voice/PR6 at4b38029.
+Both PRs stay unmerged. Developer accepts actual63d7269 Notepad WGC/JPEG/preview,
+VisibleBounds125%DPI,500/500 visual pointing with stationary OS mouse, Home/discard
+(three real captures). That gate is retained; no NativeCapture/JPEG repair reopened.
+
+D014 selects an optional unsigned sparse/external identity developer build to
+unlock existing Windows.Media.Ocr. Portable ZIP/app.manifest stay the fallback.
+Only matching identity metadata, win32App/mediumIL,runFullTrust/unvirtualizedResources
+are added. Startup refuses wrong/missing identity or redirected LocalAppData before
+trust/key services. No protected data paths, pairing identities, keys, F3/provider,
+geometry or animation code are changed. No data migration or installer.
+
+Bundle includes self-contained app, unsigned identity-only MSIX/loose manifest,
+public assets, checksums and explicit approval/WhatIf registration/removal helpers.
+No certificate creation/import/trust, Developer Mode/policy modification, auto-
+registration, all-users provisioning, app start or language download. Developer
+must separately review/enable Developer Mode and approve per-user registration.
+CI builds and checks these boundaries without registering any package. Exact
+four-line real-engine self-test is available only after explicit local registration;
+CI unregistered mode must report0 recognized words/lines, never fake success.
+
+Manifest contracts first failed2cases before implementation and now pass.
+Pending-capture Stop uses controlled completion and no timing poll; pending-OCR
+Stop also rejects late targets/preview/sharing. Final actual evidence follows.
+
+Tested application/bundle revision **6da41321de73c18b7fafe0889ab6ee05a0530d22**.
+Later closeout changes tracking only; use the artifacts explicitly tied to6da4132.
+
+| Evidence | Actual result |
+| --- | --- |
+| Local .NET10.0.402 |239 C# tests (Core27/Screen71/Link141),2 manifest contracts pass; both WPF profiles compile0warnings/errors |
+| [Windows40231453791](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40231453791) |239unit,2Python identity contracts,47native checks,14built-package/approval checks pass; both self-contained variants publish |
+| [Android40231454103](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40231454103) |111tests,0failure/error/skip; lint0errors18retained warnings; debug signature verified |
+| Stacked PR checks |Windows40231458418 and Android40231458451 pass at6da4132 |
+| Prior failure |Windows40230706897/41ec1c8 built both variants, then failed Windows PowerShell5.1 WhatIf/Get-FileHash;19bd1d3 corrected read-only .NET hashing and both19bd/final6da CI pass |
+| Static |18 canonical/Windows Markdown files,220 local links/anchors and3 JSONL fixture collections pass; protected-path diff and git diff --check pass |
+
+Artifacts retain14days:
+
+- [OCR developer bundle: app, unsigned sparse MSIX/loose manifest, approval helpers, README and SHA256SUMS](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40231453791/artifacts/12612952571)
+- [Portable Windows fallback + SHA256SUMS](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40231453791/artifacts/12613710856)
+- [Windows TRX/native/PE-manifest/package evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40231453791/artifacts/12612842983)
+- [Optional unchanged Android APK/manifest/signer](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40231454103/artifacts/12613217384) and [test/lint evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40231454103/artifacts/12612798287)
+
+| File | CI SHA-256 |
+| --- | --- |
+| OCR bundle ZIP upload digest |`fa63ba8d31e4ca3f2832b4ebe210acdd67e8e3f2dda1712b7aef767c224c7ba6` |
+| OCR app/Bluey.Windows.exe |`040ff33d162d41e4cda7f879bc274ebca9a777b2b4bd68bfbc234d22c0dba94a` |
+| OCR app/Bluey.Windows.dll |`6542b06f7c57dcd24b27cf13899edf83a70f0ac6d9a562a7bac7a5c788a0c59d` |
+| Bluey.Ocr.Dev.msix (unsigned identity-only) |`c8a3bc060b00f65accccd33e7ed7047e03176ea880d2e69f2d727d0fb0e00eeb` |
+| OCR SHA256SUMS.txt |`7e0a7b456500b3496482250de76bc87255bd25e4a17d5f08f7ff29cac29bbd71` |
+| Portable ZIP upload digest |`3bd77bc35f3c26604ea837ac43bcb11a4fbb8b31c5727e8e87079e782fea1946` |
+| Portable Bluey.Windows.exe |`37a26bcc637adf9c8a227e7ee3bf0a5bf0b2af92eae12a0adb188f25d1ac3e06` |
+| Portable Bluey.Windows.dll |`92d6716c0112744d4794af1d3b5235daa0c2d436d066701608437d4e533d96df` |
+| Portable SHA256SUMS.txt |`9bba7718a4e4b1a55185b1237ba5cf4a04b04a27aa6047327587b3998a380138` |
+| Optional app-debug.apk |`82e97b2a7115216c2d4b273226511f0469f6517cecfb1106173c1d2983a6a668` |
+
+All bundle entries verified on the Windows runner. Native SDK mt.exe extracted
+actual portable/OCR PE manifests and confirmed different matching profiles; MakeAppx
+produced an unsigned identity/assets-only package. Approval-absent registration/
+removal fail; Windows PowerShell5.1 WhatIf validates hashes and leaves package
+count0. No package-signing certificate creation/import/trust or registration occurred. OCR executable
+without identity exits3/UnavailableIdentity with0 lines/words. Thus registered
+identity/native OCR has NOT been demonstrated in CI; no synthetic annotation pass.
+
+The explicit --ocr-self-test, only after developer registration, uses real
+NativeAnalysis on generated public four-line pixels and checks exact L1-L4/W1-W9,
+word reading order/bounds, existing pure flight, Home, Stop, expiry and no unapproved
+sharing. It was compiled, not run with identity here. Real Notepad OCR, installed
+language, word positions/pointing and registered-profile data-path behavior remain
+UNVERIFIED until the developer approves registration and tests on the laptop.
+Visible Notepad chrome may precede the document's L IDs; never force/fabricate IDs.
+
+Attempts to download final app/portable/evidence archives were policy-blocked at
+productionresultssa14 (superseded19bd artifacts atsa13). Hashes/content evidence are
+actual CI/API results, not independent local-byte rehashes. No proxy bypass or
+network-policy change. CI retains the existing setup-android Node20/forced24
+annotation and18lint warnings; no final failing checks. No provider request/key,
+private capture/text, input injection, alternate OCR/NPU engine or new PR.
+
+Android unchanged: keep the installed APK for this Windows-only offline test.
+Optional fresh CI signer6b8ed14ac3dc2c722de58af0e52da5197546f481f128377c31cf82fbd0c92a2c
+may differ from the installed app; reinstall would lose Android Keystore identity
+and require explicit re-pair/revocation. Do not replace it unnecessarily. Existing
+Windows DPAPI/Link/AI/settings locations, original Apple/Android source, accepted
+WGC/JPEG, NativeAnalysis/Targets, F3/provider and animation files are unchanged.
+
+One next action: review the OCR developer bundle and, only with developer approval,
+follow its explicit registration and one harmless Notepad OCR/point/Home/Stop test.
+
+Exact28 paths changed against ff6115282a1d0505bf4c0455ce075a7a4e415980:
+
+```text
+.github/workflows/windows.yml
+project/ARCHITECTURE.md
+project/IMPLEMENTATION.md
+project/PORTING-MAP.md
+project/QA.md
+project/SECURITY.md
+tracking/CHECKPOINTS.md
+tracking/DECISIONS.md
+tracking/HANDOFF.md
+tracking/SESSION-LOG.md
+tracking/STATUS.md
+windows/Bluey.Screen.Tests/WorkflowTests.cs
+windows/Bluey.Windows/Bluey.Windows.csproj
+windows/Bluey.Windows/NativeSmoke.cs
+windows/Bluey.Windows/Program.cs
+windows/Bluey.Windows/Screen/OcrIdentity.cs
+windows/Bluey.Windows/Screen/OcrSmoke.cs
+windows/Bluey.Windows/Screen/ScreenCoordinator.cs
+windows/Bluey.Windows/app.ocr.manifest
+windows/README.md
+windows/packaging/Build-OcrPackage.ps1
+windows/packaging/OcrPackage.ps1
+windows/packaging/README.md
+windows/packaging/Register-OcrIdentity.ps1
+windows/packaging/Test-OcrPackage.ps1
+windows/packaging/Unregister-OcrIdentity.ps1
+windows/packaging/identity/AppxManifest.xml
+windows/packaging/test_package.py
+```
+
+# Accepted F4-C capture repair — retained physical evidence
+
+2026-10-26 Asia/Karachi. Existing PR #7 remains open, unmerged and stacked on
+`port/live-ai-voice`; PR #6 stays unchanged at4b380294e883e669d29000cd844962db88439e58.
+Tested application/CI revision **63d7269fac56dd8a02ce7d6a6a1caf427a83ee02**.
+JPEG correction7b35434; later63d7269 changes Windows CI SDK installation only.
+Primary Android checkout remains untouched. Work continues in a managed detached
+worktree at the published PR #7 revision, with no branch switch/reset/history rewrite.
+
+**Actual physical root cause:** JpegEncode/0x88982F41 after successful WGC frame
+acquisition and SoftwareBitmap copy. ImageQuality was incorrectly written as frame
+metadata. Move existing Single0.72 into BitmapEncoder.CreateAsync options instead;
+no capture backend, geometry/retry/consent/provider/animation change was required.
+Independent native codec probe reproduced the old error and passed the correction.
+
+**Corrected laptop evidence:** developer-triggered harmless Notepad captures
+complete in687ms,265ms and281ms. All report578x557 content/buffer/pool after one
+Recreate from594x565, final VisibleBounds, DPI1.25, HRnone. Developer explicitly
+confirmed a genuine Notepad preview. Direct GUI reads confirm Preview ready,
+578x557 Window,11 real UIA targets and mapping VisibleBounds. Labels include window
+buttons and Notepad status text. Portable OCR correctly remains UnavailableIdentity;
+this demonstrates accessible UIA labels, not OCR of the document body.
+
+Developer explicitly confirmed500/500 center animation, stationary real mouse,
+Return Home and Stop/discard clearing all passed. Subsequent direct GUI read shows
+capture OFF, Snapshot:none and analysis/point/share actions disabled. Final status
+retains prior local-analysis text, so the read alone does not distinguish Stop
+from60s expiry; Stop clearing is developer-reported, not independently timed.
+A prior capture also discarded after a selected-window geometry change.
+No image/screenshot file, private text or provider data was retained in Git.
+Only text diagnostics/UI accessibility were inspected by the agent; no screenshot
+upload or Gemini request was performed. Cloud screen sharing stayed OFF.
+
+| Fresh evidence | Result |
+| --- | --- |
+| [Windows40226759821](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40226759821) |238 unit tests (Core27/Screen70/Link141), zero failed/skipped;46 native checks including laptop-sized and scaled JPEG round trips; WPF0 warnings/errors; self-contained x64 |
+| [PR Windows40226763230](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40226763230) |Also passes at63d7269 |
+| [Android40226763197](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40226763197) |111 tests, zero failures/errors/skips; workflow passes; existing installed APK retained |
+| Local artifact verification |ZIP digest matches GitHub; all413 manifest files plus EXE/DLL/manifest hashes match; matching TRX/native evidence downloaded and read |
+| Local static |Exact seven-path scope, protected paths unchanged, historical tracking retained, git diff --check passes |
+
+[Windows application artifact12611119362](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40226759821/artifacts/12611119362)
+and [native/TRX evidence12611084399](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40226759821/artifacts/12611084399).
+Local verified executable:
+`D:\Development\bluey-windows-android\build\f4c-native-debug\ci-63d7269\app\Bluey.Windows.exe`.
+
+| File | SHA-256 |
+| --- | --- |
+| Bluey.Windows.exe |5043e7adf10d9d1f683ef8506ddcb75de1196dce872e6fede5826338eda8efd4 |
+| Bluey.Windows.dll |4b25e16d87d1a5ff423efc28b6094db2ba82a591c6ed49b19bfeb9e42dc435d9 |
+| SHA256SUMS.txt |48e6d1e1c4ebf594e21c67d5351a9f5f0dc50f0070596c832569658af41b5588 |
+| Application ZIP |2f8ad638ba570aeb92f4262b7213672b35500884fe80c4c055a56fab43f5a141 |
+| Evidence ZIP |010ea63870bb65ef6a34c7a45f867dd68718596eea09c7653e13c8180c7d8fd3 |
+
+Build prerequisite handling: no local SDK/Visual Studio installation. Initial CI
+7b35434 failed before compilation because setup-dotnet followed latestPatch to an
+unavailable10.0.403 archive (HTTP409). Installer is now pinned to the already-declared
+10.0.402 baseline; global.json remains unchanged. setup-dotnet still warns about
+its optional latest-LTS runtime download, but exact SDK setup and build pass.
+GitHub CLI artifact download stalled at0bytes; normal GitHub connector download
+succeeded, archive hash matched before extraction. No network-policy change.
+
+Authorized commit/push used the GitHub public no-reply identity after GH007 rejected
+publishing a protected private email. Rejected local commit was preserved in an
+archived managed worktree; remote history was only fast-forwarded. No account
+privacy setting changed. Required closeout documentation follows the tested app.
+
+F4-C remains active for broader physical robustness: DPI/driver/performance,
+active-capture cancellation timing and packaged OCR are not accepted by this test.
+F4-B provider acceptance remains separate. No F5, autonomous input or merge.
+**One next task:** on this same verified artifact and harmless Notepad window,
+measure Stop during an active capture and confirm no late preview is published;
+keep cloud OFF and both PRs unmerged.
+
+Exact seven paths changed from reviewed91c9d3f:
+`.github/workflows/windows.yml`, `windows/Bluey.Windows/Screen/NativeCapture.cs`,
+`windows/Bluey.Windows/Screen/CaptureSmoke.cs`, and the four tracking files
+`STATUS.md`, `CHECKPOINTS.md`, `HANDOFF.md`, `SESSION-LOG.md`.
+
+# Earlier initial local diagnosis (before CI authorization)
+
+2026-10-26 Asia/Karachi. PR #7 remains open/unmerged at reviewed head
+`91c9d3f46d0d31fe0e39d7d1db2b932a391574c9`, targeting `port/live-ai-voice`.
+Primary checkout was clean on `port/android-face` at `a9be517`; preserved in place.
+Work is isolated at the reviewed PR #7 head in a managed detached worktree.
+No commit, push, PR #6 change, provider request, tool installation or merge.
+
+**Physical failure observed:** the running verified application reaches
+`JpegEncode / NativeFailure / 0x88982F41`, not FirstFrame. Its safe diagnostic shows
+non-null content578x557 in buffer594x565, then one successful pool recreation and
+accepted content=buffer=pool578x557. DWM578x557/Win32594x565, DPI1.25, final
+VisibleBounds, frame2 accepted391ms; JPEG failure516ms. Selection, WGC item, D3D
+session, frame acquisition, recreation and SoftwareBitmap copy completed. No
+Snapshot or WPF preview was published. This attempt supplies no evidence of window
+movement, null frames or an unresolved frame-pool fault.
+
+The existing complete Windows folder at `D:\Development\F4 C FirstFrame Capture Rejection`
+was reused. All413 SHA256SUMS entries independently match, including EXE
+`78d0eeb41540bcf36b616ee3e83a3d41058f10d879822ae7abd96e82d03cd483`, DLL
+`5515303fa5317b14b7537675a3311ad98a8e1737797d5ce11f6661b924be536a` and manifest
+`8cebb8aa5022011ce43ab58ef1ecdb41029f053d46b989a65dfd25e4ac599c0f`.
+Computer Use read the existing Bluey diagnostic after the developer's GUI capture;
+only the harmless Notepad window was requested, cloud sharing remained OFF.
+
+Root cause: `ImageQuality` was sent to `BitmapProperties.SetPropertiesAsync`, a
+metadata writer. It is an encoder option. The local installed Windows WinRT codec
+independently reproduces `0x88982F41` (`WINCODEC_ERR_PROPERTYNOTSUPPORTED`) with the
+old metadata call. Passing Single0.72 to `BitmapEncoder.CreateAsync` instead encodes
+and decodes generated black/white images:578x557=>578x557/6916bytes and
+1920x1080=>1100x619/12637bytes; decoded contrast passes. No desktop pixels, files,
+network service or SDK installation are involved in that independent codec probe.
+Probe scripts remain local under the primary checkout's ignored
+`build/f4c-native-debug/`; they are not production application build evidence.
+
+Minimal correction: move the existing quality option into encoder creation;
+remove the invalid metadata write. Native smoke coverage now calls production
+Encode/Decode for the exact laptop extent and existing scaled extent, checking
+size and nonblank image. Capture policy/geometry/consent/provider/animation/F3 and
+Apple/Android code are unchanged. No GDI fallback or broader capture is needed:
+this physical attempt demonstrates WGC acquisition through bitmap copy.
+
+Local build prerequisite missing: .NET SDK10.0.402 (`windows/global.json`). No
+dotnet/MSBuild/cl compiler on PATH or dotnet in standard install locations;
+legacy .NET Framework csc/Windows WinMetadata are present but cannot build this
+net10 WPF application. No Visual Studio/SDK installed. Full application build,
+unit/native smoke execution and corrected-binary physical preview remain UNRUN.
+
+F4-C stays active: genuine corrected preview, visual geometry/point accuracy,
+UIA accessible text, animated pointing with stationary OS mouse, and snapshot
+clearing still need physical acceptance. Portable OCR package identity remains
+unavailable by design. No Gemini API call or screenshot upload was performed.
+
+Exact next task: approve committing/pushing this scoped repair to the existing
+PR #7 branch for Windows CI, verify/download its self-contained artifact, then
+repeat the harmless Notepad GUI capture and local analysis/point/Home/Stop checks.
+
+# Current F4-C FirstFrame acquisition repair — PR #7
+
+2026-10-25 Asia/Karachi. Started clean on2fb87600341ea4b429470dfbc16a03ec44b77fee,
+port/screen-understanding; PR7 targets port/live-ai-voice. PR6 remains unchanged
+at4b380294e883e669d29000cd844962db88439e58. Both remain unmerged.
+
+Developer physical evidence: five Notepad attempts reach FirstFrame/Changed, latest
+156ms, DWM578x557, WGC=Win32594x565, DPI1.25, WindowFrame. Prior ItemSize blocker is
+resolved. No real preview yet. Old code commits to the first callback and rejects
+null OR ContentSize != initial item.Size without a second frame. Those are confirmed
+source defects; which condition the laptop encounters remains unknown.
+
+Correction: FrameArrived only signals a capacity-one bounded channel. A single
+consumer acquires <=6 frames and recreates the pool <=2 times, all within the
+existing8s deadline. Every frame is disposed before Recreate. Copy requires exact
+positive bounded content/buffer/pool agreement, never assumed aspect equivalence.
+Final coordinates resolve from unchanged DWM/physical Win32 bounds, with explicit
+PreviewOnly denial for unknown mappings. Movement, actual resize, blank/protected
+frames, invalid bounds and stale/canceled publication remain rejected. No background
+recording, second capture session or user-visible automatic retry.
+
+Diagnostics add per-frame null/content/surface/pool/current-item extents, initial
+item size, counts, recreations and elapsed ms to the existing8-attempt memory ring.
+No titles/positions/handles, images, OCR/private text or keys. Event handlers never
+copy/own frames; the consumer finishes before disposal. Stop cancels publication;
+already-running native copy keeps its dependencies alive, then discards late pixels.
+New capture stays blocked until cleanup completes. Consent/F3/provider/animation
+code and original Apple/Android source remain untouched. No model request made.
+
+Regression evidence: extracted legacy policy11 cases had9fail/2pass before repair.
+The final screen suite70pass covers null then valid, transient/persistent mismatch,
+clipped/undefined buffers, bounded Recreate, movement/resize, timeout/Stop, final
+center mapping, preview-only denial and no unapproved sharing. Native Windows and
+Android results follow. No final failing app tests.
+
+Tested application revision **f3856770710d789cb7396e6080c13d7950c4c8b2**.
+Later closeout changes tracking only; the binaries below contain the final repair.
+
+| Evidence | Actual result |
+| --- | --- |
+| Local .NET10.0.402 |Core27 + Screen70 + Link141 =238pass; WPF0 warnings/errors |
+| [Windows40222661491](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40222661491) |238 unit tests,0failed/skipped;45 native checks; WPF0 warnings/errors; self-contained unsigned Windows x64 |
+| [Android40222661934](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40222661934) |111 tests,0failed/errors/skipped; lint0errors/18warnings; APK signature verified |
+| Stacked PR checks |Windows40222665650 and Android40222665604 also pass at the same application revision |
+| Static |17 canonical/Windows Markdown files,218 local links/anchors and3 JSONL fixture collections pass; protected paths unchanged; git diff --check |
+
+Artifacts (14-day retention, matching application revision):
+
+- [Windows x64 folder + SHA256SUMS](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40222661491/artifacts/12610415501)
+- [Windows TRX/native/synthetic-image evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40222661491/artifacts/12609837506)
+- [Optional unchanged Android APK + manifest/signer](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40222661934/artifacts/12610400668)
+- [Android test/lint/bitmap evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40222661934/artifacts/12610575246)
+
+| File | SHA-256 |
+| --- | --- |
+| Bluey.Windows.exe |`78d0eeb41540bcf36b616ee3e83a3d41058f10d879822ae7abd96e82d03cd483` |
+| Bluey.Windows.dll |`5515303fa5317b14b7537675a3311ad98a8e1737797d5ce11f6661b924be536a` |
+| Windows SHA256SUMS.txt |`8cebb8aa5022011ce43ab58ef1ecdb41029f053d46b989a65dfd25e4ac599c0f` |
+| Windows ZIP upload digest |`da97a08d542b106db02b7511ba93e5259b20ca276a167f1e61c4c99c3cf9181a` |
+| Optional app-debug.apk (CI hash) |`0a491e94132872aca857ae72cdc43c56b970f179c036a796571af20953363bb1` |
+
+Downloaded Windows app and evidence; independently rehashed all413 manifest entries,
+including EXE and DLL. Native JSON has45 checks, including actual supported
+Recreate calls, but never StartCapture or WGC pixel acquisition. Native public
+window dimensions are DWM=WGC306x203,Win32320x210,DPI1,VisibleBounds. Public generated
+JPEG checks and pure frame-policy tests do not prove real laptop first-frame capture.
+Physical preview, exact null-versus-size condition, DPI/point accuracy, exclusion,
+driver/performance and Stop timing remain unverified. OCR package identity and
+F4-B provider physical acceptance remain separate pending gates. No provider request.
+
+Android source/protocol unchanged: retain the installed APK for this Windows test.
+Optional new debug signer60191b84d5221a4195ee8153a7d900f9f24edca6bb061e55e8bdd06a2ab5b1bd
+differs from earlier builds. If deliberately replacing an incompatible-signer APK,
+manual reinstall loses Android Keystore identity and needs F3 re-pair/revoke old
+phone trust. Do not silently delete identities or Windows protected data. Android
+artifact download was blocked by restricted policy at productionresultssa10;
+its hash/signature are verified CI evidence, not locally rehashed bytes. Windows
+download succeeded normally; no proxy bypass or network-policy change. CI also
+retains a setup-android Node20 deprecation annotation (forced Node24), unrelated
+to app behavior; lint18warnings are retained, not new capture regressions.
+
+Next: run one offline physical Notepad capture, inspect safe frame diagnostics,
+and point500,500 only if the final map is verified; Return Home/Stop must clear it.
+
+Exact15 changed paths against2fb8760:
+
+```text
+project/QA.md
+tracking/CHECKPOINTS.md
+tracking/DECISIONS.md
+tracking/HANDOFF.md
+tracking/SESSION-LOG.md
+tracking/STATUS.md
+windows/Bluey.Screen.Tests/CaptureDiagnosticsTests.cs
+windows/Bluey.Screen.Tests/CaptureFramesTests.cs
+windows/Bluey.Screen.Tests/WorkflowTests.cs
+windows/Bluey.Screen/CaptureDiagnostics.cs
+windows/Bluey.Screen/CaptureFrames.cs
+windows/Bluey.Windows/Screen/CaptureSmoke.cs
+windows/Bluey.Windows/Screen/NativeCapture.cs
+windows/Bluey.Windows/Screen/ScreenWindow.cs
+windows/README.md
+```
+
+# Earlier F4-C ItemSize geometry repair — retained evidence
+
+2026-10-25 Asia/Karachi. Clean start cc122d02ec07a6844b2bedd3d8e5cd43968c276c on
+port/screen-understanding. PR7 still targets port/live-ai-voice; PR6 remains open
+at4b38029, unchanged. Neither PR merged. No new branch, provider request, OCR
+packaging or F5 action. Original Apple/Android/link/animation/key code unchanged.
+
+Developer physical evidence: Unicode picker titles are fixed (NOTEPAD.txt - Notepad).
+Two real window attempts stop before frames at ItemSize/Changed/HRnone (203/110ms),
+with no preview/snapshot and cloud OFF. Actual laptop dimensional values are unknown.
+Source confirms the premature gate: WGC width/height must exactly equal cached DWM
+visible bounds, with all differences classified as Changed before frame acquisition.
+Microsoft distinguishes visible DWM bounds from DPI-virtualized Win32 rectangles
+that may include invisible borders. The gate is invalid; whether this laptop's
+specific mismatch is borders, DPI or an actual geometry change remains unverified.
+
+Correction: positive WGC item dimensions (<=16384/axis,16Mi pixels, bounded aspect/
+relative extents) size the frame pool. CaptureGeometry resolves an explicit image/
+physical/DIP transform only for exact visible extents or a matching measured physical
+Win32 rectangle containing the DWM selection, bounded per-edge padding<=32DIP and
+primary containment. GetWindowRect scopes/restores per-monitor-v2 thread awareness.
+Keep both rectangles for freshness; recheck before/after capture, frame content,
+bitmap and encoded sizes. Never stretch DWM bounds or infer origins from DPI ratios.
+
+Unknown but bounded capture geometries can show PREVIEW ONLY. Coordinate converters,
+target extraction, analysis, point resolution and screenshot approval reject such
+mappings; relevant UI controls are disabled. A preview is not coordinate authority.
+Verified Surface aspect/bounds constraints remain and verified frame modes require
+matching measured bounds. Stop/expiry/movement/resize/close/DPI/disconnect invalidate
+pixels, targets and approval. No crop/warp, backend or input API was added.
+
+Diagnostics keep8 memory-only records and now include DWM/WGC/Win32 width/height,
+absolute deltas, DPI scale and mapping mode. No titles, origins/handles, screenshot
+pixels, OCR/private text or credentials are logged. Existing screenshot review,
+F3 one-question authorization, protected keys and cloud-OFF defaults are unchanged.
+
+Final tested application **df1eb62d52ea325a16fda67d2e9624097c4e1303** (geometry source42ebf5c plus
+Windows-CI-only safe report output). Later closeout changes tracking only.
+
+| Evidence | Actual result / matching artifact |
+| --- | --- |
+| Local .NET10.0.402 |Screen53 pass; retained Core27/Link141 pass after geometry/guard integration; WPF0 warnings/errors |
+| [Windows40133905687](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40133905687) |Core27/Screen53/Link141 (221 total), zero failed/skipped;44 native checks; WPF0 warnings/errors; self-contained unsigned x64 |
+| Windows ZIP + SHA256SUMS |[artifact12575917352](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40133905687/artifacts/12575917352); no separate desktop runtime |
+| Windows TRX/native/public fixture evidence |[artifact12576071997](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40133905687/artifacts/12576071997) |
+| [Android40133905040](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40133905040) |111 tests, zero failed/errors/skips; lint0 errors18 warnings; signature verified, same application revision |
+| Optional unchanged Android regression APK |[artifact12576037203](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40133905040/artifacts/12576037203); [test/lint/bitmap evidence](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40133905040/artifacts/12575892345) |
+| Stacked PR checks |Windows40133910135 and Android40133909958 also pass |
+
+Downloaded final Windows app/evidence, rehashed all413 manifest entries and verified
+EXE hash against actual CI output. Native JSON has44 checks. Earlier42ebf5c artifact
+downloads were policy-blocked at sa14; those superseded bytes were not locally
+rehashed. The final df1eb62 artifact downloaded normally. No proxy bypass/policy
+change was used. Artifacts retain14 days from upload.
+
+| File | SHA-256 |
+| --- | --- |
+| Bluey.Windows.exe |`d8c15c6c28390ca0e7526ce63af8339663497c5f86e831c7fcc0c8553914b966` |
+| Bluey.Windows.dll |`01ff39f65d7acd00a7387972c53ba5ad111bac0f2cbac15065d09412604bcc2b` |
+| Windows SHA256SUMS.txt |`adce7dc1940e3454ef4e4efae336087dc1be862545ee233353b36ab6e42cd648` |
+| Windows ZIP upload digest |`4bdd3806885cc9a4d7d6dd4d81ffa648f08cb4955beb152167dc6dfe96b78bf4` |
+| Optional app-debug.apk (CI hash) |`e6fd63d71819154abdac16bec7953d2cb6971e2621d1ac79eb431ccfbcb7f0ae` |
+
+Native CI public window: DWM306x203, WGC306x203, Win32320x210, delta0x0,
+dpiScale1, mapVisibleBounds. This is an exact-match native case, NOT the developer's
+Notepad dimensions or a reproduced native WGC/DWM mismatch. Synthetic tests cover
+measured border differences, unknown DPI/aspect, verified DIP/grid math, allocation
+limits, moved/resized bounds, preview-only denial and stale/canceled cleanup.
+Native generated1920x1080 image encodes/decodes1100x619, consistent with the transform.
+CI NEVER starts WGC capture or reads desktop pixels. First-frame/real preview,
+actual laptop dimension values, coordinate accuracy, driver/DPI/exclusion/performance
+remain UNVERIFIED. Native OCR package identity and F4-B provider acceptance remain
+separate pending checkpoints. No live Gemini/OpenAI request/key/personal image used.
+
+Initial old-equality policy regression:13 focused cases,7 failed/6 passed. Added
+verified-Surface proof test failed (unproven frame accepted), then passed after guard.
+Final53 screen cases pass. No final CI failures. Only retained Android lint18 warnings.
+24 repair paths below; preserved Mac/iOS/Shared/assets, Android app, Bluey.Core/
+OverlayArt, Bluey.Link, API-key storage and original history checked unchanged.
+
+Android app/protocol unchanged: retain installed APK for this Windows test. New
+optional debug signer b7a970ec096261849730d320fe82c440666db3d1aac0bc119554585a7a932cd9
+differs from prior builds; conscious reinstall loses Keystore identity and needs
+re-pair/revoke. No silent identity deletion or Windows protected-data removal.
+
+Exact24 changed paths against cc122d0:
+
+```text
+.github/workflows/windows.yml
+project/QA.md
+project/SECURITY.md
+tracking/CHECKPOINTS.md
+tracking/DECISIONS.md
+tracking/HANDOFF.md
+tracking/SESSION-LOG.md
+tracking/STATUS.md
+windows/Bluey.Screen.Tests/CaptureDiagnosticsTests.cs
+windows/Bluey.Screen.Tests/CaptureGeometryTests.cs
+windows/Bluey.Screen.Tests/WorkflowTests.cs
+windows/Bluey.Screen/CaptureDiagnostics.cs
+windows/Bluey.Screen/CaptureGeometry.cs
+windows/Bluey.Screen/Geometry.cs
+windows/Bluey.Screen/ScreenSession.cs
+windows/Bluey.Screen/ScreenWorkflow.cs
+windows/Bluey.Screen/Targets.cs
+windows/Bluey.Windows/Screen/CaptureSmoke.cs
+windows/Bluey.Windows/Screen/NativeAnalysis.cs
+windows/Bluey.Windows/Screen/NativeCapture.cs
+windows/Bluey.Windows/Screen/ScreenCoordinator.cs
+windows/Bluey.Windows/Screen/ScreenSmoke.cs
+windows/Bluey.Windows/Screen/ScreenWindow.cs
+windows/README.md
+```
+
+One next action: developer performs the single local Notepad capture/pointing retest
+in project/QA.md with cloud OFF; report only safe dimensions/mapping/stage/outcome
+if preview or mapping fails. Never force pointing on PREVIEW ONLY.
+
+# Earlier F4-C native capture repair (retained evidence)
+
+2026-10-24 Asia/Karachi. Resumed from clean ad5f7aac4f3cbb006aac74d837fca7d1d805e6f6
+on port/screen-understanding. Execution now works in the repository subdirectory;
+/workspace itself is not a Git root. The prior interrupted attempt made no changes.
+PR7 remains stacked against port/live-ai-voice; PR6 remains open/unmerged at4b38029.
+Neither PR is merged. No new branch, F5, OCR packaging, provider request or key.
+
+Developer physical evidence: picker labels were single characters and capture
+returned capture-denied-or-unavailable without preview. No native local OCR/UIA/
+pointing acceptance was reached. This repair does not turn that into a device pass.
+
+Confirmed source defects and experiments:
+
+- GetWindowTextW omitted CharSet.Unicode; native UTF16 output was marshalled as ANSI.
+  Actual HWND regression uses both `*Untitled - Notepad` and a public Unicode title.
+- IDXGIDevice UUID was wrong: requested54ec77fa-1377-44e6-8c32-388fd5f44c84 instead of
+  Microsoft's54ec77fa-1377-44e6-8c32-88fd5f44c84c. QueryInterface cannot obtain the
+  documented interface with that UUID; both capture kinds share this setup.
+- Red native regression d32b1e4 / [Windows40006819441](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40006819441)
+  failed Unicode title and D3D/pool setup E_NOINTERFACE(0x80004002). Window/primary
+  capture-item creation passed. Minimal two-line correction16efb78 /
+  [Windows40007491657](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40007491657)
+  passes the same real native contracts. This isolates the shared setup defect;
+  laptop first-frame/copy/encoding success remains a physical observation to obtain.
+
+Final application revision **fdc9572ee9e305cc489d9784a50f865943355cf5** adds bounded, memory-only diagnostics:
+last8 completed local attempt numbers, selected kind, stage, outcome, native HRESULT
+and elapsed ms. No exception message/stack, title, HWND, image, OCR/private text,
+credential or provider content is retained. The selectable read-only UI box and
+short safe error guidance identify selection/support, activation/item projection,
+D3D/DXGI/projection, pool/session/start, first frame, copy, JPEG and validation stages.
+The free-threaded callback cannot be overwritten by an earlier wait-stage update.
+Stop/cancel, preview, one-shot sharing, geometry/DPI/media limits and zeroing remain.
+Self/hidden/cloaked/out-of-primary selection filtering remains; self-window filter
+has a native regression. No legacy fallback, new dependency, input API or server.
+
+| Evidence | Actual result / matching artifact |
+| --- | --- |
+| Local .NET10.0.402 | Core27/Screen35/Link141 pass; zero failures/skips; WPF0 warnings/errors |
+| [Windows40008459044](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40008459044) |203 unit tests;42 native checks; WPF0 warnings/errors; self-contained unsigned win-x64 |
+| Windows app/manifests | [artifact12525795255](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40008459044/artifacts/12525795255); no separate desktop runtime needed |
+| Windows TRX/native/public fixture evidence | [artifact12524957786](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40008459044/artifacts/12524957786) |
+| [Android40008459792](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40008459792) |111 tests, zero failures/errors/skips; lint0 errors18 warnings; APK signature verified; same application revision |
+| Optional matching regression APK/manifests/signer | [artifact12524349807](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40008459792/artifacts/12524349807) |
+| Android JUnit/lint/public bitmap evidence | [artifact12525606682](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/40008459792/artifacts/12525606682) |
+| Stacked PR checks |Windows40008467356 and Android40008467447 also pass |
+
+Downloaded Windows app and evidence: rehashed all413 manifest entries, EXE hash
+matches actual CI summary, inspected native42-check JSON. Android hash/signer evidence
+is from CI, not a local APK rehash. Artifacts retain14 days from upload. Subsequent
+tracking-only closeout does not alter the tested application/artifact bytes.
+
+| File | SHA-256 |
+| --- | --- |
+| Bluey.Windows.exe | `a02e91fd2b151869f104703c515f20377d6195e3ca6cbf6571fef3ed8ff09fb6` |
+| Bluey.Windows.dll | `6994418337883db756ebae9c2f22f1aff1b4d2c4f81882b7d349c5304a5fa1eb` |
+| Windows SHA256SUMS.txt | `4083de9bb28f11f221b7eb7b51aa9ed023f7a58bbc3bb3681aa1ce3ef1ab3140` |
+| Windows ZIP upload digest | `f65b7958d605e87b7c6e7791231a20f90db98e4a29cd70909188d00f2dc5a35c` |
+| Optional app-debug.apk (CI) | `2ef6a495b6556f039376348202a39310d980444c7ceac0c19c4f98bb3d0e7bb0` |
+
+Android application/protocol source is unchanged. Retain the installed F4-B APK for
+this Windows-only repair; rebuilding debug APK changes signer. New public signer
+`4b2742606a30f3ae978552272646f791d2a76214b382753aea35ab34af20b09b`
+differs from older artifacts; deliberate reinstall loses Android Keystore identity
+and requires F3 re-pairing/revocation. Never silently erase Windows protected data.
+
+Evidence boundary: native CI exercises real Unicode Win32 titles, separate window/
+primary capture-item metadata, D3D/DXGI/WinRT device/pool/session construction and an
+invalid-window failure with safe stage/HRESULT. It NEVER calls StartCapture or reads
+real desktop pixels. Existing JPEG/blank checks use generated public bitmaps only.
+First-frame acquisition, actual laptop capture permission/driver/protected content,
+geometry/DPI/preview and physical performance remain UNVERIFIED. Native OCR still
+reports UnavailableIdentity in portable builds and is not a WGC prerequisite. F4-B
+physical provider acceptance remains pending. No Gemini/OpenAI request or secret.
+
+Exact 14 repair changed paths against ad5f7aa:
+
+```text
+project/QA.md
+tracking/CHECKPOINTS.md
+tracking/DECISIONS.md
+tracking/HANDOFF.md
+tracking/SESSION-LOG.md
+tracking/STATUS.md
+windows/Bluey.Screen.Tests/CaptureDiagnosticsTests.cs
+windows/Bluey.Screen/CaptureDiagnostics.cs
+windows/Bluey.Windows/Screen/CaptureSmoke.cs
+windows/Bluey.Windows/Screen/NativeCapture.cs
+windows/Bluey.Windows/Screen/ScreenCoordinator.cs
+windows/Bluey.Windows/Screen/ScreenSmoke.cs
+windows/Bluey.Windows/Screen/ScreenWindow.cs
+windows/README.md
+```
+
+One next action: developer runs the local-only primary-display and Notepad capture
+retest in project/QA.md, with cloud OFF, recording each result independently and
+copying only the safe diagnostic row on failure. No OCR packaging or cloud test.
+
+# Earlier F4-C implementation and delivery (retained evidence)
+
+2026-10-22 Asia/Karachi. Explicitly authorized before final F4-B physical retest;
+this is not F4-B acceptance. Base origin/port/live-ai-voice verified4b380294e883e669d29000cd844962db88439e58;
+accepted main7930efd unchanged. Branch port/screen-understanding targets the F4-B
+branch. Do not modify/merge PR6 or merge the F4-C PR.
+
+Implemented pure Bluey.Screen maps/snapshots/targets/consent/workflow/choreography,
+WGC/D3D11 one-snapshot capture with selectable primary/window and preview, read-only
+UIA, supported WinRT OCR adapter/availability guard, local pointing/Home/Stop, and
+optional same-request Gemini WAV+JPEG/structured target context. No Android app or
+LAN schema change. No screenshot/audio/private text/key logging or persistence.
+
+Exact native OCR deployment blocker: Microsoft requires package identity; current
+portable unsigned build has none. UI reports UnavailableIdentity, not fabricated
+recognition. No package install/registration or external OCR is added. Real capture,
+UIA targets and point-at-spot remain independent; synthetic demo labels all declared
+annotations. Google image/structured pages policy403; current official Google SDK
+source verifies inline multipart/JSON schema shape; actual fixed-model multimodal
+behavior and arbitrary account eligibility remain unverified. D013 records limits.
+
+Final tested application revision: **fc832f8890d8dc0f8e565b74a4a79b4687343828**. Actual Windows
+CI: Core27, Screen32, Link141 pass (200 total, zero failures/skips), WPF/net10
+Windows22000 build0 warnings/errors. Windows native35 checks pass; Android111
+tests pass with lint0 errors/18 retained warnings. Matching artifacts verified below.
+No real provider call/key/personal screenshot or OS input action was used. F4-B's
+five reported API attempts/two503s/no proven genuine visible answer stay pending.
+
+One next action: developer runs the offline stages of the combined F4-B/
+F4-C QA sequence, recording the OCR identity blocker separately from capture/UIA/
+pointing; no cloud test occurs without separately current explicit authorization.
+
+## F4-C delivery evidence
+
+[PR #7](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/pull/7)
+is stacked against `port/live-ai-voice`. Both PRs remain open/unmerged; PR6 head
+still4b380294e883e669d29000cd844962db88439e58. Documentation closeout after the
+application revision above changes tracking only, not the tested binaries.
+
+| Evidence | Actual result / download |
+| --- | --- |
+| Windows push CI | [39834969073](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39834969073): Core27/Screen32/Link141; native35; clean WPF; self-contained win-x64 |
+| Windows app + SHA256SUMS | [artifact12450033743](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39834969073/artifacts/12450033743); no separately installed desktop runtime required |
+| Windows TRX/native evidence | [artifact12449963853](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39834969073/artifacts/12449963853); 13 retained WPF frames +1 clearly public synthetic screen fixture; no real screenshot |
+| Android dispatch CI | [39834970366](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39834970366):111 tests,zero failed/errors/skips; lint0 errors/18 warnings; verified debug signature |
+| Matching regression APK + SHA256SUMS + signer | [artifact12450572867](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39834970366/artifacts/12450572867) |
+| Android JUnit/lint/bitmap evidence | [artifact12450647703](https://github.com/mohammadusamashaikh9-cmd/bluey-windows-android/actions/runs/39834970366/artifacts/12450647703) |
+| Additional stacked PR checks | Windows39834977612 and Android39834977562 also pass at this application revision |
+
+Final Windows/Android uploads and hashes are observed in actual CI logs/artifact
+metadata. Final archive downloads were blocked by this environment's network policy
+at productionresultssa19/sa9.blob.core.windows.net, so final bytes were NOT locally
+rehashed. Earlier6f471fa app/evidence downloads were successful: all413 Windows
+manifest entries/APK were rehashed, TRX/native JSON and public ALPHA BETA/Save frame
+inspected; that is earlier-revision evidence only, superseded by downloads above.
+Artifacts retain14 days from2026-10-22; authenticated GitHub download may be required.
+
+| File | SHA-256 |
+| --- | --- |
+| Windows artifact ZIP (GitHub upload digest) | `dc51d74dcff53a85f84751035fd975c6be6ba1233b6c632c78b4584ffbf3a76f` |
+| Bluey.Windows.exe | `37bf5077ad8e8f12ca10e0101725953d3bda2c5ec5173c248d43ef79154031a9` |
+| Bluey.Windows.dll | `79d939581a1b72e5ddd615205549f882408f21a99c75d259b867f64726a4f0fc` |
+| Windows SHA256SUMS.txt | `68c5970cfc9c1d10ec4cc918b88ebc197a941ffb0c23e6a97e01cae0bfafd94f` |
+| Android app-debug.apk | `0dd17e7c894e336f5b23d206bf634b1e6790b1d39f0a5e8b550d83fd16ccb0a4` |
+
+New APK public signer SHA256:
+`d2fdccd16b1fc08e1f339479184903badf0c222048dc620e0cd68270d1d1ebd3`,
+different from the F4-B delivered b30fe5e0… signer. Android app/protocol source is
+unchanged: retain the installed F4-B APK for the offline screen test.
+If deliberately replacing it, compare signers first; a mismatch requires conscious
+uninstall/reinstall, loses Android Keystore identity/trust and needs F3 re-pairing
+plus revocation of the old phone. Never erase Windows protected keys/trust files.
+
+Native evidence is precise: actual Windows11 runner JPEG encode/decode/blank-image
+rejection and read-only UIA public-button/password-exclusion checks passed. The
+unpackaged OCR guard reports `UnavailableIdentity`; **no OCR recognition pass**.
+WGC desktop capture was deliberately NOT EXECUTED in CI. Real capture consent,
+protected/HDR content, exclusion, DPI changes, actual pointing/focus/fidelity,
+FPS/resource usage and optional fixed-model multimodal replies remain UNVERIFIED.
+Microsoft-supported package identity deployment remains the native OCR blocker;
+no install/registration or unsupported workaround was added. Multi-monitor targets,
+automatic redaction and input automation are not implemented.
+
+Fake HTTP/synthetic audio and pixels cover one combined WAV+JPEG request, strict
+answer/target schema, separate screen consent/current F3 one-question authorization,
+invalid target suppression, cancellation and no retry. Actual mutual TLS revocation
+clears media and rejects a late fake reply. No new LAN message/frame size, credential
+path, real provider request, key, paid call or personal capture was used. Source
+comparison preserves1100/.72 JPEG, L400/W600/C140 and450ms/5000 UIA budgets,
+0–1000/y-down geometry and existing1s flight allowance+2.2s hold/5s quiet-home;
+primary DIP conversion and edge clamping are explicit platform adaptations.
+
+Static closeout:17 canonical/Windows Markdown files,218 local links/anchors resolved
+(including explicit legacy HTML anchors); protocol JSONL parses; git diff --check.
+Original Mac/iOS/Shared/assets, Android app, Bluey.Core motion and OverlayArt unchanged
+against4b38029. Initial local API/compiler errors corrected during implementation;
+final focused local Screen32/WPF checks and all final CI tests pass. An initial link-check false positive on an existing
+HTML anchor was resolved by recognizing explicit anchors, without changing that link.
+
+Final source cleanup also binds queued local points to their current snapshot:
+replacement, expiry or invalidation drops pending points and returns home once.
+An authenticated model point replaces any local queue, preventing full-queue failure.
+A deterministic stale-context regression passes; current capture status refreshes
+during work and shows OFF after disposal, with historical results labeled separately.
+
+Exact48 changed paths against the F4-B base:
+
+```text
+.github/workflows/android.yml
+.github/workflows/windows.yml
+project/APP-FLOWS.md
+project/ARCHITECTURE.md
+project/IMPLEMENTATION.md
+project/PORTING-MAP.md
+project/PRD.md
+project/PROTOCOL-DATA-SCHEMA.md
+project/QA.md
+project/SECURITY.md
+project/TRD.md
+tracking/CHECKPOINTS.md
+tracking/DECISIONS.md
+tracking/HANDOFF.md
+tracking/SESSION-LOG.md
+tracking/STATUS.md
+windows/Bluey.Link.Tests/GeminiScreenTests.cs
+windows/Bluey.Link.Tests/ScreenAuthorityTests.cs
+windows/Bluey.Link.Tests/TlsTests.cs
+windows/Bluey.Link/AudioAuthority.cs
+windows/Bluey.Link/Bluey.Link.csproj
+windows/Bluey.Link/GeminiAnswers.cs
+windows/Bluey.Link/LinkServer.cs
+windows/Bluey.Link/LiveAuthority.cs
+windows/Bluey.Link/ScreenAnswers.cs
+windows/Bluey.Link/ScreenAuthority.cs
+windows/Bluey.Screen.Tests/Bluey.Screen.Tests.csproj
+windows/Bluey.Screen.Tests/ControlTreeTests.cs
+windows/Bluey.Screen.Tests/ScreenTests.cs
+windows/Bluey.Screen.Tests/WorkflowTests.cs
+windows/Bluey.Screen/Bluey.Screen.csproj
+windows/Bluey.Screen/ControlTree.cs
+windows/Bluey.Screen/Geometry.cs
+windows/Bluey.Screen/ScreenSession.cs
+windows/Bluey.Screen/ScreenWorkflow.cs
+windows/Bluey.Screen/Targets.cs
+windows/Bluey.Windows/Bluey.Windows.csproj
+windows/Bluey.Windows/Connection/WindowsLinkHost.cs
+windows/Bluey.Windows/ControlsWindow.cs
+windows/Bluey.Windows/NativeSmoke.cs
+windows/Bluey.Windows/OverlayWindow.cs
+windows/Bluey.Windows/Program.cs
+windows/Bluey.Windows/Screen/NativeAnalysis.cs
+windows/Bluey.Windows/Screen/NativeCapture.cs
+windows/Bluey.Windows/Screen/ScreenCoordinator.cs
+windows/Bluey.Windows/Screen/ScreenSmoke.cs
+windows/Bluey.Windows/Screen/ScreenWindow.cs
+windows/README.md
+```
+
+# Retained F4-B evidence (no new acceptance)
+
 # Current F4-B response repair — PR #6
 
 2026-10-22 Asia/Karachi. Continue port/live-ai-voice from reviewed7c846a3;

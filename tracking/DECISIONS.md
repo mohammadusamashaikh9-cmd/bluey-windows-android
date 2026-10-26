@@ -443,3 +443,290 @@ Empty, or Budget when finishReason=MAX_TOKENS. Treat absent/null parts as no vis
 text while retaining strict type/duplicate/media validation. No physical response
 shape is inferred. The retained nonempty MAX_TOKENS behavior still returns bounded
 visible text; Budget specifically identifies exhaustion without visible text.
+
+## D013 / 2026-10-22 Asia/Karachi — F4-C native snapshots and nonprivileged pointing
+
+User explicitly authorizes a stacked F4-C slice before F4-B physical acceptance.
+Base origin/port/live-ai-voice=4b380294e883e669d29000cd844962db88439e58;
+main7930efd remains accepted. Do not modify PR6/its branch or merge either PR.
+F4-B still has no proven genuine visible physical answer (five developer-reported
+requests,two503s,other outcomes unknown). No provider calls/keys are authorized here.
+
+Use Windows.Graphics.Capture's supported1903+ desktop interop for an explicitly
+selected primary display or wholly contained visible window; start exactly one
+bounded snapshot on a user button, retain the OS capture indicator and promptly
+dispose the session. A visible bounded native-window selector is used instead of
+an opaque picker result: capture-item public properties do not supply the HWND/
+monitor rectangle needed to prove the existing primary overlay's coordinate map.
+Retain strict dimension/bounds checks; window movement/resize or display/DPI changes
+invalidate the snapshot. Use the Windows SDK projection supplied by a versioned
+.NET10 Windows TFM, D3D11 P/Invoke and SoftwareBitmap surface copy/encoding, avoiding
+Win2D/SharpDX/another UI framework. JPEG max edge1100,quality.72,768KiB; bound input
+pixels to16Mi, processing deadlines and one capture/analysis in flight. No pixels
+or OCR/private provider text enter logs or screenshot files by default.
+
+Use a small pure Bluey.Screen library for geometry, freshness, target extraction,
+one-shot screen consent and choreography, separate from motion/render/TLS adapters.
+Preserve L1..400,W1..600,C1..140, top-left/y-down,0..1000 coordinates. Windows OCR
+supplies actual word rectangles; never synthesize word boxes. UI Automation reads
+only visible nonpassword labels/roles/rectangles, never values/text patterns or
+input patterns. Cap depth10/visited5000/queue512/control140 and450ms traversal;
+one worker slot prevents a slow native provider from accumulating blocked tasks.
+A native RPC cannot be safely preempted; caller deadline/late-result rejection and
+single-slot isolation limit its effect. No click/type/drag/input/application actions.
+
+Microsoft Learn's current desktop WinRT support list explicitly requires package
+identity for Windows.Media.Ocr. The current unsigned portable WPF app has none.
+Implement the supported native adapter with an identity/language availability check;
+do not claim unsupported unpackaged OCR works, silently install/register a package,
+change security policy or introduce external OCR. Report this exact deployment
+blocker separately from fake/synthetic extraction tests; UIA/visual pointing and
+native capture remain independently useful. Packaging/identity is not silently added.
+
+Snapshots are unpredictable UUIDs, capture UTC+monotonic time,60s maximum lifetime,
+physical capture/primary rectangles and DIP DPI map, with no stale-ID fallback.
+Each cloud image approval is separate from audio/cloud approval and tied to exact
+snapshot/current trusted lease+consent. Consume it only in the existing one-question
+Gemini path; do not add another request, credential/server or LAN image payload.
+Stop/sleep/background/disconnect/revocation/replacement/configuration change clears
+media/cancels work. Treat UIA/OCR/model text as untrusted data. Optional model target
+IDs can only resolve to the same fresh snapshot and produce a visual point; a valid
+answer without a usable target remains acceptable. Reuse F4-A captions and source
+point choreography (2.2s minimum hold,5s quiet-home) without changing CursorEngine.
+
+Cloud capture stays OFF by default and requires an accurate reviewed preview and
+explicit current per-phone screen consent; no crop/redaction guarantee is made.
+If sensitive data is visible, discard and capture a harmless window. Capture
+exclusion is best-effort (WDA_EXCLUDEFROMCAPTURE is not a security guarantee);
+Bluey-owned windows are excluded/hidden where supported and never selectable.
+WPF/OS copies are released, owned media arrays zeroed; no secure physical-RAM erase
+claim. No screenshot sent to Android, no new protocol command unless necessary.
+
+Official docs inspected successfully: Microsoft Learn screen-capture,
+IGraphicsCaptureItemInterop.CreateForWindow, SoftwareBitmap.CreateCopyFromSurfaceAsync,
+SetWindowDisplayAffinity, desktop WinRT TFM configuration and
+winrt-api-desktop-app-support (OCR identity restriction). Google image-understanding/
+structured-output pages returned policy403; official googleapis/python-genai source
+at c97ae02ff87b5138bee29100b56c04c649233fed documents parts grouping,inline media,
+image/jpeg and response_json_schema. Provider-specific changes must follow those
+inspected public contracts, never an example's alternate model. Actual fixed-model
+image/audio compatibility and user Free Tier eligibility remain physical/provider
+unverified. No real request, billing action or automatic model/provider fallback.
+
+
+F4-C implementation review: timestamp the first acquired frame, not the end of
+JPEG processing; dispose the capture session immediately after its single frame
+copy. Native blank/protected-image rejection is exercised on generated bitmaps,
+including explicit buffer length before CopyToBuffer. Label normalization scans
+at most4096 input characters and allocates only bounded output. Exclude cloaked/
+minimized/changed windows when revalidating effects. No HDR color-fidelity claim.
+
+
+D013 capture repair evidence / 2026-10-24 Asia/Karachi: developer reports physical
+single-character picker titles and capture-denied-or-unavailable before preview;
+no local OCR/UIA/pointing physical pass follows from that attempt. Separate native
+regression d32b1e4, Windows40006819441, reproduced Unicode title failure and
+E_NOINTERFACE(0x80004002) in D3D/pool setup. Window and primary item creation passed.
+Microsoft GetWindowTextW documentation specifies Unicode; its P/Invoke omitted
+CharSet.Unicode. Microsoft win32metadata dxgi.h declares IDXGIDevice as
+54ec77fa-1377-44e6-8c32-88fd5f44c84c; code requested the different invalid UUID
+54ec77fa-1377-44e6-8c32-388fd5f44c84. That request cannot obtain IDXGIDevice from
+the D3D device. Two-line correction16efb78 passes actual Windows40007491657 native
+Unicode/window-item/primary-item/D3D/pool/session contract checks. No StartCapture
+or desktop pixels were used in CI; physical first-frame/copy/encode remains pending.
+This confirms source defects and shared setup failure, not all laptop behavior.
+
+Add only bounded in-memory capture outcome diagnostics: eight immutable local
+attempt summaries, kind/stage/outcome/HRESULT/elapsed counts. No exception messages,
+titles, handles, OCR/private text, pixels, credentials or stacks enter those records.
+User can select/copy safe diagnostics from Screen Understanding. Preserve one-shot
+capture, preview/consent, deadlines, cancellation, geometry and zeroed media. No
+OCR packaging, legacy fallback, dependency/server/provider/control change.
+
+Official references inspected: [GetWindowTextW](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowtextw),
+[CreateForWindow](https://learn.microsoft.com/en-us/windows/win32/api/windows.graphics.capture.interop/nf-windows-graphics-capture-interop-igraphicscaptureiteminterop-createforwindow),
+[DXGI wrapping](https://learn.microsoft.com/en-us/windows/win32/api/windows.graphics.directx.direct3d11.interop/nf-windows-graphics-directx-direct3d11-interop-createdirect3d11devicefromdxgidevice),
+and [Microsoft dxgi.h](https://github.com/microsoft/win32metadata/blob/main/generation/WinSDK/RecompiledIdlHeaders/shared/dxgi.h).
+Observed header SHA256ee21f6792f9d3f65c5007272be92bdf916aaa91491031142909124a37a4f8dd5.
+
+D013 ItemSize geometry correction / 2026-10-25 Asia/Karachi: developer verifies
+Unicode picker titles fixed, but two real Notepad attempts fail at ItemSize/Changed
+before frames (203ms/110ms). Actual dimension values remain unknown. Exact equality
+between WGC item size and DWM visible bounds is an invalid precondition: Microsoft
+GetWindowRect documents invisible resize borders and DPI virtualization; DWM bounds
+are not DPI-adjusted. Use positive, pixel-budgeted WGC size for the frame pool.
+
+Measure GetWindowRect under a scoped per-monitor-v2 thread DPI context. Select a
+verified image-to-screen transform only for exact visible-bound matches or a WGC
+size matching the independently measured physical Win32 rectangle containing the
+visible DWM rectangle, with bounded per-edge padding and primary-display containment.
+Persist both selection and frame bounds for freshness. Never infer a transform
+solely from similar aspect ratios or a DPI ratio. Unknown but bounded geometries
+may produce local preview only; all coordinate methods, targets and screen sharing
+fail closed until mapping is verified. Oversized/inconsistent frames still reject.
+Do not crop/warp pixels or add another backend. Unchanged-window validation occurs
+before/after capture; preview-only is explicit in UI/diagnostics, not an implicit
+geometry relaxation. Existing verified Surface aspect/bounds rules remain intact.
+
+Safe dimension metadata adds DWM/WGC/Win32 widths/heights, absolute deltas, DPI and
+mapping mode to the existing eight in-memory records; never title/text/pixels/key.
+No screenshot sharing, point effect or trust can be authorized by dimension hints.
+Physical WGC frame acquisition and transform accuracy remain pending retest; CI
+uses pure examples and native metadata/public generated images, not private captures.
+
+
+ItemSize source references: [Windows screen capture](https://learn.microsoft.com/en-us/windows/apps/develop/media-authoring-processing/screen-capture),
+[DWM attributes](https://learn.microsoft.com/en-us/windows/win32/api/dwmapi/ne-dwmapi-dwmwindowattribute),
+[GetWindowRect](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowrect),
+[thread DPI context](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setthreaddpiawarenesscontext).
+Observed native CI public window has DWM=WGC306x203,Win32320x210 at1x; only exact
+mapping is native-measured here. It is not evidence of the laptop's dimensions or
+border mismatch. Pure examples validate the border branch and preview-only denial.
+No WGC frame acquisition was performed in CI; physical target accuracy stays open.
+
+D013 FirstFrame correction / 2026-10-25 Asia/Karachi: developer reports five
+real Notepad FirstFrame/Changed failures. Safe physical measurements are now
+DWM578x557, WGC=Win32594x565, DPI1.25, WindowFrame. This resolves the preceding
+ItemSize gate; it does not identify whether TryGetNextFrame returned null or
+ContentSize differed. Source confirms both cases prematurely terminate acquisition.
+
+Use one sequential frame consumer; FrameArrived only signals a bounded queue.
+Within the existing eight-second deadline allow at most six acquisitions and two
+frame-pool recreations. Retire each frame before supported Recreate. Copy only
+when content, surface buffer and current pool extents agree, with positive bounded
+allocation. Re-resolve the final image transform from unchanged measured window
+bounds; never infer it from aspect similarity. Genuine movement/resizing remains
+rejected. Unknown bounded transforms remain PreviewOnly with coordinates, OCR and
+cloud sharing disabled. No user-visible automatic retry or second capture session.
+
+Record only first/last and bounded per-frame numeric/enum metadata (null/content,
+surface/pool/initial extents, count, elapsed); no titles, positions, pixels or text.
+Await the sole consumer/copy before disposing native resources. Cancellation must
+prevent publication, including a late copy completion. No change to provider, F3,
+OCR packaging, animation, cloud consent or OS input behavior.
+
+References: [Microsoft capture/frame processing and Recreate guidance](https://learn.microsoft.com/en-us/windows/uwp/audio-video-camera/screen-capture),
+[Recreate API](https://learn.microsoft.com/en-us/uwp/api/windows.graphics.capture.direct3d11captureframepool.recreate),
+[ContentSize](https://learn.microsoft.com/en-us/uwp/api/windows.graphics.capture.direct3d11captureframe.contentsize),
+[Microsoft desktop capture sample](https://github.com/microsoft/Windows.UI.Composition-Win32-Samples/blob/master/cpp/ScreenCaptureforHWND/ScreenCaptureforHWND/SimpleCapture.cpp).
+All retrieved successfully during this repair. Physical null-versus-size cause
+and successful capture remain pending new safe diagnostics/device retest.
+
+FirstFrame automated evidence at f3856770: Windows238unit/45native checks and
+Android111tests pass; clean WPF/lint0errors18warnings. Actual native Recreate calls
+succeed on the runner, without StartCapture/WGC pixel acquisition. Synthetic policy
+examples passed after the old terminal behavior failed9of11regression cases.
+The developer laptop's null-versus-size condition and successful capture remain
+unconfirmed; CI and safe source correction do not close that physical gate.
+
+## D014 / 2026-10-26 Asia/Karachi — Explicit developer OCR identity
+
+Developer accepts real Notepad capture/preview, VisibleBounds at125%DPI,500/500
+animated pointing with stationary OS mouse, Home and discard on63d7269. Do not
+reopen WGC/JPEG. Windows.Media.Ocr remains documented as requiring desktop package
+identity. Reuse NativeAnalysis/Targets and actual Windows OCR word rectangles.
+
+Add an OPTIONAL self-contained WPF developer variant with Microsoft's embedded
+msix identity and sparse/external-location AppxManifest. Keep the ordinary portable
+ZIP/manifest unchanged as fallback. Windows.Desktop min22000,win32App/mediumIL,
+runFullTrust and unvirtualizedResources preserve the existing full-trust process
+and LocalAppData paths. An OCR-variant startup guard validates the exact expected
+identity and compares LocalAppData with SHGetKnownFolderPath(NO_PACKAGE_REDIRECTION)
+before constructing settings/trust/key services. Never migrate/reset identities or
+credentials. The application still never starts a listener without existing consent.
+
+Publish an unsigned identity-only MSIX, loose manifest/assets and developer app
+folder. Supported Add-AppxPackage -Register -ExternalLocation is a developer-only
+path requiring Developer Mode, which the developer must review/enable manually.
+Registration/removal helpers require explicit approval switches and support WhatIf;
+they never change Developer Mode/policy, install/trust a certificate, self-register,
+provision all users, start Bluey or remove application data. No signing key/certificate
+is needed or shipped. Signed deployment would require a separate explicit trust
+choice and is outside this developer checkpoint. Keep extraction location stable;
+close Bluey and explicitly unregister before replacing/moving a registered build.
+
+CI builds/validates both manifests, actual embedded PE metadata and unsigned MSIX;
+it DOES NOT register a package or alter certificate trust/developer settings. Tests
+exercise denial/WhatIf, deterministic pending-capture Stop/late completion and all
+existing regressions. Add an explicit local --ocr-self-test using generated public
+four-line pixels, real NativeAnalysis and bounded result metadata after approved
+registration; no captures, user text, keys, listener or provider requests. Runtime
+identity/OCR success and actual Notepad recognition remain UNVERIFIED until the
+developer runs the artifact. Do not substitute annotations for recognized lines.
+
+Alternatives: full MSIX would move binaries and expand deployment changes; signed
+sparse installation would add certificate trust to a developer test; external OCR
+adds engines/models before any demonstrated sparse-identity blocker. None is needed
+for this smallest supported attempt. If actual registration/OCR fails, record its
+sanitized stage/HRESULT and compare a lightweight offline alternative before coding
+one. No cloud OCR/NPU dependency or fallback has been introduced.
+
+Official references inspected200: [Windows.Media.Ocr identity requirement](https://learn.microsoft.com/en-us/uwp/api/windows.media.ocr),
+[sparse identity/desktop manifest and unvirtualizedResources](https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/grant-identity-to-nonpackaged-apps),
+[Add-AppxPackage Register/ExternalLocation parameter set](https://learn.microsoft.com/en-us/powershell/module/appx/add-appxpackage),
+[AllowExternalContent](https://learn.microsoft.com/en-us/uwp/schemas/appxpackage/uapmanifestschema/element-uap10-allowexternalcontent),
+[Developer Mode](https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development),
+[known-folder redirection flags](https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/ne-shlobj_core-known_folder_flag).
+
+D014 observed validation /6da4132:239unit/2manifest/47native/14package checks and
+111Android tests pass (lint0errors18warnings). Microsoft SDK actually builds sparse
+MSIX and extracts matching embedded identity; portable EXE has no sparse metadata.
+WhatIf/approval-denied paths leave package count0; no certificates or registration.
+An initial Windows PowerShell5.1 Get-FileHash/WhatIf incompatibility was reproduced
+and repaired with read-only .NET hashing, preserving WhatIf and all gates. OCR
+without registration correctly returns UnavailableIdentity/0words. Registered native
+OCR/Notepad remains unverified until developer approval and laptop testing; no
+alternate engine or unsupported unpackaged workaround. Existing full-trust WGC
+interop is unchanged; package identity does not authorize a new capture or share.
+
+D014 Windows10 correction /2026-10-26 Asia/Karachi: developer confirms actual
+laptop Windows10 Pro Education22H2/build19045. Earlier Windows11 labels were wrong;
+accepted63d7269 capture/pointing actually ran on19045. The22000 sparse-package
+minimum is a confirmed deployment blocker, not evidence of an OCR/capture defect.
+
+Set MSIX MinVersion and explicit managed SupportedOSPlatformVersion to19041.
+Retain net10.0-windows10.0.22000.0 as the compile-time SDK target; Microsoft documents
+using a newer Windows TFM with a lower supported OS. Existing warnings-as-errors
+and CA1416 check direct managed/WinRT API usage against19041. Preserve portable
+fallback, Win11 compatibility, WGC/JPEG, OCR/target logic and original data paths.
+
+Availability verified against Microsoft references: OcrEngine10240; WGC free-threaded
+pool17763; desktop capture interop18362; cursor exclusion/AllowExternalContent/uap10
+win32App/mediumIL/external-location registration19041; no-package-redirection known
+folder flag15063. No post19041 OCR dependency identified. Native P/Invoke calls
+need documented review in addition to analyzer coverage. Keep original identity/
+profile fail-closed checks; add nonsecret runtime/minimum/API-presence metadata.
+
+Loose manifest development registration and ExternalLocation are documented Windows10
+APIs. This is NOT Windows11-only unsigned-MSIX installation (-AllowUnsigned is not
+used). Developer Mode, per-user approval and OS command availability are preflighted;
+no registration/trust/policy mutation runs in CI. Exact sparse Win32 activation and
+OCR on19045 remain physically unverified. Microsoft sparse guidance recommends a
+signed identity package, and PowerToys documents trust-related activation failures;
+therefore document a separate manual signed-package procedure with explicit approval
+for certificate creation/trust/signing/registration, never an automatic fallback.
+No certificate/private key is generated, shipped or trusted by this task. If local
+policy or trust blocks registration, stop and retain sanitized error codes. Do not
+infer that signing bypasses enterprise policy. No new engine without an evidenced
+Windows10 failure and comparison. The default bundle stays unsigned developer-only.
+
+.NET10's current maintained-OS matrix does not list Windows10 Pro Education22H2.
+This targets API/runtime compatibility on the developer's already-working .NET10
+application; it does not claim Microsoft lifecycle/ESU support or authorize an OS
+upgrade/toolchain migration. Server2025 CI cannot prove19045 runtime behavior.
+
+Official references200: [sparse minimum19041 and desktop manifest](https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/grant-identity-to-nonpackaged-apps),
+[Windows SDK target versus supported OS](https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/desktop-to-uwp-enhance),
+[RegisterPackageByUriAsync/ExternalLocation](https://learn.microsoft.com/en-us/uwp/api/windows.management.deployment.packagemanager.registerpackagebyuriasync),
+[Add-AppxPackage Register parameter set](https://learn.microsoft.com/en-us/powershell/module/appx/add-appxpackage),
+[Windows11 unsigned-MSIX distinction](https://learn.microsoft.com/en-us/windows/msix/package/unsigned-package),
+[SignTool](https://learn.microsoft.com/en-us/windows/msix/package/sign-app-package-using-signtool),
+[.NET10 maintained OS matrix](https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md).
+
+D014 Windows10 observed evidence at e36d761:239unit/3manifest/48native/24package
+checks plus111Android tests pass. Actual package and compiled supported floor19041;
+resolved TargetPlatformMin also19041, SDK22000 preserved. Newer CI APIs present and
+native public parameter pair supported; no19045 runtime/registration/OCR claim.
+Initial preflight used a noncontractual internal parameter-set name and failed CI;
+public Register/ExternalLocation predicate and regression now pass. No certificate
+or package installation, policy mutation, data move, engine swap or cloud request.

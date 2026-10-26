@@ -405,3 +405,199 @@ resource use and latency still require the above separately authorized observati
 The budget increases128→512 combined thinking/output tokens (up to4× potential
 output allowance), with low thinking, one question and a256-character caption cap;
 this is not a cost guarantee or proof of Free Tier eligibility.
+
+## F4-C combined offline and future provider acceptance
+
+Code/CI acceptance is separate from physical acceptance. F4-B repaired fake tests
+passed, but five prior developer API requests (two503s) produced no verified genuine
+Windows reply. Neither that gate nor F4-C physical functionality is accepted here.
+Codex/CI use public synthetic pixels/audio/fake HTTP only; no real cloud request.
+
+Combined later physical sequence (cloud steps require separate current user approval):
+
+1. Use the matching Windows build; Android source/protocol unchanged, so the current
+   F4-B phone APK remains compatible. Compare APK signers before replacing a debug
+   APK; differing signer requires deliberate reinstall/re-pair/revocation of old
+   identity. Preserve Windows protected files. Authenticate F3 and verify normal
+   gaze, moods, touch priority and F4-A offline gesture/border behavior.
+2. Open Screen Understanding. With cloud OFF, choose a harmless visible third-party
+   window wholly inside primary display, containing known public text/buttons.
+   Capture once, verify the OS indicator and accurate preview; Cancel/discard works.
+3. Analyze locally. Record native OCR status honestly: this portable distribution
+   reports UnavailableIdentity because Microsoft requires package identity. Do not
+   mark L/W recognition passed until a supported identity deployment is available.
+   Inspect available UIA C labels/roles/rectangles (no password/hidden values), and
+   point at a target or a known0..1000 spot. Only Bluey's overlay moves, not the OS
+   mouse. Return Home/Stop works; no action is injected. Synthetic demo is explicitly
+   declared fixture annotations, not a capture/recognition pass.
+4. Test100/150/200% scaling, primary offsets if available, a moved/resized/closed
+   selected window and display/DPI change. Old IDs must fail; expiry60s, replacement,
+   Stop/Ctrl+Alt+S and disconnect discard pixels/preview/approval and stale points.
+5. Only after separately checking Free Tier/project/privacy terms and authorizing
+   ONE real question: select GeminiFree, Start current phone hold-only consent,
+   capture/review a harmless snapshot, select that exact phone and explicitly
+   approve screen sharing, then grant one question in existing Windows AI settings.
+   Ask≤5s: "Bluey, what text is visible on my screen?" No extra image/OCR call occurs.
+6. Verify a genuine non-demo answer in Windows, pink reply/chirp/listening, optional
+   correct target pointing and source caption cleanup. A valid answer without a
+   target is allowed. Stop/sleep/background/withdrawal/revocation must discard
+   pending screen context/replies; reconnect never restores approval. If it fails,
+   retain only safe outcome/attempt/time/counts; separate F4-B provider failures
+   from F4-C capture/identity/OCR/coordinate behavior. Do not automatically retry.
+
+Automated evidence includes pure maps/freshness/consent/secure-field/deadline tests,
+injected capture/OCR cancellation, fake multimodal HTTP/structured responses, actual
+TLS revocation and existing animation/protocol tests. Native CI only uses generated
+public bitmaps/read-only UIA on its own harmless window. It never captures a real
+desktop/private image; WGC permission/capture fidelity and CPU/FPS remain unverified.
+
+
+### F4-C capture repair physical retest (local only)
+
+Use the new complete Windows development folder; keep Gemini/cloud screen sharing
+OFF. The existing Android APK is unchanged and need not be reinstalled. No phone,
+key, model request or OCR packaging is required for these capture checks.
+
+1. **Primary display:** close/hide sensitive windows and show only harmless public
+   test content on the primary display. Open Screen Understanding, refresh choices,
+   select Primary display, and click Capture once. Verify the OS indicator, accurate
+   preview, expected dimensions/freshness and cloud OFF. Stop/discard must remove
+   preview/approval; cancel during capture must not restore late pixels. This is a
+   separate display capture result, not inferred from a window item test.
+2. **Notepad:** open a visible Notepad window wholly within primary display with
+   `BLUEY SCREEN TEST`, `ALPHA BETA`, `12345`, `SCREEN CAPTURE WORKING` on separate
+   lines. Refresh choices and verify recognizable full `*Untitled - Notepad` (or
+   its localized equivalent). Select it and click Capture once. Preview must show
+   the actual public text in that window. Stop/discard clears it. Do not treat OCR
+   UnavailableIdentity as a WGC failure; recognition remains a separate deployment
+   checkpoint. Only after preview works may local UIA/spot pointing be evaluated.
+
+If either capture fails, retain only the selectable safe diagnostic row: local
+capture attempt number, PrimaryDisplay/Window, stage, outcome, HRESULT and ms.
+For example, DxgiDevice/0x80004002 identifies interface setup; FirstFrame/TimedOut
+identifies the wait; SurfaceCopy/JpegEncode identify later operations. Do not share
+window titles, screenshots, OCR text, credentials or personal content. No automatic
+retry/fallback, no API call. CI metadata/D3D/session tests do NOT prove real first
+frame acquisition on the laptop. Record both physical results independently.
+
+
+### F4-C ItemSize geometry regression retest
+
+The developer reports the title fix works, but two actual Notepad attempts stopped
+at Window/ItemSize/Changed (203ms and110ms), without frames or preview, cloud OFF.
+The old exact-equality check compared different API extents. Its rejection is
+confirmed; actual laptop DWM/WGC dimension values are still unknown.
+
+Use the new entire Windows artifact folder; retain the existing Android APK. Keep
+cloud screen sharing OFF. Place Notepad wholly inside primary display, away from
+its edges, with public lines BLUEY SCREEN TEST / ALPHA BETA /12345 / SCREEN CAPTURE
+WORKING (one per line). Refresh the recognizable title and Capture once. Expect the
+actual image preview and a safe diagnostic with DWM/WGC/Win32 width/height, absolute
+delta, DPI scale and map mode. Verified VisibleBounds or WindowFrame allows local
+spot pointing: use0/0,500/500,1000/1000, confirm the overlay follows the corresponding
+preview locations without moving the real mouse, then Return Home/Stop/discard.
+If local UIA targets are available, they must map to actual visible controls; OCR
+package identity remains a separate blocker and is not required for spot pointing.
+
+PREVIEW ONLY means no reliable measured transform: image inspection is allowed,
+but analysis/pointing and screen sharing must remain disabled. Copy only safe
+numeric diagnostic fields; do not share window titles, screenshot pixels or text.
+A moved/resized/closed window, display/DPI change, expiry or Stop must invalidate
+prior targets and approval. Cancel must not restore a late image. No cloud/model
+request is authorized by this retest. CI cannot replace this physical observation.
+
+### F4-C FirstFrame bounded-acquisition retest
+
+Developer now reports five actual Window/FirstFrame/Changed failures. Latest:
+156ms, DWM578x557, WGC=Win32594x565, DPI1.25, WindowFrame. ItemSize mapping is
+physically demonstrated; successful acquisition/preview and the exact null versus
+ContentSize mismatch are not. Preserve that distinction when recording results.
+
+Use the new complete Windows folder, retain the existing Android APK, and keep
+cloud sharing OFF. Put the same harmless four-line Notepad test wholly inside the
+primary monitor, away from edges. Refresh selection and Capture ONCE, keeping the
+window still. The same capture session can inspect at most six frames and recreate
+the pool twice within the existing eight-second deadline. It must produce a real
+preview or a safe, specific failure, without a second user-visible capture attempt.
+Diagnostics include initial dimensions and up to six numeric observations:
+null/content/buffer/pool/item extents, acquisition number, elapsed ms and disposition.
+`null=True` differs from `Recreate` with different content/buffer extents. Share
+only those safe records; never the title, pixels, recognized/private text or keys.
+
+Only if the final map is VisibleBounds or WindowFrame, point at500,500 and verify
+Bluey's animated overlay arrives at the corresponding preview center while the OS
+mouse stays put. Return Home, Stop/discard; image/approval must clear. PreviewOnly
+must disable coordinate analysis, pointing and cloud sharing. A moved/resized or
+closed selected window must fail. Stop during capture must never restore a late
+preview; another capture stays blocked until owned native work finishes. Optionally
+repeat once with Primary display to distinguish that adapter path. No Gemini call
+or OCR packaging is part of this test. CI policy tests, native Recreate calls and
+synthetic JPEGs are not real WGC first-frame or physical coordinate proof.
+
+
+### F4-C OCR developer identity and real text gate
+
+Capture/preview/VisibleBounds125%DPI/500,500 pointing/stationary mouse/Home/discard
+are developer-accepted on63d7269. Do not repeat capture repairs. D014 builds a
+separate OCR developer bundle and keeps portable mode. Follow the exact reviewed
+[registration/removal and Notepad sequence](../windows/packaging/README.md).
+No certificate trust, package registration or Developer Mode change is performed
+by CI or application startup. The developer must explicitly approve local setup.
+
+CI checks source privileges, matching actual PE/package identities, no packaged
+app binaries/signing material, all checksums, denied approval and nonmutating
+WhatIf. The OCR test executable without registration must report UnavailableIdentity
+and0 recognized lines/words, never synthetic annotations. After manual registration,
+--ocr-self-test must use real Windows OCR on generated public text: exact L1-L4,
+nine word targets, bounded word/line rectangles, reading order/125%DPI transforms,
+existing pure flight, no unapproved share, Stop and60s expiry. It does not capture
+Notepad or prove physical pointing. No OCR success is claimed before laptop tests.
+
+On actual harmless Notepad capture, Analyze must report Ready and real recognized
+text/word boxes; select document L/W targets and verify visual pointing accurately,
+without moving the OS mouse. Window chrome may itself be recognized and shift L
+IDs; never drop or fabricate lines merely to force document IDs1-4. The controlled
+four-line fixture separately checks exact IDs. Record actual text/IDs/bounds locally;
+share only sanitized counts/status if needed. Confirm Home/Stop/expiry invalidate
+media/targets and cloud sharing remains OFF. UIA secure/hidden-field exclusion has
+existing native/public PasswordBox checks; never use sensitive fields as a test.
+
+Pending-capture Stop and pending-OCR Stop are deterministic C# regressions with
+manually completed injected tasks. They assert cancellation, late-pixel disposal,
+no restored preview/targets, blocked sharing and ownership until cleanup. No
+subsecond manual clicking or GPU instantaneous-cancellation claim is required.
+UnavailableLanguage requires the developer to review installed Windows OCR languages;
+no automatic language/model download. If sparse identity/actual API fails, retain
+sanitized stage/HRESULT and demonstrate that blocker before proposing an alternate
+lightweight offline engine. Gemini/F5/background capture remain excluded.
+
+
+### F4-C Windows10 build19045 identity/OCR acceptance
+
+Actual developer OS is Windows10 Pro Education22H2/build19045; preceding accepted
+capture/pointing on63d7269 ran there, not on an independently verified Windows11
+laptop. Preserve that evidence. The22000 package minimum is a deployment defect.
+The corrected MSIX/app API floor is19041 with unchanged22000 SDK projection.
+CI verifies declared compiled minima, build/analyzer, package minimum, version gates
+(19040 denied;19041/19045/22000/26100 accepted), API-presence metadata, data-path and
+approval guards. CI runtime is Server2025, not Windows10; no runtime pass is inferred.
+
+One physical sequence: under the same Windows user, keep cloud/live AI OFF and
+Android unchanged. Review the full bundle and checksums; preview registration with
+WhatIf. Only after explicit Developer Mode/per-user approval register the loose
+manifest. Run --ocr-self-test on the actual19045 machine; expect runtime/minimum/
+API-presence metadata plus real L1-L4/W1-W9 public-fixture recognition and geometry.
+Then capture the harmless four-line Notepad window, Analyze, verify actual line/word
+text/rectangles and animated pointing with a stationary OS mouse; Home, Stop/discard,
+and a fresh snapshot's60s expiry must invalidate targets. Window chrome may add L IDs.
+Pending-capture/OCR Stop is already deterministic in CI; do not demand rapid manual
+clicking. No Gemini call, background observation or new OCR engine is authorized.
+
+If registration/activation/OCR fails, stop and retain only sanitized stage/HRESULT,
+OS/API-presence and counts. Do not automatically sign/trust/retry. The optional
+[manual signed route](../windows/packaging/README.md#optional-signed-route--separate-explicit-approval-only)
+requires separate explicit creation/trust/signing/registration approval and tools
+already reviewed; it is not a tested19045 fallback or policy bypass. No certificate
+operation occurs in Codex/CI. Remove the specific current-user identity explicitly;
+preserve external binaries and original Bluey/BlueyPort data. Signed nondevelopment
+removal differs from loose PreserveApplicationData removal; follow the README.

@@ -1,16 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.22000.0</TargetFramework>
+    <!-- SDK API surface is independent of the runtime minimum; CA1416 remains an error. -->
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
     <UseWPF>true</UseWPF>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationManifest Condition="'$(BlueyOcrIdentity)' == 'true'">app.ocr.manifest</ApplicationManifest>
+    <DefineConstants Condition="'$(BlueyOcrIdentity)' == 'true'">$(DefineConstants);OCR_IDENTITY</DefineConstants>
     <AssemblyName>Bluey.Windows</AssemblyName>
     <RootNamespace>Bluey.Windows</RootNamespace>
     <PublishTrimmed>false</PublishTrimmed>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../Bluey.Core/Bluey.Core.csproj" />
+    <ProjectReference Include="../Bluey.Screen/Bluey.Screen.csproj" />
     <ProjectReference Include="../Bluey.Link/Bluey.Link.csproj" />
     <PackageReference Include="QRCoder" Version="1.7.0" />
     <EmbeddedResource Include="../../protocol/gemini-response-trace.json" LogicalName="GeminiResponseTrace" />

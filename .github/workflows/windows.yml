@@ -1,10 +1,10 @@
 name: Windows overlay
 on:
   push:
-    branches: [main, port/windows-overlay, port/secure-device-link, port/ai-voice-foundation, port/live-ai-voice]
+    branches: [main, port/windows-overlay, port/secure-device-link, port/ai-voice-foundation, port/live-ai-voice, port/screen-understanding]
     paths: ['windows/**', 'Shared/Fonts/**', 'protocol/**', '.github/workflows/windows.yml']
   pull_request:
-    branches: [main]
+    branches: [main, port/live-ai-voice]
     paths: ['windows/**', 'Shared/Fonts/**', 'protocol/**', '.github/workflows/windows.yml']
   workflow_dispatch:
 permissions:
@@ -26,9 +26,14 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-dotnet@v5
         with:
-          global-json-file: windows/global.json
+          # Install the declared baseline; latestPatch may resolve an unavailable new archive.
+          dotnet-version: '10.0.402'
       - name: Pure deterministic tests
         run: dotnet test Bluey.Core.Tests -c Release --logger 'trx;LogFileName=core.trx' --results-directory TestResults
+      - name: Pure screen geometry, policy, extraction and cancellation tests
+        run: dotnet test Bluey.Screen.Tests -c Release --logger 'trx;LogFileName=screen.trx' --results-directory TestResults
+      - name: Sparse OCR identity privilege contracts (no registration)
+        run: python packaging/test_package.py
       - name: Strict protocol and actual TLS loopback tests
         run: dotnet test Bluey.Link.Tests -c Release --logger 'trx;LogFileName=link.trx' --results-directory TestResults
       - name: Build native WPF application
@@ -45,6 +50,7 @@ jobs:
             throw "Native smoke failed ($($process.ExitCode))"
           }
           Get-Content artifacts/native-evidence/native-smoke.json
+          Get-Content artifacts/native-evidence/screen-native-evidence.json
       - name: Development instructions and SHA-256 sums
         run: |
           Copy-Item README.md artifacts/bluey-win-x64/README.md
@@ -63,6 +69,17 @@ jobs:
         with:
           name: bluey-windows-dev-${{ github.sha }}
           path: windows/artifacts/bluey-win-x64/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Build separate unsigned OCR developer identity bundle
+        run: ./packaging/Build-OcrPackage.ps1
+      - name: Validate actual identity package and explicit approval gates (never register)
+        run: ./packaging/Test-OcrPackage.ps1 -BundleRoot artifacts/bluey-ocr-dev -PortableRoot artifacts/bluey-win-x64 -EvidenceRoot artifacts/native-evidence
+      - uses: actions/upload-artifact@v6
+        if: success()
+        with:
+          name: bluey-windows-ocr-dev-${{ github.sha }}
+          path: windows/artifacts/bluey-ocr-dev/
           if-no-files-found: error
           retention-days: 14
       - uses: actions/upload-artifact@v6

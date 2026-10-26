@@ -228,3 +228,56 @@ is retained there. Windows says "queued" rather than claiming phone/display rece
 The Android actionable failure status terminates authorization without fabricating
 an answer. Distinct20s request timeout and60s authorization expiry remain bounded;
 no retries, extra grant, paid fallback or automatic resubmission is introduced.
+
+## F4-C capture privacy and effect boundary (D013)
+
+Capture is OFF until a Windows user button. No face/wake/connection/provider event
+starts capture. WGC sessions are one snapshot, with the OS indicator unchanged,
+explicit selection and8s cancellation. Bluey-owned windows are not selectable;
+credential/control/overlay windows are hidden during capture and display exclusion
+is requested on owned windows. The nonsensitive cancel window stays reachable.
+WDA_EXCLUDEFROMCAPTURE is best effort, never an infallible privacy guarantee; the
+actual image must be previewed/reviewed. Protected/blank/denied/changed captures fail.
+No screen/audio/private OCR/model text is saved/logged; owned media buffers are
+zeroed and WPF/OS copies released, without a secure physical-memory-erase claim.
+
+Cloud image sharing remains independently OFF even with a key/audio consent. Only
+a reviewed snapshot approved for an exact current trusted phone/consent can bind
+to the existing one-question Free Tier grant. The same Gemini client/request is
+used; no added request/retry/paid fallback. Project eligibility is not attested.
+Google may use free-tier inputs under its terms; sensitive pixels require discard
+and a harmless reselected window. No automatic crop/redaction is claimed.
+
+Screen/UIA/model strings are untrusted data. UIA skips passwords/offscreen subtrees
+before reading names, never reads ValuePattern/TextPattern or input patterns.
+ControlTree has no invoke/focus/input interface. A model can return a validated
+optional target ID only; that produces a visual overlay point after authenticated
+caption ownership is proven. No OS mouse movement or input/app executor exists.
+Stop/replacement/expiry/configuration change/consent withdrawal/sleep/background/
+disconnect/revocation invalidate media, approvals and late callbacks. The remote
+HTTP service cannot authorize capture, new phones, new cloud calls or privileges.
+
+
+F4-C coordinate confidence: a bounded screenshot preview is not proof of a valid
+screen transform. Only exact visible-bound matches or a bounded, measured physical
+Win32 frame match may create pointable targets. The physical frame read scopes and
+restores per-monitor-v2 DPI awareness, and freshness retains both selected visible
+and measured frame bounds. Unknown scale/aspect origins remain preview-only; core
+coordinate methods, target extraction, analysis and screenshot approval reject
+unverified mappings independently of disabled UI controls. No additional privilege
+is granted by dimension metadata, screenshot text or a model target reference.
+
+
+D014 OCR developer identity is separate from screen/cloud consent. Package identity
+permits Windows.Media.Ocr but never authorizes capture, sharing, host start or OS
+input. Optional unsigned developer registration requires manual Developer Mode
+approval and an explicit helper switch; WhatIf changes nothing. No certificate,
+policy modification, auto-registration/all-users provisioning or data migration.
+Sparse win32App/mediumIL/unvirtualizedResources keeps existing file locations; the
+OCR startup guard refuses a missing/wrong identity or redirected LocalAppData before
+constructing protected trust/key services. Removal preserves external/Bluey/BlueyPort
+data. Keep portable mode available without identity. UIA still excludes password
+and hidden controls before reading labels; OCR of approved visible pixels is not
+password redaction and must never be described as such. No API key/audio/screenshot
+is bundled or sent to CI/cloud. Generated public-image OCR diagnostics record only
+status/stage/HRESULT/counts and fixed checks, not recognized private text or pixels.

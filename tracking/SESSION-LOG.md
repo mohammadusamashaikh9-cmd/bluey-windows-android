@@ -867,3 +867,313 @@ sa2/sa10; final archive bytes not locally rehashed. No actual model request/key/
 capture occurred. Physical response root cause for three non503 requests remains
 unknown. No PR creation/merge/F4-C. Next: developer's single physical sequence in
 QA, with separate current authorization before any one Free Tier request.
+
+
+## F4-C implementation / 2026-10-22 Asia/Karachi
+
+Verified clean4b38029 checkout/PR6 open/unmerged/main7930efd; explicit fetch refspec
+was needed because origin's configured fetch did not create its remote branch ref.
+Created port/screen-understanding from origin/port/live-ai-voice. Read project/source
+authority and Microsoft Learn capture/interop/SDK/OCR/security docs. Microsoft lists
+OCR as requiring package identity; implemented supported adapter/explicit portable
+blocker, no registration/install/unsupported fallback. Google docs403; official
+python-genai c97ae02ff87b5138bee29100b56c04c649233fed documents multimodal parts/
+JPEG and response_json_schema. No model call/key/private image.
+
+Implemented pure screen snapshots/maps/target limits/approval/cancellation/choreo;
+native single WGC snapshot, bounded in-memory JPEG, read-only UIA, WPF preview/local
+pointing and optional same-authorized-question Gemini image context. New pure API
+tests initially failed to compile while types were absent; xUnit2031 test assertion
+was corrected. First native build identified namespace qualification and .NET10
+QueryInterface ref/in errors; corrected. Local Screen29/Link140 tests now pass;
+WPF native cross-build clean. Native capture is not executed in CI; synthetic
+codec/UIA smoke pending Windows runner. Android app and all original sources and
+animation math unchanged. Both CI workflows/artifacts pending, physical unverified.
+Next after CI: offline combined QA stages, with OCR identity and F4-B provider gates
+kept separate. No real cloud action is authorized by this task.
+
+
+F4-C completion: PR7 opened/attached against port/live-ai-voice; PR6 remains open at
+4b38029, neither merged. Final application 6f471fa9a8144d1802cc1550c5244e3960c90f8a. Native review
+refinement timestamps first frame, closes capture immediately after copy, validates
+actual BGRA buffer length/blank pixels, bounds label scanning and rechecks cloaking;
+regression synchronization awaits real fake-provider entry/cleanup, no assertions
+removed. Local Core27/Screen31/Link141 and WPF0 warnings/errors pass. Windows push
+39833445133 and Android dispatch39833445930 pass at that SHA; stacked PR checks
+39833455671/39833455629 also pass. Windows native35 checks/14 public fixture frames,
+Android111 tests/lint0 errors18 warnings. Downloaded apps/evidence; all413 Windows
+manifest entries and APK checksum recomputed successfully; inspected TRX/native
+JSON/public synthetic image. Exact artifacts/hashes/48 paths/signer in STATUS.
+
+No actual WGC screenshot in CI, OCR recognition or Gemini request was made. Actual
+WinRT codec/blank rejection and native UIA public labels/password exclusion pass.
+OCR identity blocker is confirmed by Microsoft docs and runner availability guard,
+not resolved; physical capture/DPI/fidelity/performance and optional model behavior
+remain unverified. New debug signer differs; Android app source unchanged so retain
+installed F4-B APK unless consciously reinstalling/re-pairing. Static17 Markdown/
+218 links and JSONL checks pass; initial scanner needed explicit HTML anchor support.
+Original Apple/assets, Android app, motion/OverlayArt unchanged. Closeout updates
+tracking only. Exactly one next action: developer performs offline combined QA
+stages in project/QA.md, recording OCR unavailable separately; cloud stage requires
+separate current Free Tier/phone/screenshot authorization. No provider credit spent.
+
+
+Final F4-C source review found a local visual queue lifetime gap: queued manual
+points could survive snapshot invalidation, and a model point could encounter a
+full local queue. Bind local queue to current snapshot, drop it on invalidation and
+return home once; a validated reply replaces queued local points. New deterministic
+regression passes. Also refresh capture status during work and after disposal,
+labeling previous operation results separately. Focused local Screen32 tests and
+WPF0 warnings/errors pass. Intermediate25f2979 CI was superseded/canceled by normal
+workflow concurrency when the status refinement was pushed; no test failure claimed.
+
+Final application fc832f8890d8dc0f8e565b74a4a79b4687343828: Windows push39834969073 and Android
+dispatch39834970366 pass at the exact same SHA; stacked PR39834977612/39834977562
+also pass. Windows Core27/Screen32/Link141 (200 total),35 native checks, clean WPF/
+self-contained x64; Android111 tests/lint0 errors18 warnings/signature verified.
+Final apps/manifests/evidence uploaded, exact links and observed CI hashes in STATUS.
+Final archive downloads policy-blocked at sa19/sa9; no final local rehash claim.
+Earlier6f471fa archives were successfully inspected/rehashed and are superseded.
+New final debug signer d2fdccd1… differs from prior builds; Android source/protocol
+unchanged, retaining the current F4-B APK avoids unnecessary identity replacement.
+No real WGC screenshot, native OCR recognition, Gemini/OpenAI request or credential
+was used. OCR requires supported package identity; physical/provider acceptance
+remains pending. Tracking-only closeout leaves application bytes unchanged; no PR6
+modification or merge. Next: developer offline combined QA stages in project/QA.md;
+any future cloud stage requires separate current Free Tier/phone/screen authorization.
+
+
+## F4-C capture repair / 2026-10-24 Asia/Karachi
+
+User resumed after unavailable environment; previous attempt made no edits. Actual
+command execution now works: /workspace is not Git root; located repository and ran
+pwd/status/branch/HEAD clean atad5f7aa on existing port/screen-understanding. Fetched
+refs; PR7 correct base, PR6 unchanged4b38029/open. Read AGENTS/project source/QA
+skills, D013/current tracking and Microsoft Learn/official header. No new planning
+cycle/checkpoint, branch, architecture, dependency, provider or OCR packaging.
+
+Added real HWND Unicode + separate window/primary item/D3D pool/session probes,
+without StartCapture/pixels. Red d32b1e4/40006819441 and PR40006824913 failed
+UNICODE_WINDOW_TITLE and WGC_D3D_POOL_SESSION/0x80004002; item creation passed.
+Official dxgi.h IID differs from the requested UUID. Two-line fix16efb78 corrects
+Unicode and IDXGIDevice; Windows40007491657/PR40007500633 pass actual native contracts.
+New pure diagnostics tests first fail on unimplemented Record, then pass; one local
+build needed System.IO import, corrected. Stage wrappers preserve HRESULT without
+raw exceptions; callback stage cannot regress; UI keeps only8 safe summaries.
+
+Final app fdc9572ee9e305cc489d9784a50f865943355cf5: local Core27/Screen35/Link141 pass, WPF0 warnings/
+errors. Windows40008459044 and Android40008459792 pass at same SHA; stacked PR
+40008467356/40008467447 pass. Windows203 unit/42 native, Android111 tests/lint0
+errors18 warnings; all artifacts/manifests uploaded. Windows app/evidence downloaded,
+413 manifest entries and EXE hash locally reverified. Exact hashes/links/signer and
+14 changed paths in STATUS. Android APK source unchanged; avoid unnecessary signer
+replacement/re-pairing. Native OCR identity remains a separate blocker. No actual
+StartCapture/desktop pixels, model requests, API key, original source/animation/link
+changes or OS input. Physical first-frame/copy/encode/preview/permission/driver/DPI
+remains unverified; do not call this complete laptop capture acceptance. Current
+QA has separate primary and Notepad local tests. Tracking-only closeout changes no
+application bytes. Next: developer performs that local-only retest, cloud OFF, and
+reports safe diagnostics on failure. Keep PR6/7 unmerged.
+
+
+## F4-C ItemSize repair / 2026-10-25 Asia/Karachi
+
+Read uploaded request; clean cc122d0 verified on existing branch, fetched refs,
+PR7 correct base and PR6 unchanged4b38029/open. Read authority and Microsoft capture/
+DWM/GetWindowRect/DPI docs. Physical evidence confirms premature ItemSize rejection
+before frames, not actual dimensions. Old gate conflates independent API extents.
+Test-first old equality policy:13 cases,7 failures/6 pass. Implement bounded WGC
+allocation and explicit measured transforms; persist selection/frame bounds, scope
+physical GetWindowRect DPI context. Preview-only denies converters/targets/analysis/
+screen approval even with reviewed image. UI labels/disables those paths. Dimension
+metadata stays numeric and bounded8 records. Verified-Surface test first failed on
+unproven frame acceptance, then passed after constructor guard. Full source tests
+pass, with final Screen53; retained Core27/Link141 pass. Native WPF build clean.
+
+Source a1132b7/42ebf5c CI passes, initial42 artifact download blocked at sa14. Add
+one safe native JSON line to existing Windows CI for observable numeric dimensions,
+not new capture. Final app df1eb62d52ea325a16fda67d2e9624097c4e1303: Windows40133905687/Android40133905040
+and PR40133910135/40133909958 pass. Windows221 unit tests/44 native checks/self-
+contained x64/WPF0 warnings/errors; Android111/lint0 errors18 warnings/signature.
+Final app/evidence downloaded successfully; rehash413 Windows entries + EXE. Exact
+hashes/artifacts/24 paths in STATUS. Native public measurement306x203 DWM/WGC vs
+320x210 Win32 at1x selectsVisibleBounds. It does NOT reproduce laptop mismatch;
+synthetic border/DPI/aspect examples test policy separately. Public1920x1080 bitmap
+JPEG encodes1100x619. CI never starts WGC/read desktop pixels. Actual dimensions,
+frame capture/preview/point accuracy/performance unverified. No Gemini/key/private
+capture, original source/Android/link/motion changes, packaging or new backend.
+Keep installed Android APK; optional debug signer differs. Final closeout tracking
+only; PR7 updated in place, neither PR merged. Next: developer single offline
+Notepad capture/pointing retest, cloud OFF; preview-only cannot authorize points.
+
+2026-10-25 Asia/Karachi — F4-C FirstFrame repair, start2fb8760, existing PR7 only.
+Read AGENTS, source-porting/QA skills and Microsoft ContentSize/Recreate guidance
+and desktop sample. Developer's five physical rejections resolve the prior ItemSize
+mapping but do not identify null-versus-size failure. Extracted old first-frame
+policy reproduced9fail/2pass across11 cases. Replaced callback latch with bounded
+notification/one-consumer acquisition, six frames/two recreations/eight seconds,
+exact complete-buffer checks, unchanged-bounds/final-map validation, PreviewOnly
+privilege denial and safe per-frame numeric diagnostics. Local screen70pass;
+full native Windows and Android CI follow source push. Kept PR6, original sources,
+F3/animations/keys/provider code unchanged; no live API request. Physical capture
+and accurate overlay pointing remain pending; do not claim CI proves either.
+
+FirstFrame closeout evidence: application f3856770710d789cb7396e6080c13d7950c4c8b2.
+Local/Windows238unit pass,45native checks including supported Recreate calls,
+WPF0warnings/errors. Windows40222661491 and Android40222661934 successful; Android
+111tests/lint0errors18warnings. Stacked PR checks40222665650/40222665604 pass.
+Downloaded Windows artifacts and rehashed all413 entries/EXE/DLL. Matching Android
+APK CI hash0a491e94132872aca857ae72cdc43c56b970f179c036a796571af20953363bb1;
+Android download policy-blocked atsa10, not locally rehashed. New debug signer
+requires informed reinstall/re-pair only if APK replacement desired; Android app
+unchanged and existing APK retained for offline capture test. All17Markdown files/
+218local links and3JSONL fixture collections pass. Original/Android/animation/F3/key
+paths unchanged. Native WGC frames remain unexecuted in CI; physical capture QA open.
+Artifacts/hashes/exact15paths in STATUS. No automatic approval, provider request,
+new PR/branch, OCR packaging, input action or PR6 change. Next is the single offline
+Notepad capture/diagnostic/verified-center/Home/Stop test in QA.
+
+## 2026-10-26 — F4-C laptop JPEG diagnosis and scoped local repair
+
+Started clean primary checkout port/android-face/a9be517; remote origin matches.
+Verified open PR #7 head91c9d3f, base port/live-ai-voice. Created managed detached
+worktree at that exact head; no branch switch/reset or unrelated edits. Read
+AGENTS, checkpoint/animation skills, STATUS/HANDOFF, capture/UI/geometry/analysis,
+QA/implementation/tool policy. No delegation. Fully rehashed the running Windows
+artifact's413 manifest entries plus EXE/DLL/manifest, all match reviewed evidence.
+
+Requested one developer-triggered harmless Notepad GUI capture, kept cloud OFF.
+Restored Bluey and read sanitized diagnostic via Computer Use, without capturing
+other windows. Actual first failure: JpegEncode/0x88982F41/516ms after a non-null
+578x557 frame stabilized in a resized pool. Exact safe record is in CHECKPOINTS.
+WGC item/session/frame and bitmap-copy success are observed; no real preview yet.
+
+Microsoft documents PROPERTYNOTSUPPORTED and encoder-creation ImageQuality.
+Using installed Windows PowerShell5.1/WinRT (no SDK install), independently
+reproduced old metadata-call failure and passed generated JPEG options round
+trips578x557=>578x557 and1920x1080=>1100x619, with contrast and byte bounds checked.
+Initial probe setup hit PowerShell WinRT dictionary/async reflection binding
+errors; corrected before interpreting codec results. Local scripts are ignored
+build/f4c-native-debug in the primary checkout. No screen pixels persisted.
+
+Moved Single0.72 option to BitmapEncoder.CreateAsync; removed invalid metadata
+write. Native smoke adds production round-trip coverage for the laptop size and
+nonblank validation for both sizes. No capture-backend/geometry/retry/consent/F3/
+provider/animation/Apple/Android changes. Updated current tracking while retaining
+historical evidence. SDK10.0.402 missing locally; production build/unit/native
+smoke and corrected preview UNRUN. No tools installed or Gemini request/upload.
+No commit/push/merge; next is approved existing-PR CI build then physical retest.
+
+### F4-C authorized CI and physical closeout, 2026-10-26 Asia/Karachi
+
+User explicitly authorized committing/pushing the six-file repair to existing
+PR #7 and CI/laptop retest. Initial local commit de27600 was rejected by GH007
+because of private-email protection. Preserved that local commit; created an
+identical file tree with verified public GitHub no-reply identity as7b35434 and
+fast-forward pushed. No privacy-setting change, force push or history rewrite.
+Moved work to a fresh managed worktree at the public commit; old worktree archived
+recoverably. Primary Android checkout never switched or edited.
+
+Initial Windows40226535448/40226539219 failed before compilation: setup-dotnet
+mapped latestPatch to10.0.403 and its archive returned409. Minimum CI-only change
+pins installer to already-declared10.0.402 (global.json unchanged), committed and
+pushed63d7269. Optional LTS runtime fetch still warns; exact SDK/build work. No
+local SDK/Visual Studio installed. User authorization covers existing-PR build
+and retest only; no new PR, F5, provider call, OCR packaging or merge.
+
+Windows40226759821 and PR40226763230 pass238unit/46native, WPF0warnings/errors.
+Downloaded matching TRX/native evidence:27core+70screen+141link,0failed/skipped;
+native46pass/0fail. Android40226763197 passes111tests,0failure/error/skip. Existing
+installed APK retained. Native smoke still uses generated pixels, never physical
+WGC acquisition. It does not replace the following laptop observations.
+
+CLI artifact transfer stalled at0bytes and was stopped. Normal GitHub connector
+returned downloadable app/evidence files; both archive digests verified. App
+artifact12611119362 rehashed413/413 files and EXE/DLL/manifest, all match CI.
+Evidence12611084399 read locally. Exact URLs/hashes in STATUS. No policy bypass.
+Developer closed old app; agent launched verified self-contained executable at
+primary checkout build/f4c-native-debug/ci-63d7269/app through Computer Use.
+
+Developer initiated harmless Notepad captures; actual diagnostics Complete/
+Succeeded687/265/281ms,578x557 VisibleBounds,DPI1.25,2nonnullframes/1Recreate each.
+Developer explicitly confirmed genuine Notepad preview. Direct text-only GUI
+reads show Preview ready,11 UIA targets,OCR UnavailableIdentity,cloudOFF. Earlier
+geometry change discarded snapshot. User clicked target-list pointing without
+selection once (select-target), then used500/500 spot button. Developer explicitly
+confirmed center animation,stationary real mouse,Home andStop clearing all passed.
+Final direct read showsOFF/no snapshot/disabled actions; retained local-analysis
+status means Stop vs expiry timing is not independently established. No screenshot
+uploaded/saved by agent, private text committed or Gemini request made.
+
+Updated four current tracking files with source/CI/artifact/physical evidence and
+limits. Scope is seven paths including the necessary Windows workflow installer
+pin. F4-C remains active for active-capture Stop timing,broaderDPI/driver/performance
+and packagedOCR; F4-B provider acceptance remains separate. Next exact task:
+measure Stop during active harmless Notepad capture and prove no late publication.
+
+2026-10-26 Asia/Karachi — resumedff61152 after fetching/fast-forwarding existing
+PR7; PR6 remains4b38029. Accepted developer63d7269 WGC/JPEG/preview/125%DPI pointing
+and Home/discard evidence retained. Read Microsoft OCR identity, sparse/desktop
+manifest, Register/ExternalLocation, Developer Mode and known-folder documentation.
+D014 before implementation selects unsigned developer sparse identity with explicit
+manual approval/WhatIf and no certificate/policy/CI registration. Added separate
+app profile/startup identity/data-path guard, self-contained bundle, unchanged
+portable fallback, real-engine public four-line self-test and deterministic pending
+capture/OCR Stop tests. Two manifest-contract tests failed before implementation,
+then passed; both WPF variants compile. NativeAnalysis/Targets/WGC/F3/protected data
+and original/Android/animation code remain. Full CI evidence follows push. Actual
+laptop OCR remains unverified; no provider calls, input actions or OCR alternative.
+
+Initial OCR bundle CI41ec1c8/Windows40230706897 built portable and sparse variants,
+passed unit/native/schema checks, then correctly failed its new Windows PowerShell
+5.1 WhatIf regression: Get-FileHash's inherited WhatIf returned no Hash property.
+No registration occurred. Replace that read-only checksum calculation with .NET
+SHA256 stream hashing; do not disable outer WhatIf or weaken approval. Same CI
+regression will validate the corrected behavior. Initial failed logs retained.
+
+D014 closeout6da4132: actual Windows40231453791/PR40231458418 and Android40231454103/
+PR40231458451 pass.239C#tests+2manifest contracts+47native+14package gates; Android
+111tests/lint0errors18warnings. Built actual sparse-identity app/MSIX plus portable
+fallback with SDK tools, validated embedded identities, unsigned contents, checksums,
+approval refusal and nonmutating WhatIf. Added explicit real-engine self-test word
+text/order and W1-W9 checks; actual OCR run awaits developer registration, not fake.
+Initial41ec WhatIf failure corrected19bd; no hidden test failure or disabled approval.
+Final6da artifact downloads blockedsa14 (earlier19bd sa13); CI hashes observed but
+no local rehash claim. No certificates/packages registered, key/profile migration,
+provider requests, user pixels/text, original/Android/WGC/OCR adapter/F3/animation
+changes.28 exact paths/hashes/links in STATUS. Native API/language/Notepad geometry
+and registered-profile behavior still unverified; next is reviewed manual developer
+registration plus single offline Notepad OCR/point/Home/Stop/expiry test. Both PRs
+remain unmerged; PR6 unchanged. Portable fallback and installed Android retained.
+
+2026-10-26 Asia/Karachi — Windows10 adaptation, clean e5abe8a, existing PR7 only.
+Developer confirms Pro Education22H2/19045; actual earlier capture acceptance retained.
+Inspected Microsoft sparse19041, OCR/capture/native minima, supported-OS versus TFM,
+registration API/DeveloperMode/unsigned-MSIX distinction and.NET10 lifecycle matrix.
+D014 correction recorded before code. Red manifest tests2fail/1pass then3pass after
+MSIX19041 and explicit managed19041 floor; SDK22000 retained. Clean OCR WPF compile.
+Added version/command preflight and actual-runtime/API metadata, with no capture/
+OCR/geometry/key/F3 rewrite. Separate manual signed procedure requires explicit
+approval; no certificate or package registration in Codex/CI. Full CI/artifacts
+follow source push; actual19045 identity/OCR test stays pending. No OS upgrade,
+alternate engine, Android/Apple changes, provider call or F5.
+
+Initial Windows10 CI939d23d/40314439701 passed build/unit/native setup, then caught
+a too-specific native command preflight: it required internal ParameterSet.Name
+"Register" rather than testing public Register/ExternalLocation parameters together.
+Changed the predicate to inspect that pair and added an actual Windows PowerShell
+metadata regression. No approval/version/trust gate weakened; no package registered.
+Final corrected CI evidence follows. Earlier failed WhatIf logs retained.
+
+Windows10 closeout: e36d761 application, Windows40315042806 and Android40315043601
+pass.239C#/3manifest/48native/24package checks; Android111/lint0errors18warnings;
+PR40315048406/40315048410 pass. Actual MSIX and assembly floor19041, Win10/Win11
+version gates, native command metadata, API-presence/fail-closed output verified.
+939d23d parameter-set-name failure retained and fixed e36d761 by public parameters.
+Built default unsigned developer bundle and portable fallback with CI SHA manifests;
+no registration, developer signer/trust, policy/OS upgrade, cloud call, new engine
+or key/profile migration. Downloadsa2 denied; no independent rehash claimed.
+18paths/evidence/hashes in STATUS. Exact Windows10 registration/sparse activation/
+OCR/language/word pointing/profile remains unverified; keep one explicit physical
+sequence and stop on errors. Original Apple/Android/F3/animation/WGC/OCR files
+unchanged; both PRs remain open. No alternative OCR without actual failure evidence.

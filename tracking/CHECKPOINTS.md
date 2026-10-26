@@ -91,3 +91,177 @@ Local downloads blocked at sa2/sa10, CI evidence only. Earlier PR test3967312329
 failed one scheduler-dependent20ms cleanup assertion; awaited entry/cleanup retains
 all byte/no-stale-reply assertions and passes final CI. Physical/provider repaired
 behavior and user project eligibility remain UNVERIFIED. No real Codex API call.
+
+
+## F4-C stacked checkpoint / 2026-10-22 Asia/Karachi
+
+Active code/CI slice, explicitly authorized before F4-B physical acceptance. Base
+4b38029 on port/live-ai-voice; PR7 targets that branch, no PR6 modification/merge.
+Application fc832f8890d8dc0f8e565b74a4a79b4687343828: Windows CI Core27,Screen32,
+Link141 pass; native35 checks and WPF0 warnings/errors; Android111 tests/lint0 errors
+18 warnings. Matching Windows39834969073/Android39834970366 artifacts/evidence
+uploaded with CI SHA manifests. Final downloads policy-blocked at sa19/sa9; earlier
+6f471fa downloads rehashed413 Windows entries+APK, superseded. STATUS records
+exact links/hashes/signer. Native codec/UIA checks use public fixtures; WGC capture
+not executed. Documentation closeout changes no application code. Native OCR deployment BLOCKED for portable output: Microsoft
+requires package identity. No false recognition/capture claim or silent installation.
+F4-B/F4-C physical/provider acceptance stays unverified. See D013 and combined QA.
+
+
+## F4-C native capture repair / 2026-10-24 Asia/Karachi
+
+Physical gate remains pending: developer observed truncated titles and failed capture
+before preview, so OCR/UIA/pointing was not accepted. Red native d32b1e4 Windows
+40006819441 reproduced Unicode title failure and shared D3D E_NOINTERFACE. Microsoft
+header identifies a mistyped IDXGIDevice IID;16efb78 two-line fix passes native setup.
+Final app fdc9572ee9e305cc489d9784a50f865943355cf5: local/Windows Core27,Screen35,Link141 and42 native
+checks pass, WPF0 warnings/errors; Android111 tests/lint0 errors18 warnings pass.
+Windows40008459044 / Android40008459792 publish matching artifacts/manifests.
+Windows413-file manifest and EXE rehashed after download; exact links/hashes in
+STATUS. Native probes do not start capture/read pixels; physical primary/window
+first-frame/preview remains UNVERIFIED. OCR package identity remains separately
+BLOCKED; no packaging/provider/F5 or PR6 modification/merge. Last8 safe diagnostics
+contain no title/pixels/private text/credentials. Canonical QA gives one local-only
+retest; next is developer physical primary and Notepad checks with cloud OFF.
+
+
+## F4-C ItemSize geometry repair / 2026-10-25 Asia/Karachi
+
+Developer-reported Unicode fix accepted; two Notepad attempts fail ItemSize/Changed
+before frames, no preview, cloud OFF. Actual laptop sizes are unobserved; no capture/
+OCR/pointing physical pass. Old API-extents equality is removed as an allocation
+precondition, not replaced with a guessed coordinate scale. WGC bounds the pool;
+measured rectangles and DPI context govern verified mapping, unknowns preview-only
+with all coordinate/target/share paths blocked. Freshness retains both bounds.
+
+Final app df1eb62d52ea325a16fda67d2e9624097c4e1303: Windows40133905687 Core27/Screen53/Link141,44 native
+checks/WPF0 warnings-errors pass; Android40133905040 111 tests/lint0 errors18 warnings.
+Matching artifacts/manifests uploaded; finalWindows413 entries/EXE rehashed. STATUS
+contains24 paths/hashes/links. CI public window DWM=WGC306x203,Win32320x210,1x,exact
+mapping; border mismatch cases are synthetic. No native frame acquisition in CI.
+First-frame/preview/physical point accuracy remains UNVERIFIED; OCR identity and F4-B
+provider gates stay separate. PR6/7 open, unmerged. Next is one local Notepad retest,
+cloud OFF, preserving preview-only denial and reporting only safe geometry metadata.
+
+F4-C FirstFrame repair /2026-10-25 Asia/Karachi: developer reports five real
+FirstFrame/Changed failures; DWM578x557/WGC=Win32594x565/DPI1.25/WindowFrame confirms
+prior ItemSize mapping, not capture success. Source latch conflates null and size
+mismatch. Bounded sequential acquisition/Recreate and safe frame diagnostics now
+implemented; local regression tests pass. Windows/native and Android CI pending
+source push. Real preview/pointing remains UNVERIFIED; OCR packaging and F4-B live
+provider gate remain separate. No cloud call or input operation authorized/run.
+
+FirstFrame final automated gate: application f3856770710d789cb7396e6080c13d7950c4c8b2;
+Windows40222661491 succeeds with238unit/45native checks, clean WPF and self-contained
+x64 artifact; Android40222661934 succeeds with111tests/lint0errors18warnings/APK.
+Stacked PR40222665650/40222665604 checks also pass. Downloaded Windows/evidence and
+rehash413manifest entries; EXE78d0eeb41540bcf36b616ee3e83a3d41058f10d879822ae7abd96e82d03cd483.
+Native Recreate is exercised without StartCapture; no real first frame in CI.
+Exact physical null-versus-size diagnosis, successful preview/500,500 pointing,
+Stop cleanup/exclusion/DPI/performance remain UNVERIFIED. No cloud provider calls.
+
+## F4-C physical laptop JPEG diagnosis / 2026-10-26 Asia/Karachi
+
+Gate remains **active**, successful real preview **not observed**. PR #7 head
+91c9d3f; application artifact f3856770 (same binary as reviewed head). Existing
+Windows folder verified against413 manifest entries, all match. See STATUS for
+full binary hashes, paths and current build limitation.
+
+Safe diagnostic read directly from the running Bluey GUI after the requested
+harmless Notepad test (cloud OFF; no screenshot retained in the repository):
+
+```text
+capture#1 Window JpegEncode NativeFailure HR=0x88982F41 516ms DWM=578x557 WGC=578x557 delta=0x0 Win32=594x565 dpiScale=1.25 map=VisibleBounds initial=594x565 frames=2 recreates=1 [f1 null=False content=578x557 buffer=594x565 pool=594x565 item=594x565 Recreate 359ms; f2 null=False content=578x557 buffer=578x557 pool=578x557 item=594x565 Accepted 391ms]
+```
+
+| Evidence tier | Observed result |
+| --- | --- |
+| Physical application pipeline | Selected HWND/WGC item/D3D/session/frame/recreation/bitmap copy succeed; first failing stage is JpegEncode. No Snapshot/WPF preview. No null frame or movement failure in this attempt. |
+| Independent local native codec | Invalid ImageQuality metadata call reproduces0x88982F41. Correct encoder-creation option yields578x557 and1100x619 JPEG round trips with generated contrast preserved. No screen capture or production assembly executed by probe. |
+| Local source correction | ImageQuality moved to CreateAsync options; production native smoke adds laptop-sized nonblank round trip. No geometry/consent/provider/capture-backend changes. |
+| Corrected production build/tests | UNRUN: .NET SDK10.0.402 absent; CI requires approved push to existing PR #7. |
+| Corrected physical acceptance | UNVERIFIED: real preview, coordinate accuracy, UIA text, stationary-mouse pointing and Stop/discard. Portable OCR identity unavailable. |
+
+Microsoft references: [WIC error codes](https://learn.microsoft.com/en-us/windows/win32/wic/-wic-codec-error-codes),
+[encoding options](https://learn.microsoft.com/en-us/windows/apps/develop/media-authoring-processing/bitmapencoder-options-reference),
+[BitmapEncoder](https://learn.microsoft.com/en-us/uwp/api/windows.graphics.imaging.bitmapencoder).
+No Gemini request/upload, fallback capture or toolchain installation. Preserve
+previous CI evidence as historical; it does not validate this unbuilt repair.
+
+## F4-C corrected laptop functional retest / 2026-10-26 Asia/Karachi
+
+Application63d7269fac56dd8a02ce7d6a6a1caf427a83ee02. JPEG repair7b35434 moves
+ImageQuality Single0.72 to encoder creation, leaving capture/geometry/consent
+unchanged. CI-only installer pin avoids unavailable10.0.403; no local SDK install.
+
+| Acceptance / tier | Actual evidence |
+| --- | --- |
+| Genuine Notepad preview, physical | Developer explicitly confirmed genuine image. Agent read Preview ready/Window578x557/VisibleBounds in the running verified app; no screenshots uploaded or saved by agent. |
+| Geometry, physical + numeric | Three successful attempts687/265/281ms. DWM578x557/Win32594x565/DPI1.25; non-null content578x557 needs one Recreate from594x565 to exact578x557 buffer/pool. Developer confirms500/500 center placement. Other DPI/driver configurations unverified. |
+| Accessible local text | Agent directly read11 UIA targets including buttons and status fields. Portable OCR UnavailableIdentity correctly retained; no OCR document-body claim. |
+| Animated pointing / mouse | Developer explicitly confirmed center flight with stationary real mouse and Return Home. No input API added/called by capture repair. No frame-by-frame motion or OS-cursor telemetry recorded. |
+| Stop/discard | Developer explicitly confirmed clearing. Final direct UI read: capture OFF, Snapshot:none, analysis/point/share disabled, no target rows. Its retained prior-analysis status does not independently distinguish Stop from expiry; active-capture Stop timing remains unverified. |
+| Privacy | Cloud screen sharing OFF throughout GUI reads; no Gemini/provider request or screenshot upload performed; only harmless Notepad capture requested. No fallback/display capture, private images/text or credentials committed. |
+| CI | Windows40226759821 + PR40226763230 pass;238unit (27/70/141),46native, WPF0warnings/errors. Android40226763197:111tests,0failure/error/skip, workflow passes. |
+| Downloaded artifacts | Application12611119362 and evidence12611084399. Both archive digests match; all413 application manifest entries, primary binary hashes, native46pass/0fail and TRX238pass/0fail/0skip independently checked. Full URLs/hashes in STATUS. |
+
+Safe successful records (no HWND, origins, titles, recognized text or pixels):
+
+```text
+capture#1 Window Complete Succeeded HR=none 687ms DWM=578x557 WGC=578x557 delta=0x0 Win32=594x565 dpiScale=1.25 map=VisibleBounds initial=594x565 frames=2 recreates=1 [f1 null=False content=578x557 buffer=594x565 pool=594x565 item=594x565 Recreate 500ms; f2 null=False content=578x557 buffer=578x557 pool=578x557 item=594x565 Accepted 515ms]
+capture#2 Window Complete Succeeded HR=none 265ms DWM=578x557 WGC=578x557 delta=0x0 Win32=594x565 dpiScale=1.25 map=VisibleBounds initial=594x565 frames=2 recreates=1 [f1 null=False content=578x557 buffer=594x565 pool=594x565 item=594x565 Recreate 234ms; f2 null=False content=578x557 buffer=578x557 pool=578x557 item=594x565 Accepted 250ms]
+capture#3 Window Complete Succeeded HR=none 281ms DWM=578x557 WGC=578x557 delta=0x0 Win32=594x565 dpiScale=1.25 map=VisibleBounds initial=594x565 frames=2 recreates=1 [f1 null=False content=578x557 buffer=594x565 pool=594x565 item=594x565 Recreate 235ms; f2 null=False content=578x557 buffer=578x557 pool=578x557 item=594x565 Accepted 250ms]
+```
+
+Reproduction: open same harmless Notepad fully inside primary display; choose it
+in Screen Understanding and capture once while still. Previous verified artifact
+fails JpegEncode0x88982F41; corrected artifact shows the real preview. Analyze
+locally lists actual UIA labels,500/500 spot points at its center, Home/Stop clears.
+The target-list button requires a selected row; one select-target UI message was
+user selection state, not another capture failure. A geometry change discarded an
+earlier snapshot as designed. No broader capture backend was needed.
+
+F4-C **active**: this is functional laptop evidence with explicit developer visual
+confirmation, not comprehensive animation/DPI/performance/cancellation acceptance.
+One next check is active-capture Stop/no-late-publication timing; packaged OCR and
+F4-B provider acceptance remain separately pending. Both PRs stay unmerged.
+
+2026-10-26 D014 OCR identity checkpoint: developer accepts actual63d7269 capture,
+preview,125%DPI VisibleBounds, center overlay pointing/stationary real mouse and
+Home/discard across three Notepad captures. Preserve accepted implementation.
+A separate sparse/external developer identity build plus manual approval-gated
+registration/removal and portable fallback is implemented. No CI/app registration,
+certificate trust/policy change or credential/identity migration. CI evidence to
+follow. Real native OCR/Notepad word geometry remains UNVERIFIED until developer
+explicitly registers and tests. Deterministic Stop coverage replaces manual timing.
+
+D014 final automated evidence at6da41321de73c18b7fafe0889ab6ee05a0530d22:
+Windows40231453791 passes239C#tests,2manifest contracts,47native and14built-package/
+approval checks; portable and separate OCR self-contained artifacts published.
+Android40231454103 passes111tests/lint0errors18warnings; matching optional APK.
+Stacked PR40231458418/40231458451 pass. Initial41ec WhatIf/Get-FileHash failure
+fixed19bd and regression passes without disabling WhatIf. Native PE metadata and
+unsigned MSIX contents/checksums actually validated on Windows. No cert/trust,
+registration or registered-native OCR execution. Unregistered app exits3 with0
+lines/words. Real Notepad OCR/word boxes and registered data paths remain UNVERIFIED.
+Full artifact links/CI hashes and28-path scope in STATUS; local downloads blockedsa14.
+Developer approval is required before local Developer Mode/registration; no automatic
+setup, cloud call, new engine or F5. Accepted capture/pointing evidence retained.
+
+2026-10-26 D014 Windows10 correction: actual developer laptop Pro Education19045;
+accepted capture/pointing63d7269 remains. Package22000 minimum blocked deployment;
+correct to19041 and declare managed minimum19041 with existing22000 SDK target.
+API/version/metadata/approval checks added. Local manifest regression2fail/1pass
+before fix, now3pass; OCR build clean. Windows/native/package and Android CI pending
+source push.19045 runtime registration/native OCR NOT VERIFIED by newer CI. No
+certificate/trust/policy/OS mutation, new engine, provider call or protected-data move.
+
+Windows10 final automated evidence e36d7619fe03ef02a37af58566b4380979f655bb:
+Windows40315042806 passes239C#/3manifest/48native/24package checks; both variants
+published. Android40315043601 passes111tests/lint0errors18warnings. PR40315048406/
+40315048410 pass. Actual MSIX/assembly minimum19041 and native parameter/API checks
+verified; SDK22000 retained. Initial939d23d preflight failure fixed using public
+Register/ExternalLocation pair. No package registration/signing trust/OS policy
+change or provider call. Actual19045 identity/native OCR/word geometry/profile
+acceptance remains UNVERIFIED; Server2025 cannot establish it. Artifacts/CI hashes/
+18paths in STATUS; local downloads policy-blockedsa2. Portable/keys/F3/WGC retained.

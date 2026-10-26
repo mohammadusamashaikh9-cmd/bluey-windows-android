@@ -16,11 +16,11 @@ internal sealed class ControlsWindow : Window
     private readonly TextBlock warning = new() { TextWrapping = TextWrapping.Wrap };
     private readonly CheckBox shown;
     private readonly Dictionary<int, Action> hotkeys = [];
-    private nint hwnd;
+    private nint hwnd;private Action? stopScreen;
     private double lastStatus;
-    internal ControlsWindow(CursorEngine engine, OverlayWindow overlay, VisualState visuals, Action? openConnection = null, Action? voicePreview = null, Action? liveSettings = null)
+    internal ControlsWindow(CursorEngine engine, OverlayWindow overlay, VisualState visuals, Action? openConnection = null, Action? voicePreview = null, Action? liveSettings = null, Action? screenSettings=null,Action? screenStop=null)
     {
-        this.engine = engine; this.overlay = overlay; this.visuals = visuals;
+        Screen.OwnPrivacy.Protect(this);stopScreen=screenStop;this.engine = engine; this.overlay = overlay; this.visuals = visuals;
         Title = "Bluey — offline Windows demo"; Width = 430; Height = 700; MinWidth = 350; MinHeight = 420;
         var panel = new StackPanel { Margin = new(20) }; Content = new ScrollViewer { Content = panel, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
         panel.Children.Add(new TextBlock { Text = "Bluey desktop character", FontSize = 23, FontWeight = FontWeights.SemiBold });
@@ -57,6 +57,8 @@ internal sealed class ControlsWindow : Window
         Button(demos, "Talk output (Ctrl+Alt+T)", () => engine.TalkUntil = engine.Now + 3);
         if (openConnection != null) Button(demos, "Secure device connection", openConnection);
         if(liveSettings!=null)Button(demos,"Live AI settings (off by default)",liveSettings);
+        if(screenSettings!=null)Button(demos,"Screen Understanding (off by default)",screenSettings);
+        if(screenStop!=null)Button(demos,"STOP screen context / pointing (Ctrl+Alt+S)",screenStop);
         if (voicePreview != null) Button(demos, "Offline voice caption preview", voicePreview);
         panel.Children.Add(new TextBlock { Text = "Offline voice simulation: no audio or cloud. Planned permissions — microphone: OFF; cloud processing: OFF; screen capture: OFF. Future live awake sessions may stream audio continuously, even without holding. No API key needed here.", TextWrapping = TextWrapping.Wrap, Margin = new(0, 12, 0, 0) });
         Button(demos, "Exit", Close);
@@ -90,7 +92,7 @@ internal sealed class ControlsWindow : Window
         var bindings = new (char Key, Action Action)[] {
             ('P', overlay.PointAtMouse), ('D', engine.GoHome), ('F', () => { engine.Settings.FollowMouse = !engine.Settings.FollowMouse; engine.GoHome(); Save(); }),
             ('H', () => { engine.Settings.ShowCursor = !engine.Settings.ShowCursor; shown.IsChecked = engine.Settings.ShowCursor; Save(); }),
-            ('T', () => engine.TalkUntil = engine.Now + 3) };
+            ('T', () => engine.TalkUntil = engine.Now + 3),('S',()=>stopScreen?.Invoke()) };
         foreach (var (key, action) in bindings)
         {
             var id = (int)key;

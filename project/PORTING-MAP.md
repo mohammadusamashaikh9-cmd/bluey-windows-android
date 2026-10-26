@@ -80,3 +80,14 @@ implementation choices, not proven cross-platform performance requirements.
 | LiveVoice.startAudio/converter | AndroidCapture/Pcm24k | Public AudioRecord; foreground only; bounded PCM frames/anti-alias filter |
 | LiveVoice.chirp | Chirp/LocalChirp | Local generated AudioTrack phrase; no cloud audio output |
 | RootView hold/double tap + ModeIndicator | Existing VoiceController + unchanged indicator | Native provider inputs only; sleep/pause invalidation retained |
+
+## F4-C concrete screen map
+
+| Swift authority | Windows owner | Retained / deliberate difference |
+| --- | --- | --- |
+| ScreenReader.snapshot/jpeg | Screen.NativeCapture | WGC/D3D11 one frame, primary/window selection,1100/.72 JPEG; explicit consent/preview, no automatic look |
+| ScreenReader.recognize/targetList/target | Bluey.Screen Targets/Surface/ScreenSession + NativeAnalysis | L/W IDs, actual word boxes, top-left0..1000, hard400/600 caps, UUID/60s freshness; portable OCR identity blocker explicit; optional D014 sparse developer identity |
+| ControlsReader.read | ControlTree + NativeControls | C IDs/140 controls,450ms budget; no secure/hidden values, bounded depth/queue and isolated native worker |
+| RealtimeHost.point/choreograph/caption | ScreenCoordinator/Pointing + existing OverlayWindow/CursorEngine/VoicePresentation | target bottom+3 DIP where in bounds;1s+2.2s hold,5s quiet-home; explicit Stop immediate |
+| RealtimeHost.look/tool result | Existing GeminiAnswers/LiveAuthority optional screen path | image stays Windows-side; one same audio+image request, strict optional target schema; no general tool dispatch |
+| ComputerControl | NOT PORTED | Behavior inspected only; no click/type/scroll/drag/app/input methods introduced |
